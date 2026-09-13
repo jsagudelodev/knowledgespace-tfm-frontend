@@ -1,0 +1,234 @@
+<!-- Loading (modo edición) -->
+@if (loading) {
+  <div class="af-state">
+    <span class="af-spinner"></span>
+    <p>Cargando asistente...</p>
+  </div>
+}
+
+@if (!loading) {
+<div class="af-container">
+
+  <!-- ── Header ──────────────────────────────────────────────────────── -->
+  <div class="af-header">
+    <button class="af-back-btn" (click)="cancel()" title="Volver">
+      <span class="material-symbols-outlined icon-sm">arrow_back</span>
+    </button>
+    <div class="af-header-info">
+      <h1 class="af-title">{{ isEdit ? 'Editar asistente' : 'Nuevo asistente' }}</h1>
+      <p class="af-subtitle">{{ isEdit ? 'Modifica la configuración del asistente' : 'Define el área de conocimiento, modelo y personalidad' }}</p>
+    </div>
+  </div>
+
+  <!-- ── Error global ─────────────────────────────────────────────────── -->
+  @if (error) {
+    <div class="af-msg-error">
+      <span class="material-symbols-outlined icon-sm">error</span>
+      {{ error }}
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- Sección 1 — Identidad                                             -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <div class="af-card">
+    <div class="af-section-header">
+      <span class="material-symbols-outlined icon-sm">badge</span>
+      <span>Identidad</span>
+    </div>
+
+    <div class="af-identity-layout">
+
+      <!-- Avatar preview + selector -->
+      <div class="af-avatar-col">
+        <div class="af-avatar-preview">{{ avatar || '🤖' }}</div>
+        <p class="af-avatar-label">Avatar</p>
+        <div class="af-avatar-presets">
+          @for (emoji of avatarPresets; track emoji) {
+            <button class="af-avatar-preset"
+              [class.af-avatar-preset--active]="avatar === emoji"
+              (click)="selectAvatar(emoji)"
+              type="button">
+              {{ emoji }}
+            </button>
+          }
+        </div>
+        <input
+          type="text"
+          class="af-input af-input--small"
+          [(ngModel)]="avatar"
+          placeholder="🤖 o URL"
+          [disabled]="saving"
+          maxlength="200"
+        />
+      </div>
+
+      <!-- Nombre + descripción -->
+      <div class="af-identity-fields">
+        <div class="af-field">
+          <label class="af-label" for="af-name">
+            Nombre <span class="af-required">*</span>
+          </label>
+          <input
+            id="af-name"
+            type="text"
+            class="af-input"
+            [(ngModel)]="name"
+            placeholder="Ej: Asistente de Ventas"
+            [disabled]="saving"
+            maxlength="100"
+          />
+          <span class="af-char-count">{{ name.length }}/100</span>
+        </div>
+
+        <div class="af-field">
+          <label class="af-label" for="af-desc">Descripción</label>
+          <input
+            id="af-desc"
+            type="text"
+            class="af-input"
+            [(ngModel)]="description"
+            placeholder="Breve descripción del área funcional o propósito"
+            [disabled]="saving"
+            maxlength="300"
+          />
+          <span class="af-hint">Visible en la lista de asistentes.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- Sección 2 — Personalidad                                          -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <div class="af-card">
+    <div class="af-section-header">
+      <span class="material-symbols-outlined icon-sm">chat</span>
+      <span>Personalidad</span>
+    </div>
+
+    <div class="af-field">
+      <label class="af-label" for="af-prompt">System Prompt</label>
+      <textarea
+        id="af-prompt"
+        class="af-textarea"
+        [(ngModel)]="systemPrompt"
+        placeholder="Eres un asistente experto en ventas corporativas. Respondes de forma profesional, concisa y siempre basándote en la documentación interna de la empresa. Si no tienes información suficiente, lo dices claramente..."
+        [disabled]="saving"
+        rows="7"
+      ></textarea>
+      <div class="af-textarea-footer">
+        <span class="af-hint">Define el comportamiento, tono y restricciones del asistente.</span>
+        <span class="af-char-count">{{ systemPrompt.length }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- Sección 3 — Modelo                                                -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <div class="af-card">
+    <div class="af-section-header">
+      <span class="material-symbols-outlined icon-sm">psychology</span>
+      <span>Modelo IA</span>
+    </div>
+
+    <div class="af-model-row">
+
+      <!-- Selector de modelo -->
+      <div class="af-field">
+        <label class="af-label" for="af-model">Modelo</label>
+        <select id="af-model" class="af-select" [(ngModel)]="model" [disabled]="saving">
+          @for (m of availableModels; track m) {
+            <option [value]="m">{{ m }}</option>
+          }
+        </select>
+        <span class="af-hint">{{ modelHint() }}</span>
+      </div>
+
+      <!-- Temperatura -->
+      <div class="af-field">
+        <label class="af-label" for="af-temp">
+          Temperatura
+          <span class="af-temp-badge" [class.af-temp-badge--low]="temperature <= 0.3"
+            [class.af-temp-badge--mid]="temperature > 0.3 && temperature <= 0.7"
+            [class.af-temp-badge--high]="temperature > 0.7">
+            {{ temperature }}
+          </span>
+        </label>
+        <input
+          id="af-temp"
+          type="range"
+          class="af-range"
+          [value]="temperature"
+          min="0" max="1" step="0.1"
+          (input)="onTemperatureInput($event)"
+          [disabled]="saving"
+        />
+        <div class="af-range-labels">
+          <span>🎯 Preciso</span>
+          <span>🎨 Creativo</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- Sección 4 — Sugerencias rápidas                                    -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <div class="af-card">
+    <div class="af-section-header">
+      <span class="material-symbols-outlined icon-sm">lightbulb</span>
+      <span>Sugerencias rápidas</span>
+      <span class="af-badge-count">{{ quickPrompts.length }}/6</span>
+    </div>
+    <p class="af-hint af-hint--block">Frases que aparecen en el chat como accesos rápidos para el usuario. Máximo 6.</p>
+
+    <!-- Lista de prompts existentes -->
+    @if (quickPrompts.length > 0) {
+      <ul class="af-prompts-list">
+        @for (prompt of quickPrompts; track $index) {
+          <li class="af-prompt-item">
+            <span class="af-prompt-text">{{ prompt }}</span>
+            <button class="af-prompt-remove" type="button" (click)="removePrompt($index)" [disabled]="saving" title="Eliminar">
+              <span class="material-symbols-outlined icon-sm">close</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    <!-- Input para añadir -->
+    @if (quickPrompts.length < 6) {
+      <div class="af-prompt-add">
+        <input
+          type="text"
+          class="af-input"
+          [(ngModel)]="newPromptText"
+          placeholder="Ej: ¿Cuáles son las políticas de devolución?"
+          [disabled]="saving"
+          maxlength="120"
+          (keydown.enter)="addPrompt()"
+        />
+        <button class="af-btn-add" type="button" (click)="addPrompt()" [disabled]="saving || !newPromptText.trim()">
+          <span class="material-symbols-outlined icon-sm">add</span>
+          Añadir
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- ── Acciones ─────────────────────────────────────────────────────── -->
+  <div class="af-actions">
+    <button class="af-btn-secondary" (click)="cancel()" [disabled]="saving">
+      Cancelar
+    </button>
+    <button class="af-btn-primary" (click)="save()" [disabled]="saving || !name.trim()">
+      <span class="material-symbols-outlined icon-sm">check</span>
+      {{ saving ? 'Guardando...' : (isEdit ? 'Guardar cambios' : 'Crear asistente') }}
+    </button>
+  </div>
+
+</div>
+}

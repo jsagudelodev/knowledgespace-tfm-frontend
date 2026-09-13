@@ -1,0 +1,231 @@
+<div class="company-list-container">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="company-list-header">
+    <h1>Empresas</h1>
+    @if (isAdmin) {
+      <button class="btn-primary" (click)="openCreateModal()">
+        <span class="material-symbols-outlined icon-sm">add</span>
+        Nueva Empresa
+      </button>
+    }
+  </div>
+
+  <!-- ── Barra de filtros ────────────────────────────────────────────────── -->
+  <div class="filters-bar">
+    <div class="search-wrapper">
+      <span class="material-symbols-outlined icon-sm search-icon">search</span>
+      <input
+        #searchInput
+        type="text"
+        class="search-input"
+        placeholder="Buscar por nombre o email..."
+        (input)="onSearchInput($event)"
+      />
+      @if (searchTerm()) {
+        <button class="clear-search-btn" (click)="clearSearch()" title="Limpiar búsqueda">
+          <span class="material-symbols-outlined icon-sm">close</span>
+        </button>
+      }
+    </div>
+
+    <select class="filter-select" [value]="selectedPlan()" (change)="onPlanChange($event)">
+      <option value="">Todos los planes</option>
+      <option value="basic">Basic</option>
+      <option value="pro">Pro</option>
+      <option value="enterprise">Enterprise</option>
+    </select>
+
+    <select class="filter-select" [value]="selectedStatus()" (change)="onStatusChange($event)">
+      <option value="">Todos los estados</option>
+      <option value="active">Activo</option>
+      <option value="inactive">Inactivo</option>
+    </select>
+
+    @if (hasActiveFilters()) {
+      <button class="btn-text" (click)="clearAllFilters()">
+        <span class="material-symbols-outlined icon-sm">filter_alt_off</span>
+        Limpiar
+      </button>
+    }
+  </div>
+
+  <!-- ── Cargando ────────────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="state-card">
+      <span class="material-symbols-outlined spin">progress_activity</span>
+      <p>Cargando empresas...</p>
+    </div>
+  }
+
+  <!-- ── Error ───────────────────────────────────────────────────────────── -->
+  @if (!loading() && error()) {
+    <div class="state-card state-card--error">
+      <span class="material-symbols-outlined state-icon">warning</span>
+      <p>{{ error() }}</p>
+      <button class="btn-secondary-sm" (click)="loadCompanies()">
+        <span class="material-symbols-outlined icon-sm">refresh</span>
+        Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- ── Tabla ───────────────────────────────────────────────────────────── -->
+  @if (!loading() && !error()) {
+    <div class="company-table">
+      <div class="table-header">
+        <div class="col-name">Nombre</div>
+        <div class="col-email">Email</div>
+        <div class="col-plan">Plan</div>
+        <div class="col-users">Usuarios</div>
+        <div class="col-docs">Documentos</div>
+        <div class="col-limit">Límite/mes</div>
+        <div class="col-status">Estado</div>
+        <div class="col-actions">Acciones</div>
+      </div>
+
+      @for (company of paginatedData(); track company.id) {
+        <div class="table-row">
+
+          <div class="col-name">
+            <span class="company-name">{{ company.name }}</span>
+          </div>
+
+          <div class="col-email">
+            <span class="company-email">{{ company.email }}</span>
+          </div>
+
+          <div class="col-plan">
+            <span class="plan-badge" [ngClass]="getPlanClass(company.plan)">
+              {{ getPlanLabel(company.plan) }}
+            </span>
+          </div>
+
+          <div class="col-users">
+            <span>{{ company.max_users }}</span>
+          </div>
+
+          <div class="col-docs">
+            <span>{{ company.max_documents }}</span>
+          </div>
+
+          <div class="col-limit">
+            @if (company.monthly_message_limit) {
+              <span class="limit-value">{{ company.monthly_message_limit | number }}</span>
+            } @else {
+              <span class="limit-none">Sin límite</span>
+            }
+          </div>
+
+          <div class="col-status">
+            <span class="status-badge" [ngClass]="company.is_active ? 'active' : 'inactive'">
+              {{ company.is_active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+
+          <div class="col-actions">
+            @if (isAdmin) {
+              @if (deleteConfirmId() === company.id) {
+                <span class="delete-confirm-text">¿Eliminar?</span>
+                <button
+                  class="action-btn confirm-btn"
+                  (click)="deleteCompany(company.id)"
+                  [disabled]="deletingId() === company.id"
+                  title="Confirmar eliminación"
+                >
+                  <span class="material-symbols-outlined icon-sm">check</span>
+                </button>
+                <button class="action-btn cancel-btn" (click)="cancelDelete()" title="Cancelar">
+                  <span class="material-symbols-outlined icon-sm">close</span>
+                </button>
+              } @else {
+                <button class="action-btn edit-btn" (click)="openEditModal(company.id)" title="Editar empresa">
+                  <span class="material-symbols-outlined icon-sm">edit</span>
+                </button>
+                <button class="action-btn delete-btn" (click)="confirmDelete(company.id)" title="Eliminar empresa">
+                  <span class="material-symbols-outlined icon-sm">delete</span>
+                </button>
+              }
+            }
+          </div>
+
+        </div>
+      } @empty {
+        <app-empty-state
+          icon="business"
+          title="No hay empresas registradas"
+          [subtitle]="hasActiveFilters() ? 'Prueba ajustando los filtros de búsqueda.' : undefined"
+        >
+          @if (hasActiveFilters()) {
+            <button class="btn-secondary-sm" (click)="clearAllFilters()">Limpiar filtros</button>
+          }
+        </app-empty-state>
+      }
+    </div>
+
+    <!-- ── Paginación ─────────────────────────────────────────────────── -->
+    @if (filteredData().length > pageSize()) {
+      <div class="pagination">
+        <span class="pagination-info">
+          Mostrando {{ paginationStart() }}–{{ paginationEnd() }} de {{ filteredData().length }} empresas
+        </span>
+        <div class="pagination-controls">
+          <button class="page-btn" (click)="previousPage()" [disabled]="currentPage() === 1" title="Página anterior">
+            <span class="material-symbols-outlined icon-sm">chevron_left</span>
+          </button>
+          <span class="page-label">{{ currentPage() }} / {{ totalPages() }}</span>
+          <button class="page-btn" (click)="nextPage()" [disabled]="currentPage() === totalPages()" title="Página siguiente">
+            <span class="material-symbols-outlined icon-sm">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+</div>
+
+<!-- ── Overlay ──────────────────────────────────────────────────────────── -->
+<div
+  class="modal-overlay"
+  [class.open]="showEditModal() || showCreateModal()"
+  (click)="closeModals()"
+></div>
+
+<!-- ── Modal: Editar empresa ───────────────────────────────────────────── -->
+<div class="modal" [class.open]="showEditModal()">
+  <div class="modal-header">
+    <h2>Editar Empresa</h2>
+    <button class="modal-close-btn" (click)="closeModals()" title="Cerrar">
+      <span class="material-symbols-outlined icon-sm">close</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    @if (showEditModal() && selectedCompanyId()) {
+      <app-company-form
+        [companyId]="selectedCompanyId()"
+        [isEmbedded]="true"
+        (companySaved)="onCompanySaved()"
+        (cancel)="closeModals()"
+      />
+    }
+  </div>
+</div>
+
+<!-- ── Modal: Nueva empresa ────────────────────────────────────────────── -->
+<div class="modal" [class.open]="showCreateModal()">
+  <div class="modal-header">
+    <h2>Nueva Empresa</h2>
+    <button class="modal-close-btn" (click)="closeModals()" title="Cerrar">
+      <span class="material-symbols-outlined icon-sm">close</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    @if (showCreateModal()) {
+      <app-company-form
+        [isEmbedded]="true"
+        (companySaved)="onCompanySaved()"
+        (cancel)="closeModals()"
+      />
+    }
+  </div>
+</div>

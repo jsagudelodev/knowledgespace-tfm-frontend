@@ -1,0 +1,367 @@
+<!-- Loading -->
+@if (loadingAssistant) {
+  <div class="ad-state">
+    <span class="ad-spinner"></span>
+    <p>Cargando asistente...</p>
+  </div>
+}
+
+<!-- Error -->
+@if (!loadingAssistant && errorAssistant) {
+  <div class="ad-state ad-state--error">
+    <span class="material-symbols-outlined icon-sm ad-state-icon">warning</span>
+    <p>{{ errorAssistant }}</p>
+    <button class="ad-btn-secondary" (click)="goBack()">
+      <span class="material-symbols-outlined icon-sm">arrow_back</span> Volver
+    </button>
+  </div>
+}
+
+<!-- Contenido principal -->
+@if (!loadingAssistant && !errorAssistant && assistant(); as a) {
+<div class="ad-container">
+
+  <!-- ── Header ──────────────────────────────────────────────────────── -->
+  <div class="ad-header">
+    <button class="ad-back-btn" (click)="goBack()" title="Volver">
+      <span class="material-symbols-outlined icon-sm">arrow_back</span>
+    </button>
+
+    <div class="ad-header-avatar">{{ a.avatar || '🤖' }}</div>
+
+    <div class="ad-header-info">
+      <div class="ad-header-top">
+        <h1 class="ad-header-name">{{ a.name }}</h1>
+        <span class="ad-badge" [class.ad-badge--active]="a.is_active" [class.ad-badge--inactive]="!a.is_active">
+          {{ a.is_active ? 'Activo' : 'Inactivo' }}
+        </span>
+      </div>
+      @if (a.description) {
+        <p class="ad-header-sub">{{ a.description }}</p>
+      }
+    </div>
+
+    <div class="ad-header-actions">
+      <button class="ad-btn-secondary" (click)="goToEdit()">
+        <span class="material-symbols-outlined icon-sm">edit</span> Editar
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Tabs ────────────────────────────────────────────────────────── -->
+  <div class="ad-tabs">
+    <button class="ad-tab" [class.ad-tab--active]="activeTab() === 'documents'" (click)="setTab('documents')">
+      <span class="material-symbols-outlined icon-sm">storage</span> Documentos
+      <span class="ad-tab-count">{{ documents().length }}</span>
+    </button>
+    <button class="ad-tab" [class.ad-tab--active]="activeTab() === 'widgets'" (click)="setTab('widgets')">
+      <span class="material-symbols-outlined icon-sm">public</span> Widgets
+      <span class="ad-tab-count">{{ widgets().length }}</span>
+    </button>
+    <button class="ad-tab" [class.ad-tab--active]="activeTab() === 'info'" (click)="setTab('info')">
+      <span class="material-symbols-outlined icon-sm">info</span> Configuración
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- Tab: Documentos                                                    -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  @if (activeTab() === 'documents') {
+
+    <!-- Selector de categoría -->
+    <div class="ad-category-selector">
+      <label for="ad-category-select">Categoría <span class="ad-category__optional">(opcional)</span></label>
+      <select id="ad-category-select" (change)="onCategoryChange($event)">
+        <option value="">Sin categoría</option>
+        @for (cat of categories(); track cat.id) {
+          <option [value]="cat.id" [selected]="selectedCategoryId === cat.id">{{ cat.name }}</option>
+        }
+      </select>
+      <p class="ad-category__hint">Se asignará a todos los archivos de esta carga.</p>
+    </div>
+
+    <!-- Zona de carga -->
+    <div class="ad-upload-zone"
+      [class.ad-upload-zone--dragover]="isDragOver"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave()"
+      (drop)="onDrop($event)"
+      (click)="triggerFileInput()">
+      <input #fileInput type="file" multiple accept=".pdf,.docx,.txt"
+        class="ad-file-input" (change)="onFileInputChange($event)">
+      <span class="material-symbols-outlined icon-sm ad-upload-icon">cloud_upload</span>
+      <p class="ad-upload-text">Arrastra archivos aquí o <span class="ad-upload-link">haz clic para seleccionar</span></p>
+      <p class="ad-upload-hint">PDF, DOCX, TXT — máximo 10 MB por archivo</p>
+    </div>
+
+    <!-- Archivos en subida -->
+    @if (uploadingFiles.length > 0) {
+      <div class="ad-uploading-list">
+        @for (u of uploadingFiles; track u.name) {
+          <div class="ad-uploading-item" [class.ad-uploading-item--error]="!!u.error">
+            <span class="material-symbols-outlined icon-sm ad-uploading-icon">description</span>
+            <div class="ad-uploading-info">
+              <p class="ad-uploading-name">{{ u.name }}</p>
+              @if (!u.error) {
+                <div class="ad-progress-bar">
+                  <div class="ad-progress-fill" [style.width.%]="u.progress"></div>
+                </div>
+                <p class="ad-uploading-pct">{{ u.progress }}%</p>
+              } @else {
+                <p class="ad-uploading-error">{{ u.error }}</p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Loading docs -->
+    @if (loadingDocs) {
+      <div class="ad-state ad-state--inline">
+        <span class="ad-spinner ad-spinner--sm"></span>
+        <p>Cargando documentos...</p>
+      </div>
+    }
+
+    <!-- Error docs -->
+    @if (!loadingDocs && errorDocs) {
+      <div class="ad-state ad-state--inline ad-state--error">
+        <span class="material-symbols-outlined icon-sm ad-state-icon">warning</span>
+        <p>{{ errorDocs }}</p>
+        <button class="ad-btn-secondary" (click)="loadDocs()">
+          <span class="material-symbols-outlined icon-sm">refresh</span> Reintentar
+        </button>
+      </div>
+    }
+
+    <!-- Empty -->
+    @if (!loadingDocs && !errorDocs && documents().length === 0) {
+      <div class="ad-state ad-state--inline">
+        <span class="material-symbols-outlined icon-sm ad-state-icon">inbox</span>
+        <p class="ad-state-title">Sin documentos aún</p>
+        <p class="ad-state-sub">Sube el primer documento para alimentar la base de conocimiento de este asistente</p>
+      </div>
+    }
+
+    <!-- Lista de documentos -->
+    @if (!loadingDocs && !errorDocs && sortedDocuments().length > 0) {
+      <div class="ad-doc-list">
+        @for (doc of pagedDocuments(); track doc.id) {
+          <div class="ad-doc-row" [class.ad-doc-row--deleting]="deletingId === doc.id">
+
+            <!-- Icono -->
+            <div class="ad-doc-icon-wrap">
+              <span class="material-symbols-outlined icon-sm ad-doc-icon">{{ fileIcon(doc.filename) }}</span>
+            </div>
+
+            <!-- Info -->
+            <div class="ad-doc-info">
+              <p class="ad-doc-name">{{ doc.original_filename || doc.filename }}</p>
+              <div class="ad-doc-meta">
+                <span>{{ formatBytes(doc.file_size) }}</span>
+                @if (doc.chunk_count) {
+                  <span class="ad-meta-sep">·</span>
+                  <span>{{ doc.chunk_count }} fragmentos</span>
+                }
+                <span class="ad-meta-sep">·</span>
+                <span>{{ formatDate(doc.created_at) }}</span>
+              </div>
+            </div>
+
+            <!-- Estado -->
+            <div class="ad-doc-status">
+              @switch (doc.status) {
+                @case ('completed') {
+                  <span class="ad-status ad-status--ok">
+                    <span class="material-symbols-outlined icon-sm">check_circle</span> Listo
+                  </span>
+                }
+                @case ('processing') {
+                  <span class="ad-status ad-status--processing">
+                    <span class="material-symbols-outlined icon-sm" [class.pi-spin]="true">progress_activity</span> Procesando
+                  </span>
+                }
+                @case ('pending') {
+                  <span class="ad-status ad-status--pending">
+                    <span class="material-symbols-outlined icon-sm">schedule</span> Pendiente
+                  </span>
+                }
+                @case ('failed') {
+                  <span class="ad-status ad-status--failed" [title]="doc.error_message ?? ''">
+                    <span class="material-symbols-outlined icon-sm">cancel</span> Error
+                  </span>
+                }
+              }
+            </div>
+
+            <!-- Acciones -->
+            @if (deleteConfirmId !== doc.id) {
+              <div class="ad-doc-actions">
+                @if (doc.status === 'failed' || doc.status === 'processing') {
+                  <button class="ad-doc-btn ad-doc-btn--retry"
+                    [disabled]="retryingId === doc.id"
+                    (click)="retryDocument(doc.id)"
+                    title="Reintentar procesamiento">
+                    <span class="material-symbols-outlined icon-sm" [class.pi-spin]="retryingId === doc.id">refresh</span>
+                  </button>
+                }
+                @if (doc.status === 'completed') {
+                  <button class="ad-doc-btn ad-doc-btn--download"
+                    [disabled]="downloadingId === doc.id"
+                    (click)="downloadDocument(doc.id)"
+                    title="Descargar archivo">
+                    <span class="material-symbols-outlined icon-sm">download</span>
+                  </button>
+                }
+                <button class="ad-doc-btn ad-doc-btn--delete"
+                  [disabled]="!!deletingId"
+                  (click)="confirmDelete(doc.id)"
+                  title="Eliminar">
+                  <span class="material-symbols-outlined icon-sm">delete</span>
+                </button>
+              </div>
+            } @else {
+              <div class="ad-doc-confirm">
+                <span class="ad-confirm-text">¿Eliminar?</span>
+                <button class="ad-doc-btn ad-doc-btn--confirm" (click)="deleteDocument(doc.id)">
+                  <span class="material-symbols-outlined icon-sm">check</span>
+                </button>
+                <button class="ad-doc-btn" (click)="cancelDelete()">
+                  <span class="material-symbols-outlined icon-sm">close</span>
+                </button>
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+
+      @if (sortedDocuments().length > docPageSize()) {
+        <div class="ad-paginator">
+          <p-paginator
+            [rows]="docPageSize()"
+            [totalRecords]="sortedDocuments().length"
+            [first]="docPage() * docPageSize()"
+            [rowsPerPageOptions]="[10, 20, 50]"
+            (onPageChange)="onDocPageChange($event)"
+          />
+        </div>
+      }
+    }
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- Tab: Widgets                                                       -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  @if (activeTab() === 'widgets') {
+
+    <!-- Loading -->
+    @if (loadingWidgets) {
+      <div class="ad-state ad-state--inline">
+        <span class="ad-spinner ad-spinner--sm"></span>
+        <p>Cargando widgets...</p>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (!loadingWidgets && errorWidgets) {
+      <div class="ad-state ad-state--inline ad-state--error">
+        <span class="material-symbols-outlined icon-sm ad-state-icon">warning</span>
+        <p>{{ errorWidgets }}</p>
+      </div>
+    }
+
+    <!-- Empty -->
+    @if (!loadingWidgets && !errorWidgets && widgets().length === 0) {
+      <div class="ad-state ad-state--inline">
+        <span class="material-symbols-outlined icon-sm ad-state-icon">public</span>
+        <p class="ad-state-title">Sin widgets vinculados</p>
+        <p class="ad-state-sub">Crea un widget y asígnale este asistente para desplegarlo en tu web</p>
+      </div>
+    }
+
+    <!-- Lista de widgets -->
+    @if (!loadingWidgets && !errorWidgets && widgets().length > 0) {
+      <div class="ad-doc-list">
+        @for (w of widgets(); track w.id) {
+          <div class="ad-doc-row">
+            <div class="ad-doc-icon-wrap ad-doc-icon-wrap--widget">
+              <span class="material-symbols-outlined icon-sm ad-doc-icon">public</span>
+            </div>
+            <div class="ad-doc-info">
+              <p class="ad-doc-name">{{ w.bot_name || w.name }}</p>
+              <div class="ad-doc-meta">
+                <span>{{ w.position }}</span>
+                <span class="ad-meta-sep">·</span>
+                <span>{{ w.model_name }}</span>
+              </div>
+            </div>
+            <div class="ad-doc-status">
+              <span class="ad-status" [class.ad-status--ok]="w.is_active" [class.ad-status--failed]="!w.is_active">
+                <span class="material-symbols-outlined icon-sm">{{ w.is_active ? 'check_circle' : 'cancel' }}</span>
+                {{ w.is_active ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- Tab: Configuración                                                 -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  @if (activeTab() === 'info') {
+    <div class="ad-info-grid">
+
+      <div class="ad-info-card">
+        <h3 class="ad-info-section">Modelo IA</h3>
+        <div class="ad-info-row">
+          <span class="ad-info-label">Modelo</span>
+          <span class="ad-info-value">{{ a.model }}</span>
+        </div>
+        <div class="ad-info-row">
+          <span class="ad-info-label">Temperatura</span>
+          <span class="ad-info-value">{{ a.temperature }}</span>
+        </div>
+        <div class="ad-info-row">
+          <span class="ad-info-label">Estado</span>
+          <span class="ad-info-value">{{ a.is_active ? 'Activo' : 'Inactivo' }}</span>
+        </div>
+        <div class="ad-info-row">
+          <span class="ad-info-label">Creado</span>
+          <span class="ad-info-value">{{ formatDate(a.created_at) }}</span>
+        </div>
+        @if (a.updated_at) {
+          <div class="ad-info-row">
+            <span class="ad-info-label">Actualizado</span>
+            <span class="ad-info-value">{{ formatDate(a.updated_at) }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="ad-info-card">
+        <h3 class="ad-info-section">Uso</h3>
+        <div class="ad-info-row">
+          <span class="ad-info-label">Documentos</span>
+          <span class="ad-info-value">{{ a.document_count }}</span>
+        </div>
+        <div class="ad-info-row">
+          <span class="ad-info-label">Widgets</span>
+          <span class="ad-info-value">{{ a.widget_count }}</span>
+        </div>
+      </div>
+
+      @if (a.system_prompt) {
+        <div class="ad-info-card ad-info-card--full">
+          <h3 class="ad-info-section">Personalidad (System Prompt)</h3>
+          <p class="ad-info-prompt">{{ a.system_prompt }}</p>
+        </div>
+      }
+
+    </div>
+  }
+
+</div>
+}

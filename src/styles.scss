@@ -1,0 +1,565 @@
+// ══════════════════════════════════════════════════════════════════════════
+// KnowledgeSpace — Global Styles Entry Point
+// Sistema: Deep Blue Premium · src/styles/core/
+// Regla Sass: @use SIEMPRE antes que cualquier otro statement
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── 1. Tokens del sistema (deben ir primero) ──────────────────────────────
+@use 'sass:color';
+@use 'styles/core/colors'    as *;
+@use 'styles/core/variables' as *;
+@use 'styles/core/mixins'    as *;
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// 2. RESET Y BASE GLOBAL
+// ══════════════════════════════════════════════════════════════════════════
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: $font-family;
+  font-size: $size-base;
+  color: $font-body;
+  background-color: $bg-app;
+  line-height: $lh-normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: $color-primary;
+  text-decoration: none;
+
+  &:hover { color: $color-primary-hover; }
+}
+
+button { font-family: inherit; }
+
+// ══════════════════════════════════════════════════════════════════════════
+// ANIMACIONES COMPARTIDAS
+// Definidas una sola vez — los componentes solo declaran `animation: spin ...`
+// sin repetir el @keyframes (antes duplicado en ~15 archivos .scss).
+// ══════════════════════════════════════════════════════════════════════════
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// MATERIAL SYMBOLS — Google Fonts Icons
+// ══════════════════════════════════════════════════════════════════════════
+
+.material-symbols-outlined,
+.material-symbols-rounded {
+  font-family: 'Material Symbols Outlined', 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga';
+}
+
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+}
+
+// Variantes de tamaño
+.icon-xs { font-size: 16px; }
+.icon-sm { font-size: 18px; }
+.icon-md { font-size: 20px; }
+.icon-lg { font-size: 24px; }
+.icon-xl { font-size: 32px; }
+.icon-2xl { font-size: 40px; }
+
+// ══════════════════════════════════════════════════════════════════════════
+// 3. CSS CUSTOM PROPERTIES — alimentadas desde $variables del core
+//    Permite usar var(--color-primary) en cualquier parte del DOM
+// ══════════════════════════════════════════════════════════════════════════
+
+:root {
+
+  // ── Identidad / Marca ─────────────────────────────────────────────────
+  --color-primary:        #{$color-primary};
+  --color-primary-hover:  #{$color-primary-hover};
+  --color-primary-active: #{$color-primary-active};
+  --color-primary-light:  #{$color-primary-light};
+  --color-primary-muted:  #{$color-primary-muted};
+  --color-primary-text:   #{$color-primary-text};
+  --color-accent:         #{$color-accent};
+  --color-success:        #{$color-success};
+
+  // ── Paleta navy ───────────────────────────────────────────────────────
+  --navy-900: #{$navy-900};
+  --navy-700: #{$navy-700};
+  --navy-500: #{$navy-500};
+  --navy-400: #{$navy-400};
+  --navy-300: #{$navy-300};
+  --navy-100: #{$navy-100};
+  --navy-50:  #{$navy-50};
+
+  // ── Paleta slate ──────────────────────────────────────────────────────
+  --slate-800: #{$slate-800};
+  --slate-600: #{$slate-600};
+  --slate-400: #{$slate-400};
+  --slate-200: #{$slate-200};
+  --slate-100: #{$slate-100};
+  --slate-50:  #{$slate-50};
+
+  // ── Estados semánticos ────────────────────────────────────────────────
+  --color-success:       #{$green-active};
+  --color-success-light: #{$green-light};
+  --color-success-text:  #{$green-text};
+  --color-warning:       #{$amber-500};
+  --color-warning-light: #{$amber-light};
+  --color-warning-text:  #{$amber-text};
+  --color-danger:        #{$red-500};
+  --color-danger-light:  #{$red-light};
+  --color-danger-text:   #{$red-text};
+  --color-info:          #{$navy-400};
+  --color-info-light:    #{$navy-50};
+
+  // ── Superficies y fondos ──────────────────────────────────────────────
+  --bg-app:      #{$bg-app};
+  --bg-card:     #{$bg-card};
+  --bg-hover:    #{$bg-hover};
+  --bg-selected: #{$bg-selected};
+  --bg-disabled: #{$bg-disabled};
+
+  // ── Tipografía ────────────────────────────────────────────────────────
+  --font-family:    #{$font-family};
+  --font-title:     #{$font-title};
+  --font-body:      #{$font-body};
+  --font-muted:     #{$font-muted};
+  --font-on-primary: #{$font-on-primary};
+
+  --size-2xs:  #{$size-2xs};
+  --size-xs:   #{$size-xs};
+  --size-sm:   #{$size-sm};
+  --size-base: #{$size-base};
+  --size-md:   #{$size-md};
+  --size-lg:   #{$size-lg};
+  --size-xl:   #{$size-xl};
+  --size-2xl:  #{$size-2xl};
+  --size-3xl:  #{$size-3xl};
+  --size-4xl:  #{$size-4xl};
+
+  --w-regular:  #{$w-regular};
+  --w-medium:   #{$w-medium};
+  --w-semibold: #{$w-semibold};
+  --w-bold:     #{$w-bold};
+
+  --lh-tight:   #{$lh-tight};
+  --lh-normal:  #{$lh-normal};
+
+  // ── Bordes y divisores ────────────────────────────────────────────────
+  --border-flat:   #{$border-flat};
+  --border-strong: #{$border-strong};
+  --border-focus:  #{$border-focus};
+
+  // ── Radios ────────────────────────────────────────────────────────────
+  --radius-xs:     #{$radius-xs};
+  --radius-sm:     #{$radius-sm};
+  --radius-md:     #{$radius-md};
+  --radius-lg:     #{$radius-lg};
+  --radius-xl:     #{$radius-xl};
+  --radius-circle: #{$radius-circle};
+  --radius-pill:   #{$radius-pill};
+
+  // ── Sombras ───────────────────────────────────────────────────────────
+  --shadow-xs:    #{$shadow-xs};
+  --shadow-sm:    #{$shadow-sm};
+  --shadow-md:    #{$shadow-md};
+  --shadow-lg:    #{$shadow-lg};
+  --shadow-focus: #{$shadow-focus};
+
+  // ── Espaciado ─────────────────────────────────────────────────────────
+  --sp-1:  #{$sp-1};
+  --sp-2:  #{$sp-2};
+  --sp-3:  #{$sp-3};
+  --sp-4:  #{$sp-4};
+  --sp-6:  #{$sp-6};
+  --sp-8:  #{$sp-8};
+
+  // ── Botones ───────────────────────────────────────────────────────────
+  --btn-primary-bg:     #{$btn-primary-bg};
+  --btn-primary-hover:  #{$btn-primary-hover};
+  --btn-primary-text:   #{$btn-primary-text};
+  --btn-height-sm:      #{$btn-height-sm};
+  --btn-height-md:      #{$btn-height-md};
+  --btn-height-lg:      #{$btn-height-lg};
+  --btn-radius:         #{$btn-radius};
+
+  // ── Tablas / Badges ───────────────────────────────────────────────────
+  --badge-active-bg:     #{$badge-active-bg};
+  --badge-active-text:   #{$badge-active-text};
+  --badge-inactive-bg:   #{$badge-inactive-bg};
+  --badge-inactive-text: #{$badge-inactive-text};
+  --badge-pending-bg:    #{$badge-pending-bg};
+  --badge-pending-text:  #{$badge-pending-text};
+  --badge-neutral-bg:    #{$badge-neutral-bg};
+  --badge-neutral-text:  #{$badge-neutral-text};
+
+  // ── Motion ────────────────────────────────────────────────────────────
+  --motion-fast: #{$motion-fast};
+  --motion-base: #{$motion-base};
+  --motion-slow: #{$motion-slow};
+
+  // ── Z-index ───────────────────────────────────────────────────────────
+  --z-dropdown: #{$z-dropdown};
+  --z-sticky:   #{$z-sticky};
+  --z-modal:    #{$z-modal};
+  --z-toast:    #{$z-toast};
+
+  // ── Layout ────────────────────────────────────────────────────────────
+  --topbar-height:    #{$topbar-height};
+  --layout-padding:   #{$layout-padding};
+  --layout-max-width: #{$layout-max-width};
+
+  // ── Tooltips ─────────────────────────────────────────────────────────
+  --tooltip-bg:     #{$slate-800};
+  --tooltip-danger: #{$red-text};
+
+  // ── Compatibilidad backward ───────────────────────────────────────────
+  --primary-color:   #{$color-primary};
+  --brand:           #{$color-primary};
+  --gray-50:         #{$slate-50};
+  --gray-100:        #{$slate-100};
+  --gray-200:        #{$slate-200};
+  --gray-300:        #{$slate-300};
+  --gray-400:        #{$slate-400};
+  --gray-500:        #{$slate-500};
+  --gray-700:        #{$slate-700};
+  --gray-900:        #{$slate-900};
+  --background-page: #{$bg-app};
+  --card-background: #{$bg-card};
+  --text-color:      #{$font-body};
+  --border-color:    #{$border-flat};
+  --error-color:     #{$red-500};
+  --success-color:   #{$color-success};
+  --warning-color:   #{$amber-500};
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// 4. TOOLTIPS DE ACCIÓN — aplicados globalmente (PrimeNG appends to body)
+// ══════════════════════════════════════════════════════════════════════════
+
+.action-tooltip {
+  &.p-tooltip .p-tooltip-text {
+    background: $slate-800;
+    color: $font-on-primary;
+    font-size: $size-xs;
+    font-weight: $w-medium;
+    padding: 5px $sp-3;
+    border-radius: $radius-sm;
+    box-shadow: $shadow-md;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+  }
+
+  &.p-tooltip-top    .p-tooltip-arrow { border-top-color:    $slate-800; }
+  &.p-tooltip-bottom .p-tooltip-arrow { border-bottom-color: $slate-800; }
+  &.p-tooltip-left   .p-tooltip-arrow { border-left-color:   $slate-800; }
+  &.p-tooltip-right  .p-tooltip-arrow { border-right-color:  $slate-800; }
+
+  &.action-tooltip--danger {
+    .p-tooltip-text { background: $red-text; }
+    &.p-tooltip-top .p-tooltip-arrow { border-top-color: $red-text; }
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// 5. TOAST GLOBAL — aplica el sistema de diseño a p-toast (appends to body)
+// ══════════════════════════════════════════════════════════════════════════
+
+.p-toast {
+  z-index: $z-toast;
+
+  .p-toast-message {
+    border-radius: $radius-md;
+    box-shadow: $shadow-lg;
+    border: none;
+    overflow: hidden;
+
+    .p-toast-message-content {
+      display: flex;
+      align-items: center;
+      gap: $sp-3;
+      padding: $sp-3 $sp-4;
+    }
+
+    .p-toast-message-icon {
+      font-size: $size-lg;
+      flex-shrink: 0;
+    }
+
+    .p-toast-message-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .p-toast-summary {
+      font-size: $size-sm;
+      font-weight: $w-semibold;
+      line-height: $lh-tight;
+      display: block;
+    }
+
+    .p-toast-detail {
+      font-size: $size-xs;
+      margin-top: 2px;
+      opacity: 0.85;
+      display: block;
+    }
+
+    .p-toast-close-button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: $radius-sm;
+      flex-shrink: 0;
+      color: inherit;
+      opacity: 0.6;
+      transition: opacity $motion-fast, background $motion-fast;
+      padding: 0;
+
+      &:hover { opacity: 1; background: $overlay-dark-sm; }
+
+      .p-toast-close-icon { font-size: 11px; }
+    }
+
+    &.p-toast-message-success {
+      background: $green-light;
+      color: $green-text;
+      border-left: 4px solid $green-active;
+    }
+
+    &.p-toast-message-error {
+      background: $red-light;
+      color: $red-text;
+      border-left: 4px solid $red-500;
+    }
+
+    &.p-toast-message-info {
+      background: $navy-50;
+      color: $navy-700;
+      border-left: 4px solid $navy-400;
+    }
+
+    &.p-toast-message-warn {
+      background: $amber-light;
+      color: $amber-text;
+      border-left: 4px solid $amber-500;
+    }
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// 6. PRIMENG BUTTON — overrides del sistema de diseño
+// ══════════════════════════════════════════════════════════════════════════
+
+button.p-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-2;
+  padding: $sp-3 $sp-5;
+  border-radius: $radius-md;
+  font-size: $size-base;
+  font-weight: $w-medium;
+  font-family: $font-family;
+  cursor: pointer;
+  border: 1px solid transparent;
+  line-height: 1;
+  transition: background $motion-base, border-color $motion-base,
+              color $motion-base, opacity $motion-base;
+  white-space: nowrap;
+
+  background: $btn-primary-bg;
+  color:      $btn-primary-text;
+
+  &:hover:not(:disabled)  { background: $btn-primary-hover; }
+  &:active:not(:disabled) { background: $btn-primary-active; }
+  &:disabled              { opacity: 0.55; cursor: not-allowed; }
+
+  &.p-button-sm {
+    padding: $sp-2 $sp-3;
+    font-size: $size-sm;
+  }
+
+  &.p-button-icon-only {
+    padding: $sp-2;
+    width:  2rem;
+    height: 2rem;
+
+    &.p-button-sm {
+      width:  1.75rem;
+      height: 1.75rem;
+    }
+  }
+
+  &.p-button-rounded { border-radius: $radius-pill; }
+
+  &.p-button-text {
+    background:   transparent;
+    border-color: transparent;
+    color:        $font-body;
+
+    &:hover:not(:disabled)  { background: $bg-disabled; }
+    &:active:not(:disabled) { background: color.adjust($bg-disabled, $lightness: -3%); }
+
+    &.p-button-secondary {
+      color: $font-body;
+      &:hover:not(:disabled) { color: $color-primary; background: $color-primary-light; }
+    }
+
+    &.p-button-danger {
+      color: $red-500;
+      &:hover:not(:disabled)  { background: $red-light; }
+    }
+
+    &.p-button-success {
+      color: $green-text;
+      &:hover:not(:disabled) { background: $green-light; }
+    }
+  }
+
+  &.p-button-outlined {
+    background:   transparent;
+    border-color: $border-flat;
+    color:        $font-body;
+
+    &:hover:not(:disabled) { background: $bg-disabled; border-color: $border-strong; }
+
+    &.p-button-secondary {
+      border-color: $border-flat;
+      color: $font-body;
+    }
+
+    &.p-button-danger {
+      border-color: $red-500;
+      color: $red-500;
+      &:hover:not(:disabled) { background: $red-light; }
+    }
+  }
+
+  .p-button-icon { font-size: $size-base; }
+  .p-button-icon.p-button-icon-left  { margin-right: $sp-2; }
+  .p-button-icon.p-button-icon-right { margin-left:  $sp-2; }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════════
+// 7. PRIMENG SELECT — trigger + panel (panel appends to body vía overlay)
+// Sin theme preset, PrimeNG inyecta su CSS base en runtime (después de este
+// bundle) usando var(--p-select-*) sin definir — motivo por el que background
+// y border necesitan !important: sin eso pierden el empate de especificidad
+// contra la regla inyectada más tarde, y quedan transparentes.
+// ══════════════════════════════════════════════════════════════════════════
+
+.p-select {
+  display: inline-flex;
+  align-items: center;
+  height: 2.125rem;
+  background: $bg-card !important;
+  border: 1px solid $border-strong !important;
+  border-radius: $radius-sm;
+  cursor: pointer;
+  transition: border-color $motion-fast;
+
+  &.p-focus {
+    border-color: $color-primary-active !important;
+    box-shadow: $field-focus-shadow;
+  }
+
+  &.p-disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .p-select-label {
+    flex: 1;
+    padding: 0 $sp-3;
+    font-size: $size-sm;
+    font-family: $font-family;
+    color: $font-body !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    outline: none;
+  }
+
+  .p-select-dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    flex-shrink: 0;
+    color: $font-muted;
+  }
+
+  .p-select-dropdown-icon { width: 12px; height: 12px; }
+}
+
+.p-select-overlay {
+  background: $bg-card !important;
+  border: 1px solid $border-flat !important;
+  border-radius: $radius-md;
+  box-shadow: $shadow-lg;
+  z-index: $z-dropdown;
+  overflow: hidden;
+
+  .p-select-list {
+    list-style: none;
+    margin: 0;
+    padding: $sp-2 0;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .p-select-option {
+    display: flex;
+    align-items: center;
+    padding: $sp-2 $sp-4;
+    font-size: $size-sm;
+    color: $font-body !important;
+    cursor: pointer;
+    transition: background $motion-fast, color $motion-fast;
+
+    &:hover { background: $bg-hover !important; }
+
+    &.p-select-option-selected {
+      background: $color-primary-light !important;
+      color: $color-primary !important;
+      font-weight: $w-semibold;
+    }
+  }
+
+  .p-select-empty-message {
+    padding: $sp-3 $sp-4;
+    font-size: $size-sm;
+    color: $font-muted;
+  }
+}

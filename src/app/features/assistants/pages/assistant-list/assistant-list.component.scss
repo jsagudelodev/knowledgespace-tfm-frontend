@@ -1,0 +1,503 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+
+.al-container {
+  padding: $sp-6;
+  max-width: $layout-max-width;
+  margin: 0 auto;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.al-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $sp-4;
+  margin-bottom: $sp-6;
+  flex-wrap: wrap;
+}
+
+.al-header-left { flex: 1; min-width: 0; }
+
+.al-title {
+  margin: 0 0 $sp-1;
+  font-size: $size-3xl;
+  font-weight: $w-bold;
+  color: $font-title;
+}
+
+.al-subtitle {
+  margin: 0;
+  font-size: $size-sm;
+  color: $font-muted;
+}
+
+.al-header-right {
+  display: flex;
+  align-items: center;
+  gap: $sp-2;
+  flex-shrink: 0;
+}
+
+.al-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+  background: $bg-card;
+  color: $font-muted;
+  cursor: pointer;
+  transition: background $motion-fast, color $motion-fast;
+
+  &:hover { background: $bg-hover; color: $font-body; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.al-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+  padding: $sp-2 $sp-4;
+  background: $btn-primary-bg;
+  color: $btn-primary-text;
+  border: none;
+  border-radius: $radius-md;
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  cursor: pointer;
+  transition: background $motion-fast;
+
+  &:hover { background: $btn-primary-hover; }
+  &:disabled { background: $btn-disabled-bg; color: $btn-disabled-text; cursor: not-allowed; }
+}
+
+.al-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+  padding: $sp-2 $sp-4;
+  background: $bg-card;
+  color: $font-body;
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+  font-size: $size-sm;
+  cursor: pointer;
+  transition: background $motion-fast;
+
+  &:hover { background: $bg-hover; }
+}
+
+// ── Filters ───────────────────────────────────────────────────────────────────
+
+.al-filters {
+  display: flex;
+  gap: $sp-3;
+  flex-wrap: wrap;
+  margin-bottom: $sp-3;
+  align-items: center;
+}
+
+.al-search {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+
+  &__icon {
+    position: absolute;
+    left: $sp-3;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $font-muted;
+    pointer-events: none;
+  }
+
+  &__input {
+    width: 100%;
+    padding: $sp-3 $sp-8 $sp-3 calc(#{$sp-3} + 20px);
+    border: 1px solid $field-border;
+    border-radius: $radius-md;
+    background: $bg-card;
+    color: $font-body;
+    font-size: $size-sm;
+    transition: border-color $motion-fast, box-shadow $motion-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $field-border-focus;
+      box-shadow: $shadow-focus;
+    }
+  }
+
+  &__clear {
+    position: absolute;
+    right: $sp-3;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: $font-muted;
+    cursor: pointer;
+    padding: $sp-1;
+    display: flex;
+    align-items: center;
+    &:hover { color: $font-body; }
+  }
+}
+
+.al-select {
+  padding: $sp-3 $sp-4;
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+  background: $bg-card;
+  color: $font-body;
+  font-size: $size-sm;
+  cursor: pointer;
+  transition: border-color $motion-fast;
+
+  &:focus { outline: none; border-color: $color-primary; }
+}
+
+// ── Chips ─────────────────────────────────────────────────────────────────────
+
+.al-chips {
+  display: flex;
+  align-items: center;
+  gap: $sp-2;
+  flex-wrap: wrap;
+  margin-bottom: $sp-4;
+}
+
+.al-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-1;
+  padding: $sp-1 $sp-3;
+  background: rgba($color-primary, 0.08);
+  color: $color-primary;
+  border: 1px solid rgba($color-primary, 0.2);
+  border-radius: $radius-pill;
+  font-size: $size-xs;
+  font-weight: $w-medium;
+
+  &__remove {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0 $sp-1;
+    opacity: 0.7;
+    display: flex;
+    align-items: center;
+    &:hover { opacity: 1; }
+  }
+
+  &--clear {
+    background: none;
+    color: $font-muted;
+    border-color: $field-border;
+    cursor: pointer;
+    &:hover { color: $color-danger; border-color: $color-danger; }
+  }
+}
+
+// ── States ────────────────────────────────────────────────────────────────────
+
+.al-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-3;
+  padding: $sp-16 $sp-6;
+  text-align: center;
+  color: $font-muted;
+
+  &--error { color: $color-danger; }
+}
+
+.al-state__icon { font-size: 2.5rem; }
+
+.al-state__title {
+  margin: 0;
+  font-size: $size-lg;
+  font-weight: $w-semibold;
+  color: $font-body;
+}
+
+.al-state__sub {
+  margin: 0;
+  font-size: $size-sm;
+  color: $font-muted;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.al-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: $radius-circle;
+  background: rgba($color-primary, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .material-symbols-outlined { font-size: 2rem; color: $color-primary; opacity: 0.6; }
+}
+
+.al-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid $field-border;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+// ── Cards grid ────────────────────────────────────────────────────────────────
+
+.al-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: $sp-4;
+  margin-bottom: $sp-5;
+}
+
+.al-card {
+  background: $bg-card;
+  border: 1px solid $field-border;
+  border-radius: $radius-lg;
+  padding: $sp-5;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-4;
+  cursor: pointer;
+  transition: border-color $motion-fast, box-shadow $motion-fast, transform $motion-fast;
+
+  &:hover {
+    border-color: $color-primary;
+    box-shadow: $shadow-md;
+    transform: translateY(-1px);
+  }
+
+  &--deleting { opacity: 0.4; pointer-events: none; }
+}
+
+// Card header
+
+.al-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-3;
+}
+
+.al-card-avatar {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  background: rgba($color-primary, 0.06);
+  border-radius: $radius-lg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.al-card-identity {
+  flex: 1;
+  min-width: 0;
+}
+
+.al-card-name {
+  margin: 0 0 $sp-1;
+  font-size: $size-base;
+  font-weight: $w-semibold;
+  color: $font-title;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.al-card-desc {
+  margin: 0;
+  font-size: $size-xs;
+  color: $font-muted;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.al-status {
+  flex-shrink: 0;
+  padding: 2px $sp-3;
+  border-radius: $radius-pill;
+  font-size: $size-xs;
+  font-weight: $w-semibold;
+
+  &--active   { background: $badge-active-bg;   color: $badge-active-text; }
+  &--inactive { background: $badge-inactive-bg; color: $badge-inactive-text; }
+}
+
+// Card meta badges
+
+.al-card-meta {
+  display: flex;
+  gap: $sp-2;
+  flex-wrap: wrap;
+}
+
+.al-meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-1;
+  padding: $sp-1 $sp-2;
+  border-radius: $radius-sm;
+  font-size: $size-xs;
+  font-weight: $w-medium;
+
+  .material-symbols-outlined { font-size: 11px; }
+
+  &--model { background: rgba($color-primary, 0.08); color: $color-primary; }
+  &--temp  { background: rgba($color-warning, 0.10); color: $color-warning; }
+}
+
+// Card stats
+
+.al-card-stats {
+  display: flex;
+  align-items: center;
+  padding: $sp-3 0;
+  border-top: 1px solid $field-border;
+  border-bottom: 1px solid $field-border;
+}
+
+.al-stat {
+  flex: 1;
+  text-align: center;
+
+  &__value {
+    display: block;
+    font-size: $size-xl;
+    font-weight: $w-bold;
+    color: $font-title;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+
+  &__label {
+    display: block;
+    font-size: $size-xs;
+    color: $font-muted;
+  }
+}
+
+.al-stat-sep {
+  width: 1px;
+  height: 32px;
+  background: $field-border;
+}
+
+// Card actions
+
+.al-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $sp-2;
+}
+
+.al-confirm-text {
+  flex: 1;
+  font-size: $size-xs;
+  color: $color-danger;
+  font-weight: $w-medium;
+}
+
+.al-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-1;
+  height: 30px;
+  padding: 0 $sp-2;
+  border: 1px solid $field-border;
+  border-radius: $radius-sm;
+  background: $bg-card;
+  color: $font-muted;
+  cursor: pointer;
+  font-size: $size-xs;
+  font-weight: $w-medium;
+  transition: background $motion-fast, color $motion-fast, border-color $motion-fast;
+
+  .material-symbols-outlined { font-size: $size-sm; }
+
+  &:hover:not(:disabled) { background: $bg-hover; color: $font-body; border-color: $border-strong; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  &--manage {
+    background: $bg-hover;
+    color: $font-body;
+    border-color: $field-border;
+    margin-right: auto;
+
+    &:hover:not(:disabled) {
+      background: $color-primary;
+      color: $bg-card;
+      border-color: $color-primary;
+    }
+  }
+
+  &--danger:hover:not(:disabled) {
+    background: $badge-inactive-bg;
+    color: $badge-inactive-text;
+    border-color: $badge-inactive-text;
+  }
+
+  &--confirm:hover:not(:disabled) {
+    background: $badge-active-bg;
+    color: $badge-active-text;
+    border-color: $badge-active-text;
+  }
+}
+
+// ── Pagination ────────────────────────────────────────────────────────────────
+
+.al-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-4 0;
+  border-top: 1px solid $field-border;
+}
+
+.al-pagination__info { font-size: $size-xs; color: $font-muted; }
+
+.al-pagination__controls {
+  display: flex;
+  align-items: center;
+  gap: $sp-2;
+}
+
+.al-page-current { font-size: $size-xs; color: $font-body; min-width: 48px; text-align: center; }
+
+.al-page-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid $field-border;
+  border-radius: $radius-sm;
+  background: $bg-card;
+  color: $font-muted;
+  cursor: pointer;
+  transition: background $motion-fast;
+
+  &:hover:not(:disabled) { background: $bg-hover; color: $font-body; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}

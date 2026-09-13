@@ -1,0 +1,346 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+
+// ─── Página: split layout ────────────────────────────────────────────────────
+
+.auth-page {
+  display: flex;
+  min-height: 100vh;
+  font-family: $font-family;
+}
+
+// ─── Panel izquierdo: branding ───────────────────────────────────────────────
+
+.auth-brand {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 45%;
+  padding: $sp-12 $sp-10;
+  background: linear-gradient(145deg, $navy-900 0%, $navy-700 60%, $navy-600 100%);
+  overflow: hidden;
+
+  &__decoration {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 70% at 110% 110%, rgba($navy-400, 0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at -5%  -5%,  rgba($navy-300, 0.10) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  &__content {
+    position: relative;
+    z-index: 1;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: $sp-3;
+    margin-bottom: $sp-10;
+  }
+
+  &__logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: $color-primary;
+    border-radius: $radius-md;
+    font-size: $size-base;
+    font-weight: $w-bold;
+    color: $font-on-primary;
+    letter-spacing: -0.5px;
+    box-shadow: 0 2px 12px rgba($navy-500, 0.45);
+  }
+
+  &__logo-text {
+    font-size: $size-2xl;
+    font-weight: $w-bold;
+    color: $font-on-primary;
+    letter-spacing: $letter-spacing-tight;
+  }
+
+  &__title {
+    margin: 0 0 $sp-4;
+    font-size: $size-3xl;
+    font-weight: $w-semibold;
+    color: $font-on-primary;
+    line-height: $lh-tight;
+  }
+
+  &__sub {
+    margin: 0 0 $sp-10;
+    font-size: $size-base;
+    color: rgba($font-on-primary, 0.62);
+    line-height: $lh-relaxed;
+  }
+
+  &__features {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-3;
+  }
+
+  &__feature {
+    display: flex;
+    align-items: center;
+    gap: $sp-3;
+    font-size: $size-sm;
+    color: rgba($font-on-primary, 0.78);
+
+    i {
+      font-size: $size-base;
+      color: $navy-300;
+      flex-shrink: 0;
+    }
+  }
+}
+
+// ─── Panel derecho: formulario ───────────────────────────────────────────────
+
+.auth-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $sp-8 $sp-6;
+  background: $bg-app;
+}
+
+.auth-form-card {
+  width: 100%;
+  max-width: 420px;
+  background: $bg-card;
+  border-radius: $radius-xl;
+  padding: $sp-10;
+  box-shadow: $shadow-xl;
+  border: 1px solid $border-flat;
+}
+
+.auth-form-header {
+  margin-bottom: $sp-8;
+
+  h1 {
+    margin: 0 0 $sp-1;
+    font-size: $size-3xl;
+    font-weight: $w-bold;
+    color: $font-title;
+    letter-spacing: $letter-spacing-tight;
+  }
+
+  p {
+    margin: 0;
+    font-size: $size-base;
+    color: $font-muted;
+  }
+}
+
+// ─── Alerta de error ──────────────────────────────────────────────────────────
+
+.auth-alert {
+  display: flex;
+  align-items: center;
+  gap: $sp-2;
+  padding: $sp-3 $sp-4;
+  border-radius: $radius-md;
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  margin-bottom: $sp-5;
+
+  i { font-size: $size-base; flex-shrink: 0; }
+
+  &--error {
+    background: $red-light;
+    color: $red-text;
+    border: 1px solid rgba($red-500, 0.20);
+  }
+}
+
+// ─── Formulario ──────────────────────────────────────────────────────────────
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-5;
+}
+
+// ─── Campo de formulario (BEM) ────────────────────────────────────────────────
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-1;
+
+  &__label {
+    font-size: $size-sm;
+    font-weight: $w-medium;
+    color: $font-title;
+    letter-spacing: 0.02em;
+  }
+
+  &__control {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    &:focus-within .form-field__icon {
+      color: $color-primary;
+    }
+
+    &--error {
+      .form-field__input  { border-color: $field-border-error; }
+      .form-field__icon   { color: $red-500; }
+    }
+
+    &--error:focus-within .form-field__icon {
+      color: $color-primary;
+    }
+  }
+
+  &__icon {
+    position: absolute;
+    left: $sp-3;
+    color: $font-muted;
+    font-size: $size-base;
+    pointer-events: none;
+    transition: color $motion-fast;
+  }
+
+  &__input {
+    width: 100%;
+    height: $field-height;
+    padding: 0 $sp-4 0 calc(#{$sp-3} + 16px + #{$sp-2});
+    border: 1px solid $field-border;
+    border-radius: $field-radius;
+    font-size: $size-base;
+    font-family: $font-family;
+    color: $field-text;
+    background: $field-bg;
+    transition: border-color $motion-fast, box-shadow $motion-fast;
+    box-sizing: border-box;
+
+    &::placeholder { color: $font-placeholder; }
+
+    &:focus {
+      outline: none;
+      border-color: $field-border-focus;
+      box-shadow: $field-focus-shadow;
+    }
+  }
+
+  &__error {
+    font-size: $size-xs;
+    color: $red-500;
+    padding-left: $sp-1;
+  }
+}
+
+// ─── Botón de login ───────────────────────────────────────────────────────────
+
+.btn-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-2;
+  width: 100%;
+  height: $btn-height-lg;
+  margin-top: $sp-2;
+  background: $btn-primary-bg;
+  color: $btn-primary-text;
+  border: none;
+  border-radius: $btn-radius;
+  font-size: $size-base;
+  font-weight: $w-semibold;
+  font-family: $font-family;
+  cursor: pointer;
+  transition: background $motion-fast, transform $motion-fast, box-shadow $motion-fast;
+
+  i { font-size: $size-lg; }
+
+  &:hover:not(:disabled) {
+    background: $btn-primary-hover;
+    transform: translateY(-1px);
+    box-shadow: $btn-primary-shadow;
+  }
+
+  &:active:not(:disabled) {
+    background: $btn-primary-active;
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  &:disabled {
+    background: $btn-disabled-bg;
+    color: $btn-disabled-text;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// ─── Footer ──────────────────────────────────────────────────────────────────
+
+.auth-form-footer {
+  margin-top: $sp-6;
+  text-align: center;
+
+  p {
+    margin: 0;
+    font-size: $size-sm;
+    color: $font-muted;
+  }
+
+  &__link {
+    color: $color-primary;
+    font-weight: $w-medium;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color $motion-fast;
+
+    &:hover {
+      color: $color-primary-hover;
+      text-decoration: underline;
+    }
+  }
+}
+
+// ─── Responsive ──────────────────────────────────────────────────────────────
+
+@media (max-width: 900px) {
+  .auth-brand {
+    width: 42%;
+    padding: $sp-8;
+
+    &__title { font-size: $size-2xl; }
+    &__features { display: none; }
+  }
+
+  .auth-form-card { padding: $sp-8; }
+}
+
+@media (max-width: 640px) {
+  .auth-page { flex-direction: column; }
+
+  .auth-brand {
+    width: 100%;
+    padding: $sp-8 $sp-6;
+
+    &__logo { margin-bottom: $sp-4; }
+    &__title { display: none; }
+    &__sub { display: none; }
+    &__features { display: none; }
+  }
+
+  .auth-form-panel { padding: $sp-5 $sp-4; }
+
+  .auth-form-card {
+    padding: $sp-6;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-md;
+  }
+}

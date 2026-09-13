@@ -1,0 +1,205 @@
+<div class="al-container">
+
+  <!-- ── Page header ──────────────────────────────────────────────────────── -->
+  <div class="al-header">
+    <div class="al-header-left">
+      <h1 class="al-title">Asistentes</h1>
+      <p class="al-subtitle">Asistentes de conocimiento especializados por área funcional</p>
+    </div>
+    <div class="al-header-right">
+      <button class="al-btn-icon" (click)="loadAssistants()" [disabled]="loading" title="Actualizar">
+        <span class="material-symbols-outlined icon-sm" [class.pi-spin]="loading">refresh</span>
+      </button>
+      <button class="al-btn-primary" (click)="goToNew()">
+        <span class="material-symbols-outlined icon-sm">add</span>
+        Nuevo Asistente
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Filters ──────────────────────────────────────────────────────────── -->
+  <div class="al-filters">
+    <div class="al-search">
+      <span class="material-symbols-outlined icon-sm al-search__icon">search</span>
+      <input
+        type="text"
+        class="al-search__input"
+        placeholder="Buscar por nombre o descripción..."
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+        autocomplete="off"
+      />
+      @if (searchTerm()) {
+        <button class="al-search__clear" (click)="clearSearch()">
+          <span class="material-symbols-outlined icon-sm">close</span>
+        </button>
+      }
+    </div>
+
+    <select class="al-select" [value]="selectedStatus()" (change)="onStatusChange($event)">
+      <option value="">Todos los estados</option>
+      <option value="active">Activo</option>
+      <option value="inactive">Inactivo</option>
+    </select>
+  </div>
+
+  <!-- Active filter chips -->
+  @if (hasActiveFilters()) {
+    <div class="al-chips">
+      @if (selectedStatus()) {
+        <span class="al-chip">
+          <span class="material-symbols-outlined icon-sm">filter_alt</span>
+          Estado: {{ selectedStatus() === 'active' ? 'Activo' : 'Inactivo' }}
+          <button class="al-chip__remove" (click)="clearStatusFilter()"><span class="material-symbols-outlined icon-sm">close</span></button>
+        </span>
+      }
+      @if (searchTerm().trim()) {
+        <span class="al-chip">
+          <span class="material-symbols-outlined icon-sm">search</span>
+          "{{ searchTerm() }}"
+          <button class="al-chip__remove" (click)="clearSearch()"><span class="material-symbols-outlined icon-sm">close</span></button>
+        </span>
+      }
+      <button class="al-chip al-chip--clear" (click)="clearAllFilters()">
+        <span class="material-symbols-outlined icon-sm">close</span> Limpiar
+      </button>
+    </div>
+  }
+
+  <!-- ── Loading ──────────────────────────────────────────────────────────── -->
+  @if (loading) {
+    <div class="al-state">
+      <span class="al-spinner"></span>
+      <p class="al-state__title">Cargando asistentes...</p>
+    </div>
+  }
+
+  <!-- ── Error ────────────────────────────────────────────────────────────── -->
+  @if (!loading && error) {
+    <div class="al-state al-state--error">
+      <span class="material-symbols-outlined icon-sm al-state__icon">warning</span>
+      <p class="al-state__title">Error al cargar</p>
+      <p class="al-state__sub">{{ error }}</p>
+      <button class="al-btn-secondary" (click)="loadAssistants()">
+        <span class="material-symbols-outlined icon-sm">refresh</span> Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- ── Empty (sin datos) ────────────────────────────────────────────────── -->
+  @if (!loading && !error && originalData().length === 0) {
+    <div class="al-state">
+      <div class="al-empty-icon">
+        <span class="material-symbols-outlined icon-sm">smart_toy</span>
+      </div>
+      <p class="al-state__title">Sin asistentes aún</p>
+      <p class="al-state__sub">Crea tu primer asistente especializado para empezar a gestionar conocimiento corporativo</p>
+      <button class="al-btn-primary" (click)="goToNew()">
+        <span class="material-symbols-outlined icon-sm">add</span> Crear primer asistente
+      </button>
+    </div>
+  }
+
+  <!-- ── Empty (sin resultados filtro) ───────────────────────────────────── -->
+  @if (!loading && !error && originalData().length > 0 && filteredData().length === 0) {
+    <div class="al-state">
+      <span class="material-symbols-outlined icon-sm al-state__icon">search</span>
+      <p class="al-state__title">Sin resultados</p>
+      <p class="al-state__sub">Ningún asistente coincide con los filtros aplicados</p>
+      <button class="al-btn-secondary" (click)="clearAllFilters()">Limpiar filtros</button>
+    </div>
+  }
+
+  <!-- ── Cards grid ───────────────────────────────────────────────────────── -->
+  @if (!loading && !error && filteredData().length > 0) {
+    <div class="al-grid">
+      @for (assistant of paginatedData(); track assistant.id) {
+        <div class="al-card" [class.al-card--deleting]="deletingId === assistant.id" (click)="goToDetail(assistant.id)">
+
+          <!-- Card header -->
+          <div class="al-card-header">
+            <div class="al-card-avatar">{{ assistant.avatar || '🤖' }}</div>
+            <div class="al-card-identity">
+              <h3 class="al-card-name">{{ assistant.name }}</h3>
+              @if (assistant.description) {
+                <p class="al-card-desc">{{ assistant.description }}</p>
+              }
+            </div>
+            <span class="al-status" [class.al-status--active]="assistant.is_active" [class.al-status--inactive]="!assistant.is_active">
+              {{ assistant.is_active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+
+          <!-- Card meta -->
+          <div class="al-card-meta">
+            <span class="al-meta-badge al-meta-badge--model">
+              <span class="material-symbols-outlined icon-sm">psychology</span>
+              {{ assistant.model }}
+            </span>
+            <span class="al-meta-badge al-meta-badge--temp">
+              <span class="material-symbols-outlined icon-sm">tune</span>
+              {{ assistant.temperature }}
+            </span>
+          </div>
+
+          <!-- Card stats -->
+          <div class="al-card-stats">
+            <div class="al-stat">
+              <span class="al-stat__value">{{ assistant.document_count }}</span>
+              <span class="al-stat__label">Documentos</span>
+            </div>
+            <div class="al-stat-sep"></div>
+            <div class="al-stat">
+              <span class="al-stat__value">{{ assistant.widget_count }}</span>
+              <span class="al-stat__label">Widgets</span>
+            </div>
+          </div>
+
+          <!-- Card actions -->
+          <div class="al-card-actions" (click)="$event.stopPropagation()">
+            @if (deleteConfirmId === assistant.id) {
+              <span class="al-confirm-text">¿Eliminar?</span>
+              <button class="al-action-btn al-action-btn--confirm" (click)="deleteAssistant(assistant.id)">
+                <span class="material-symbols-outlined icon-sm">check</span>
+              </button>
+              <button class="al-action-btn" (click)="cancelDelete()">
+                <span class="material-symbols-outlined icon-sm">close</span>
+              </button>
+            } @else {
+              <button class="al-action-btn al-action-btn--manage" (click)="goToDetail(assistant.id)" title="Gestionar asistente">
+                <span class="material-symbols-outlined icon-sm">settings</span> Gestionar
+              </button>
+              <button class="al-action-btn" (click)="goToEdit(assistant.id, $event)" title="Editar">
+                <span class="material-symbols-outlined icon-sm">edit</span>
+              </button>
+              <button class="al-action-btn al-action-btn--danger"
+                [disabled]="deletingId === assistant.id"
+                (click)="confirmDelete(assistant.id, $event)"
+                title="Eliminar">
+                <span class="material-symbols-outlined icon-sm">delete</span>
+              </button>
+            }
+          </div>
+
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <div class="al-pagination">
+        <span class="al-pagination__info">{{ paginationStart() }}–{{ paginationEnd() }} de {{ filteredData().length }}</span>
+        <div class="al-pagination__controls">
+          <button class="al-page-btn" [disabled]="currentPage() === 1" (click)="previousPage()">
+            <span class="material-symbols-outlined icon-sm">chevron_left</span>
+          </button>
+          <span class="al-page-current">{{ currentPage() }} / {{ totalPages() }}</span>
+          <button class="al-page-btn" [disabled]="currentPage() === totalPages()" (click)="nextPage()">
+            <span class="material-symbols-outlined icon-sm">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+</div>

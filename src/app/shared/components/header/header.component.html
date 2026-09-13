@@ -1,0 +1,143 @@
+<header class="main-header">
+
+  <!-- ── Izquierda: toggle sidebar + nombre de empresa ──────────────────────── -->
+  <div class="header-left">
+    <button
+      class="sidebar-toggle-btn"
+      type="button"
+      (click)="onToggleSidebar()"
+      [title]="sidebarOpen ? 'Contraer menú' : 'Expandir menú'"
+      aria-label="Alternar menú lateral"
+    >
+      <span class="material-symbols-outlined icon-sm">{{ sidebarOpen ? 'menu_open' : 'menu' }}</span>
+    </button>
+
+    <div class="context-badge">
+      <span class="context-indicator"></span>
+      <span class="context-text">{{ companyName() }}</span>
+    </div>
+  </div>
+
+  <!-- ── Derecha: perfil ───────────────────────────────────────────────────── -->
+  <div class="header-right">
+
+    <!-- Chat IA flotante -->
+    <button
+      class="ia-pill-btn"
+      type="button"
+      [class.ia-pill-btn--active]="chatOpen()"
+      (click)="toggleChatDrawer()"
+      title="Chat IA"
+      aria-label="Abrir chat IA"
+    >
+      <div class="ia-dots">
+        <span class="ia-dot ia-dot--blue"></span>
+        <span class="ia-dot ia-dot--violet"></span>
+        <span class="ia-dot ia-dot--cyan"></span>
+      </div>
+      <span class="ia-label">Chat IA</span>
+    </button>
+
+    <!-- Notificaciones -->
+    <button
+      class="notif-bell-btn"
+      type="button"
+      [class.notif-bell-btn--active]="notifOpen()"
+      (click)="toggleNotifications($event)"
+      title="Notificaciones"
+      aria-label="Notificaciones"
+    >
+      <span class="material-symbols-outlined icon-sm">notifications</span>
+      @if (unreadCount() > 0) {
+        <span class="notif-badge">{{ notifBadge() }}</span>
+      }
+    </button>
+
+    @if (notifOpen()) {
+      <div class="notif-dropdown" role="menu" (click)="$event.stopPropagation()">
+        <div class="notif-dropdown__header">
+          <p class="notif-dropdown__title">Notificaciones</p>
+          @if (unreadCount() > 0) {
+            <button class="notif-dropdown__mark-all" type="button" (click)="markAllAsRead($event)">
+              Marcar todas como leídas
+            </button>
+          }
+        </div>
+
+        <div class="notif-dropdown__list">
+          @if (notifLoading()) {
+            <div class="notif-dropdown__loading">
+              <span class="mini-spinner"></span>
+            </div>
+          } @else if (recentNotifications().length === 0) {
+            <div class="notif-dropdown__empty">
+              <span class="material-symbols-outlined icon-lg">notifications_off</span>
+              <p>Sin notificaciones</p>
+            </div>
+          } @else {
+            @for (n of recentNotifications(); track n.id) {
+              <button
+                class="notif-item"
+                [class.notif-item--unread]="!n.read"
+                type="button"
+                (click)="markAsRead(n, $event)"
+              >
+                <span
+                  class="notif-item__icon"
+                  [style.background]="(n.notification_type.color || '#6B7280') + '1A'"
+                  [style.color]="n.notification_type.color || '#6B7280'"
+                >
+                  <span class="material-symbols-outlined icon-sm">{{ notificationIcon(n.notification_type.name) }}</span>
+                </span>
+                <span class="notif-item__body">
+                  <span class="notif-item__title">{{ n.title }}</span>
+                  <span class="notif-item__message">{{ n.message }}</span>
+                  <span class="notif-item__time">{{ relativeTime(n.created_at) }}</span>
+                </span>
+                @if (!n.read) { <span class="notif-item__dot" aria-label="No leída"></span> }
+              </button>
+            }
+          }
+        </div>
+
+        <a class="notif-dropdown__footer" routerLink="/notifications" (click)="notifOpen.set(false)">
+          Ver todas las notificaciones
+          <span class="material-symbols-outlined icon-xs">arrow_forward</span>
+        </a>
+      </div>
+    }
+
+    <span class="header-divider" aria-hidden="true"></span>
+
+    <!-- Perfil -->
+    <button
+      class="user-profile"
+      type="button"
+      [attr.aria-expanded]="profileOpen()"
+      aria-label="Menú de perfil"
+      (click)="toggleProfile($event)">
+      <div class="user-info">
+        <span class="user-name">{{ userName() }}</span>
+        <span class="user-company">{{ userRole() }}</span>
+      </div>
+      <div class="profile-avatar" aria-hidden="true">{{ userInitials() }}</div>
+      <span class="material-symbols-outlined icon-xs profile-chevron" [class.is-open]="profileOpen()" aria-hidden="true">expand_more</span>
+    </button>
+
+    <!-- Dropdown de perfil -->
+    @if (profileOpen()) {
+      <div class="profile-dropdown" role="menu" (click)="$event.stopPropagation()">
+        <div class="dropdown-header">
+          <p class="dropdown-name">{{ userName() }}</p>
+          <p class="dropdown-email">{{ userEmail() }}</p>
+        </div>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item dropdown-item--danger" role="menuitem" (click)="logout()">
+          <span class="material-symbols-outlined icon-sm">logout</span>
+          <span>Cerrar sesión</span>
+        </button>
+      </div>
+    }
+
+  </div>
+</header>

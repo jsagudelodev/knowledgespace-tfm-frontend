@@ -1,0 +1,304 @@
+// ==========================================================================
+// VARIABLES SEMÁNTICAS — DEEP BLUE PREMIUM
+// Capa de mapeo entre colores crudos y roles de diseño.
+// Este archivo es el ÚNICO punto de acceso para componentes.
+// Uso: @use 'styles/core/variables' as *;
+// ==========================================================================
+
+@use 'colors' as *;
+
+
+// ==========================================================================
+// IDENTIDAD Y MARCA
+// ==========================================================================
+
+$color-primary:        $navy-500;      // #2563EB — Azul corporativo oficial (botones, burbujas)
+$color-primary-hover:  $navy-hover;    // #1D4ED8 — Hover (un tono más oscuro que el primario)
+$color-primary-active: $navy-600;      // #1E40AF — Active / foco
+$color-primary-light:  $navy-50;       // #EFF6FF — Fondo azul suave
+$color-primary-muted:  $navy-100;      // #DBEAFE — Bordes y chips activos
+$color-primary-text:   #FFFFFF;
+
+$color-accent:         $navy-accent;   // #3B82F6 — Azul medio (badges, selección)
+$color-accent-light:   $navy-50;       // #EFF6FF
+$color-success:        $green-active;  // #10B981
+$color-warning:        $amber-500;     // #F59E0B
+$color-danger:         $red-500;       // #EF4444
+$color-violet:         $violet-500;    // #8B5CF6 — Logo dot violeta
+$color-cyan:           $cyan-500;      // #06B6D4 — Logo dot cyan
+
+
+// ==========================================================================
+// SUPERFICIES, FONDOS Y CAPAS
+// ==========================================================================
+
+$bg-app:               $slate-bg;     // #F8FAFC — Piso base del dashboard
+$bg-card:              #FFFFFF;       // Blanco puro — tarjetas, header, chat
+$bg-hover:             $slate-50;     // #F8FAFC — Hover sutil en listas
+$bg-selected:          $navy-light;   // #F0F5FF — Ítem activo o seleccionado
+$bg-disabled:          $slate-100;    // #F1F5F9
+$bg-overlay:           rgba(15, 23, 42, 0.45);  // Overlay de modales (navy oscuro)
+
+$border-flat:          $slate-border; // #E2E8F0 — Divisor 1px limpio
+$border-strong:        $slate-300;    // #CBD5E1 — Inputs en reposo
+$border-focus:         $color-primary-active;
+
+
+// ==========================================================================
+// TIPOGRAFÍA — 4 NIVELES DE JERARQUÍA (CERO NEGROS PUROS)
+// ==========================================================================
+
+$font-title:           $navy-darktext; // #1E293B — Nombres, títulos, encabezados
+$font-body:            $slate-text;    // #57657A — Texto de cuerpo y párrafos
+$font-muted:           $slate-muted;   // #94A3B8 — Timestamps, metadatos, iconos
+$font-placeholder:     $slate-400;     // #94A3B8 — Placeholder de inputs
+$font-disabled:        $slate-300;     // #CBD5E1
+$font-on-primary:      #FFFFFF;        // Texto sobre botones primarios / sidebar
+
+
+// ==========================================================================
+// SIDEBAR DARK SHELL
+// ==========================================================================
+
+$sidebar-bg:                $navy-900;                    // #0F172A
+$sidebar-border:            rgba(255, 255, 255, 0.06);
+$sidebar-text:              rgba(255, 255, 255, 0.92);
+$sidebar-text-hover:        rgba(255, 255, 255, 0.98);
+$sidebar-text-active:       #FFFFFF;
+$sidebar-text-subtle:       rgba(255, 255, 255, 0.90);   // Brand name, user name
+$sidebar-active-bg:         rgba($navy-400, 0.15);        // rgba(59,130,246,0.15) — fondo ítem activo
+$sidebar-active-bar:        $navy-400;                    // #3B82F6 — barra izquierda activa
+$sidebar-hover-bg:          rgba(255, 255, 255, 0.05);   // Hover sutil sobre oscuro
+$sidebar-icon-muted:        rgba(255, 255, 255, 0.32);
+$sidebar-avatar-bg:         rgba($navy-400, 0.25);        // Avatar fondo
+$sidebar-avatar-border:     rgba($navy-400, 0.40);        // Avatar borde
+$sidebar-avatar-text:       $navy-250;                    // #93C5FD — texto avatar y hover acción
+$sidebar-logout-hover-bg:   rgba($red-500, 0.15);         // Hover botón logout
+$sidebar-logout-hover-text: $red-300;                     // #FCA5A5 — texto logout hover
+
+$sidebar-width:          240px;
+$sidebar-width-collapsed: 64px;
+
+
+// ==========================================================================
+// CHAT — BURBUJAS Y ÁREA DE ENTRADA
+// ==========================================================================
+
+$chat-user-bg:          $color-primary;       // Azul marino — burbuja usuario
+$chat-user-text:        #FFFFFF;
+$chat-user-shadow:      0 2px 12px rgba($navy-700, 0.20);
+$chat-user-radius:      18px 18px 4px 18px;
+
+$chat-ai-bg:            $bg-app;              // Gris azulado ultraclaro
+$chat-ai-text:          $font-body;
+$chat-ai-border:        $border-flat;
+$chat-ai-radius:        4px 18px 18px 18px;
+
+$chat-input-bg:         $bg-app;
+$chat-input-focus-shadow: 0 0 0 3px rgba($navy-700, 0.10);
+
+
+// ==========================================================================
+// BOTONES — TOKENS POR VARIANTE
+// ==========================================================================
+
+// Primario
+$btn-primary-bg:         $color-primary;
+$btn-primary-hover:      $color-primary-hover;
+$btn-primary-active:     $color-primary-active;
+$btn-primary-text:       #FFFFFF;
+$btn-primary-shadow:     0 2px 8px rgba($navy-700, 0.25);
+$btn-disabled-bg:        $slate-200;
+$btn-disabled-text:      $slate-400;
+
+// Secundario (outlined)
+$btn-secondary-border:   $color-primary;
+$btn-secondary-text:     $color-primary;
+$btn-secondary-hover-bg: $color-primary-light;
+
+// Terciario (ghost)
+$btn-ghost-text:         $font-body;
+$btn-ghost-hover-bg:     $bg-hover;
+$btn-ghost-hover-text:   $font-title;
+
+// Peligro
+$btn-danger-bg:          $red-light;
+$btn-danger-text:        $red-text;
+$btn-danger-hover-bg:    $red-500;
+$btn-danger-hover-text:  #FFFFFF;
+
+// Dropdown danger (ítem destructivo en menú)
+$dropdown-danger-hover-bg:   $red-50;     // #FEF2F2
+$dropdown-danger-hover-text: $red-600;    // #B91C1C
+$dropdown-danger-hover-icon: $red-hover;  // #DC2626
+
+// Overlay de modales estándar
+$overlay-modal:       rgba(0, 0, 0, 0.50);
+
+// Overlays oscuros sobre superficies coloreadas (tinting)
+$overlay-dark-xs:     rgba(0, 0, 0, 0.06);  // Fondo code inline sobre burbuja azul
+$overlay-dark-sm:     rgba(0, 0, 0, 0.08);  // Tint sutil sobre chips/badges
+$overlay-dark-border: rgba(0, 0, 0, 0.10);  // Borde sutil sobre colores
+$overlay-dark-md:     rgba(0, 0, 0, 0.18);  // Hover tint sobre chips/badges
+
+// Dimensiones
+$btn-height-sm:   32px;
+$btn-height-md:   40px;
+$btn-height-lg:   48px;
+$btn-radius:      8px;
+$btn-radius-pill: 9999px;
+
+
+// ==========================================================================
+// FORMULARIOS
+// ==========================================================================
+
+$field-height:          40px;
+$field-bg:              $bg-card;
+$field-bg-disabled:     $bg-disabled;
+$field-border:          $border-strong;
+$field-border-hover:    $slate-500;
+$field-border-focus:    $border-focus;
+$field-border-error:    $red-500;
+$field-border-disabled: $border-flat;
+$field-text:            $font-body;
+$field-radius:          6px;
+$field-padding:         0 12px;
+$field-focus-shadow:    0 0 0 3px rgba($navy-700, 0.10);
+
+
+// ==========================================================================
+// TABLAS Y BADGES DE ESTADO
+// ==========================================================================
+
+$table-header-bg:    $bg-app;
+$table-header-text:  $font-muted;
+$table-border:       $border-flat;
+$table-row-hover:    $bg-hover;
+$table-row-selected: $bg-selected;
+
+$badge-active-bg:    $green-light;    $badge-active-text:    $green-text;
+$badge-inactive-bg:  $red-light;      $badge-inactive-text:  $red-text;
+$badge-pending-bg:   $amber-light;    $badge-pending-text:   $amber-text;
+$badge-info-bg:      $navy-50;        $badge-info-text:      $color-primary;
+$badge-neutral-bg:   $slate-100;      $badge-neutral-text:   $slate-600;
+
+$msg-success-bg:     $green-light;    $msg-success-text:     $green-text;
+$msg-error-bg:       $red-light;      $msg-error-text:       $red-text;
+
+$score-high-text:    $green-600;      // #16A34A — Score alto
+$score-mid-text:     $amber-600;      // #D97706 — Score medio
+
+$search-highlight-bg:   $yellow-200; // #FEF08A — Fondo highlight de búsqueda
+$search-highlight-text: $yellow-900; // #713F12 — Texto highlight de búsqueda
+
+
+// ==========================================================================
+// TIPOGRAFÍA — ESCALA
+// ==========================================================================
+
+$font-family:          'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+$size-2xs:   11px;
+$size-xs:    12px;
+$size-sm:    13px;
+$size-base:  14px;
+$size-md:    15px;
+$size-lg:    16px;
+$size-xl:    18px;
+$size-2xl:   20px;
+$size-3xl:   24px;
+$size-4xl:   32px;
+
+$w-light:    300;
+$w-regular:  400;
+$w-medium:   500;
+$w-semibold: 600;
+$w-bold:     700;
+
+$lh-tight:   1.25;
+$lh-snug:    1.375;
+$lh-normal:  1.5;
+$lh-relaxed: 1.625;
+
+$letter-spacing-tight:  -0.02em;
+$letter-spacing-normal: -0.01em;
+$letter-spacing-sm:      0.02em;
+$letter-spacing-wide:    0.05em;
+$letter-spacing-wider:   0.08em;
+
+
+// ==========================================================================
+// ESPACIADO — BASE 4px
+// ==========================================================================
+
+$sp-1:  4px;
+$sp-2:  8px;
+$sp-3:  12px;
+$sp-4:  16px;
+$sp-5:  20px;
+$sp-6:  24px;
+$sp-8:  32px;
+$sp-10: 40px;
+$sp-12: 48px;
+$sp-16: 64px;
+
+
+// ==========================================================================
+// RADIOS
+// ==========================================================================
+
+$radius-xs:     4px;
+$radius-sm:     6px;
+$radius-md:     8px;
+$radius-lg:     12px;
+$radius-xl:     16px;
+$radius-2xl:    20px;
+$radius-circle: 50%;
+$radius-pill:   9999px;
+
+
+// ==========================================================================
+// SOMBRAS — SISTEMA DE ELEVACIÓN
+// ==========================================================================
+
+$shadow-xs:    0 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-sm:    0 1px 4px rgba(0, 0, 0, 0.07);
+$shadow-md:    0 4px 12px rgba(0, 0, 0, 0.09);
+$shadow-lg:    0 8px 24px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.05);
+$shadow-xl:    0 20px 48px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.07);
+$shadow-focus: 0 0 0 3px rgba($navy-700, 0.15);  // Anillo azul marino
+
+
+// ==========================================================================
+// MOTION
+// ==========================================================================
+
+$ease-out:     cubic-bezier(0.0, 0.0, 0.2, 1);
+$ease-in-out:  cubic-bezier(0.4, 0.0, 0.2, 1);
+
+$motion-fast:  0.15s #{$ease-out};
+$motion-base:  0.22s #{$ease-in-out};
+$motion-slow:  0.35s #{$ease-in-out};
+
+
+// ==========================================================================
+// Z-INDEX
+// ==========================================================================
+
+$z-base:     1;
+$z-raised:   10;
+$z-dropdown: 100;
+$z-sticky:   200;
+$z-modal:    500;
+$z-lateral:  800;
+$z-toast:    1000;
+
+
+// ==========================================================================
+// LAYOUT
+// ==========================================================================
+
+$topbar-height:        64px;
+$layout-max-width:     1440px;
+$layout-padding:       24px;

@@ -1,0 +1,168 @@
+<div class="dashboard-container">
+
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    @if (currentUser()) {
+      <p>Bienvenido, {{ currentUser()!.full_name }}</p>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="loading-spinner"></div>
+      <span>Cargando métricas...</span>
+    </div>
+  }
+
+  @if (!loading() && metrics()) {
+
+    <!-- ── Tarjetas de métricas ──────────────────────────────────────────── -->
+    <div class="metrics-grid">
+
+      <div class="metric-card">
+        <div class="metric-icon metric-icon--documents">
+          <span class="material-symbols-outlined">description</span>
+        </div>
+        <h3>Documentos</h3>
+        <div class="metric-value">{{ metrics()!.documents.total }}</div>
+        <div class="metric-detail">
+          <span>Listos: {{ metrics()!.documents.completed }}</span>
+          <span>Procesando: {{ metrics()!.documents.processing }}</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon metric-icon--users">
+          <span class="material-symbols-outlined">groups</span>
+        </div>
+        <h3>Usuarios</h3>
+        <div class="metric-value">{{ metrics()!.users.total }}</div>
+        <div class="metric-detail">
+          <span>Total en la empresa</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon metric-icon--conversations">
+          <span class="material-symbols-outlined">forum</span>
+        </div>
+        <h3>Conversaciones</h3>
+        <div class="metric-value">{{ metrics()!.conversations.total }}</div>
+        <div class="metric-detail">
+          <span>Total acumuladas</span>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon metric-icon--messages">
+          <span class="material-symbols-outlined">mail</span>
+        </div>
+        <h3>Mensajes</h3>
+        <div class="metric-value">{{ metrics()!.messages.total }}</div>
+        <div class="metric-detail">
+          <span>Total intercambiados</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Onboarding (empty state) ──────────────────────────────────────── -->
+    @if (isEmptyState()) {
+      <div class="onboarding-card">
+        <div class="onboarding-card__header">
+          <span class="material-symbols-outlined onboarding-card__icon">rocket_launch</span>
+          <div>
+            <h2 class="onboarding-card__title">¡Empieza a construir tu base de conocimiento!</h2>
+            <p class="onboarding-card__subtitle">Sigue estos pasos para configurar tu asistente IA.</p>
+          </div>
+        </div>
+
+        <div class="onboarding-steps">
+
+          <div class="onboarding-step" [class.onboarding-step--done]="hasDocuments()">
+            <div class="onboarding-step__indicator">
+              @if (hasDocuments()) {
+                <span class="material-symbols-outlined icon-sm">check_circle</span>
+              } @else {
+                <span class="onboarding-step__number">1</span>
+              }
+            </div>
+            <div class="onboarding-step__body">
+              <p class="onboarding-step__title">Sube tu primer documento</p>
+              <p class="onboarding-step__desc">PDF, DOCX o TXT — el asistente aprenderá de él.</p>
+            </div>
+            <a class="onboarding-step__cta" routerLink="/documents">
+              Ir a documentos
+              <span class="material-symbols-outlined icon-sm">arrow_forward</span>
+            </a>
+          </div>
+
+          <div class="onboarding-step">
+            <div class="onboarding-step__indicator">
+              <span class="onboarding-step__number">2</span>
+            </div>
+            <div class="onboarding-step__body">
+              <p class="onboarding-step__title">Crea un asistente IA</p>
+              <p class="onboarding-step__desc">Configura nombre, personalidad y documentos que usará.</p>
+            </div>
+            <a class="onboarding-step__cta" routerLink="/assistants">
+              Ver asistentes
+              <span class="material-symbols-outlined icon-sm">arrow_forward</span>
+            </a>
+          </div>
+
+          <div class="onboarding-step" [class.onboarding-step--done]="hasConversations()">
+            <div class="onboarding-step__indicator">
+              @if (hasConversations()) {
+                <span class="material-symbols-outlined icon-sm">check_circle</span>
+              } @else {
+                <span class="onboarding-step__number">3</span>
+              }
+            </div>
+            <div class="onboarding-step__body">
+              <p class="onboarding-step__title">Abre el Chat IA</p>
+              <p class="onboarding-step__desc">Haz tu primera pregunta al asistente sobre tus documentos.</p>
+            </div>
+            <a class="onboarding-step__cta" routerLink="/chat">
+              Ir al chat
+              <span class="material-symbols-outlined icon-sm">arrow_forward</span>
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+    } @else {
+
+      <!-- ── Actividad reciente ─────────────────────────────────────────── -->
+      <div class="recent-activity">
+        <h2>Actividad reciente</h2>
+        <div class="activity-table">
+          <div class="activity-table-header">
+            <div>Tipo</div>
+            <div>Descripción</div>
+            <div>Fecha</div>
+          </div>
+          @for (item of metrics()!.recent_activity; track item.id) {
+            <div class="activity-row">
+              <div class="activity-icon-badge">
+                <span class="material-symbols-outlined icon-sm">info</span>
+              </div>
+              <div class="activity-description">{{ item.title }}</div>
+              <div class="activity-date">{{ item.updated_at | date:'short' }}</div>
+            </div>
+          }
+          @empty {
+            <div class="activity-empty">
+              <span class="material-symbols-outlined">hourglass_empty</span>
+              <p>Sin actividad reciente</p>
+            </div>
+          }
+        </div>
+      </div>
+
+    }
+
+  }
+
+</div>

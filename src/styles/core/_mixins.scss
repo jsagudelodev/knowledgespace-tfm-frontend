@@ -1,0 +1,181 @@
+// ==========================================================================
+// MIXINS GLOBALES — DEEP BLUE PREMIUM
+// Uso: @use 'styles/core/mixins' as *;
+// ==========================================================================
+
+@use 'colors'    as *;
+@use 'variables' as *;
+
+
+// ── Layout ────────────────────────────────────────────────────────────────
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between-center {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@mixin flex-start-center {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+@mixin flex-col($gap: null) {
+  display: flex;
+  flex-direction: column;
+  @if $gap { gap: $gap; }
+}
+
+
+// ── Motion ────────────────────────────────────────────────────────────────
+
+@mixin transition-premium($prop: all, $time: 0.2s) {
+  transition: $prop $time ease-in-out;
+}
+
+@mixin transition-fast($props...) {
+  $list: ();
+  @each $p in $props {
+    $list: append($list, $p $motion-fast, comma);
+  }
+  @if length($props) == 0 {
+    transition: all $motion-fast;
+  } @else {
+    transition: $list;
+  }
+}
+
+
+// ── Botones ───────────────────────────────────────────────────────────────
+
+@mixin btn-base($height: $btn-height-md, $radius: $btn-radius) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: $height;
+  padding: 0 $sp-4;
+  border-radius: $radius;
+  border: none;
+  font-family: $font-family;
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  cursor: pointer;
+  white-space: nowrap;
+  @include transition-fast(background-color, color, border-color, box-shadow);
+
+  &:disabled {
+    background-color: $btn-disabled-bg;
+    color: $btn-disabled-text;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+
+// ── Superficies / Tarjetas ────────────────────────────────────────────────
+
+@mixin card-surface($radius: $radius-lg) {
+  background: $bg-card;
+  border: 1px solid $border-flat;
+  border-radius: $radius;
+}
+
+@mixin card-elevated($radius: $radius-lg) {
+  @include card-surface($radius);
+  box-shadow: $shadow-md;
+}
+
+
+// ── Campos de formulario ──────────────────────────────────────────────────
+
+@mixin field-base {
+  height: $field-height;
+  padding: $field-padding;
+  background: $field-bg;
+  border: 1px solid $field-border;
+  border-radius: $field-radius;
+  font-family: $font-family;
+  font-size: $size-base;
+  color: $font-body;
+  outline: none;
+  width: 100%;
+  @include transition-fast(border-color, box-shadow);
+
+  &::placeholder { color: $font-placeholder; }
+
+  &:hover:not(:focus):not(:disabled) {
+    border-color: $field-border-hover;
+  }
+
+  &:focus {
+    border-color: $field-border-focus;
+    box-shadow: $field-focus-shadow;
+  }
+
+  &:disabled {
+    background: $field-bg-disabled;
+    color: $font-disabled;
+    cursor: not-allowed;
+  }
+
+  &.is-error {
+    border-color: $field-border-error;
+  }
+}
+
+
+// ── Truncar texto ────────────────────────────────────────────────────────
+
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+// ── Scrollbar estilizado ──────────────────────────────────────────────────
+
+@mixin scrollbar-slim($width: 4px) {
+  &::-webkit-scrollbar       { width: $width; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: $slate-200;
+    border-radius: $radius-pill;
+
+    &:hover { background: $slate-300; }
+  }
+}
+
+
+// ── Badges de estado ─────────────────────────────────────────────────────
+
+@mixin badge-style($bg, $text) {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px;
+  background: $bg;
+  color: $text;
+  border-radius: $radius-pill;
+  font-size: $size-xs;
+  font-weight: $w-semibold;
+  white-space: nowrap;
+}
+
+
+// ── Focus ring accesible ──────────────────────────────────────────────────
+
+@mixin focus-ring($color: $color-primary) {
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($color, 0.18);
+  }
+}

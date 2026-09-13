@@ -1,0 +1,258 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+@use 'styles/core/mixins'    as *;
+
+// ==========================================================================
+// CONTENEDOR PRINCIPAL
+// ==========================================================================
+
+.company-form-container {
+  padding: $sp-8;
+  max-width: 800px;
+  margin: 0 auto;
+
+  // El modal ya provee padding y encuadre
+  &.is-embedded {
+    padding: 0;
+    max-width: none;
+    margin: 0;
+  }
+}
+
+// ==========================================================================
+// HEADER (solo en modo página completa)
+// ==========================================================================
+
+.form-header {
+  @include flex-between-center;
+  margin-bottom: $sp-8;
+
+  h1 {
+    font-size: $size-4xl;
+    color: $font-title;
+    margin: 0;
+    font-weight: $w-semibold;
+  }
+}
+
+// ==========================================================================
+// ESTADOS: CARGA Y ERROR
+// ==========================================================================
+
+.form-loading {
+  @include flex-center;
+  gap: $sp-3;
+  padding: $sp-8;
+  color: $font-muted;
+  font-size: $size-sm;
+}
+
+.spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-size: $size-xl;
+  color: $color-primary;
+}
+
+.error-banner {
+  @include flex-start-center;
+  gap: $sp-3;
+  padding: $sp-4 $sp-5;
+  background: $red-light;
+  color: $red-text;
+  border-radius: $radius-md;
+  font-size: $size-sm;
+  margin-bottom: $sp-6;
+}
+
+// ==========================================================================
+// FORMULARIO (card en modo página, sin card en modal)
+// ==========================================================================
+
+.company-form {
+  background: $bg-card;
+  padding: $sp-8;
+  border-radius: $radius-lg;
+  border: 1px solid $border-flat;
+  box-shadow: $shadow-xs;
+
+  &.is-embedded {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+// ==========================================================================
+// SECCIONES
+// ==========================================================================
+
+.form-section {
+  margin-bottom: $sp-8;
+
+  &:last-of-type { margin-bottom: 0; }
+
+  h2 {
+    font-size: $size-xl;
+    color: $font-title;
+    margin-bottom: $sp-6;
+    font-weight: $w-semibold;
+    padding-bottom: $sp-3;
+    border-bottom: 1px solid $border-flat;
+  }
+}
+
+// ==========================================================================
+// CAMPOS
+// ==========================================================================
+
+.form-group {
+  margin-bottom: $sp-6;
+
+  label {
+    display: block;
+    font-size: $size-sm;
+    font-weight: $w-medium;
+    color: $font-body;
+    margin-bottom: $sp-2;
+  }
+
+  .required { color: $red-text; margin-left: 2px; }
+
+  input[type='text'],
+  input[type='email'],
+  input[type='number'],
+  select,
+  textarea {
+    width: 100%;
+    padding: $sp-3 $sp-4;
+    border: 1px solid $field-border;
+    border-radius: $radius-md;
+    font-size: $size-base;
+    color: $field-text;
+    background: $field-bg;
+    box-sizing: border-box;
+    @include transition-fast(border-color, box-shadow);
+
+    &:hover:not(:disabled) { border-color: $field-border-hover; }
+
+    &:focus {
+      outline: none;
+      border-color: $field-border-focus;
+      box-shadow: $field-focus-shadow;
+    }
+
+    &.is-invalid {
+      border-color: $field-border-error;
+      &:focus { box-shadow: 0 0 0 3px rgba($red-500, 0.12); }
+    }
+
+    &::placeholder { color: $font-muted; }
+    &:disabled     { background: $field-bg-disabled; cursor: not-allowed; }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .field-error {
+    @include flex-start-center;
+    gap: $sp-1;
+    color: $red-text;
+    font-size: $size-xs;
+    margin-top: $sp-1;
+  }
+
+  .field-hint {
+    @include flex-start-center;
+    gap: $sp-1;
+    color: $font-muted;
+    font-size: $size-xs;
+    margin-top: $sp-1;
+
+    .icon-xs { font-size: 14px; }
+  }
+
+  .checkbox-label {
+    @include flex-start-center;
+    gap: $sp-2;
+    cursor: pointer;
+
+    input[type='checkbox'] {
+      width: $sp-4;
+      height: $sp-4;
+      cursor: pointer;
+      accent-color: $color-primary;
+    }
+
+    span { font-size: $size-base; color: $font-body; }
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-6;
+}
+
+// ==========================================================================
+// BOTONES DE ACCIÓN
+// ==========================================================================
+
+.form-actions {
+  @include flex-start-center;
+  justify-content: flex-end;
+  gap: $sp-4;
+  margin-top: $sp-8;
+  padding-top: $sp-6;
+  border-top: 1px solid $border-flat;
+}
+
+.btn-secondary,
+.btn-primary {
+  @include flex-start-center;
+  gap: $sp-2;
+  padding: $sp-3 $sp-6;
+  border-radius: $radius-md;
+  font-size: $size-base;
+  font-weight: $w-medium;
+  cursor: pointer;
+  border: 1px solid transparent;
+  line-height: 1;
+  @include transition-fast(background, border-color, opacity);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: $font-body;
+  border-color: $border-flat;
+
+  &:hover { background: $bg-disabled; border-color: $border-strong; }
+}
+
+.btn-primary {
+  background: $btn-primary-bg;
+  color: $btn-primary-text;
+
+  &:hover:not(:disabled)  { background: $btn-primary-hover; }
+  &:active:not(:disabled) { background: $btn-primary-active; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+// ==========================================================================
+// RESPONSIVE
+// ==========================================================================
+
+@media (max-width: 640px) {
+  .form-row { grid-template-columns: 1fr; }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
+    .btn-secondary,
+    .btn-primary { width: 100%; justify-content: center; }
+  }
+}

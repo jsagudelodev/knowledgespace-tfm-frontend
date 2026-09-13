@@ -1,0 +1,15 @@
+<div class="toast-host">
+  @for (item of notifications.items(); track item.id) {
+    <div
+      class="toast"
+      [class.toast--success]="item.type === 'success'"
+      [class.toast--error]="item.type === 'error'"
+      [class.toast--info]="item.type === 'info'"
+      role="status"
+      (click)="notifications.dismiss(item.id)"
+    >
+      <span class="material-symbols-outlined">{{ icon(item.type) }}</span>
+      <span class="toast__message">{{ item.message }}</span>
+    </div>
+  }
+</div>

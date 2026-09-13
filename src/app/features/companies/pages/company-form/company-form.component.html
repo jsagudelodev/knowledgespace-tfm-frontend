@@ -1,0 +1,189 @@
+<div class="company-form-container" [class.is-embedded]="isEmbedded">
+
+  <!-- Header propio: solo visible en modo página completa -->
+  @if (!isEmbedded) {
+    <div class="form-header">
+      <h1>{{ isEditMode ? 'Editar Empresa' : 'Nueva Empresa' }}</h1>
+      <button type="button" class="btn-secondary" (click)="onCancel()">
+        <span class="material-symbols-outlined icon-sm">arrow_back</span>
+        Volver
+      </button>
+    </div>
+  }
+
+  <!-- Estado de carga (solo en edición, mientras se obtienen los datos) -->
+  @if (loading() && isEditMode) {
+    <div class="form-loading">
+      <span class="material-symbols-outlined spin">progress_activity</span>
+      <span>Cargando empresa...</span>
+    </div>
+  }
+
+  <!-- Banner de error -->
+  @if (error()) {
+    <div class="error-banner">
+      <span class="material-symbols-outlined icon-sm">error</span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  <!-- Formulario principal -->
+  @if (!loading() || !isEditMode) {
+    <form
+      [formGroup]="companyForm"
+      (ngSubmit)="onSubmit()"
+      class="company-form"
+      [class.is-embedded]="isEmbedded"
+    >
+
+      <!-- ── Sección: Información básica ─────────────────────────────── -->
+      <div class="form-section">
+        <h2>Información Básica</h2>
+
+        <div class="form-group">
+          <label for="name">Nombre de la Empresa <span class="required">*</span></label>
+          <input
+            id="name"
+            type="text"
+            formControlName="name"
+            placeholder="Ej: Mi Empresa S.A."
+            [class.is-invalid]="isFieldInvalid('name')"
+          />
+          @if (isFieldInvalid('name')) {
+            <span class="field-error">{{ getErrorMessage('name') }}</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email <span class="required">*</span></label>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="Ej: contacto@empresa.com"
+            [class.is-invalid]="isFieldInvalid('email')"
+          />
+          @if (isFieldInvalid('email')) {
+            <span class="field-error">{{ getErrorMessage('email') }}</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Teléfono</label>
+          <input
+            id="phone"
+            type="text"
+            formControlName="phone"
+            placeholder="Ej: +57 300 123 4567"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="address">Dirección</label>
+          <textarea
+            id="address"
+            formControlName="address"
+            placeholder="Ej: Calle Principal 123, Ciudad"
+            rows="3"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- ── Sección: Plan y límites ──────────────────────────────────── -->
+      <div class="form-section">
+        <h2>Plan y Límites</h2>
+
+        <div class="form-group">
+          <label for="plan">Plan <span class="required">*</span></label>
+          <select
+            id="plan"
+            formControlName="plan"
+            [class.is-invalid]="isFieldInvalid('plan')"
+          >
+            <option value="basic">Basic</option>
+            <option value="pro">Pro</option>
+            <option value="enterprise">Enterprise</option>
+          </select>
+          @if (isFieldInvalid('plan')) {
+            <span class="field-error">{{ getErrorMessage('plan') }}</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="max_users">Máximo de Usuarios <span class="required">*</span></label>
+            <input
+              id="max_users"
+              type="number"
+              formControlName="max_users"
+              min="1"
+              [class.is-invalid]="isFieldInvalid('max_users')"
+            />
+            @if (isFieldInvalid('max_users')) {
+              <span class="field-error">{{ getErrorMessage('max_users') }}</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="max_documents">Máximo de Documentos <span class="required">*</span></label>
+            <input
+              id="max_documents"
+              type="number"
+              formControlName="max_documents"
+              min="1"
+              [class.is-invalid]="isFieldInvalid('max_documents')"
+            />
+            @if (isFieldInvalid('max_documents')) {
+              <span class="field-error">{{ getErrorMessage('max_documents') }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="monthly_message_limit">Límite Mensual de Mensajes IA</label>
+          <input
+            id="monthly_message_limit"
+            type="number"
+            formControlName="monthly_message_limit"
+            min="1"
+            placeholder="Sin límite (dejar vacío)"
+            [class.is-invalid]="isFieldInvalid('monthly_message_limit')"
+          />
+          <span class="field-hint">
+            <span class="material-symbols-outlined icon-xs">info</span>
+            Máximo de mensajes de IA por mes. Vacío = sin restricción.
+          </span>
+          @if (isFieldInvalid('monthly_message_limit')) {
+            <span class="field-error">{{ getErrorMessage('monthly_message_limit') }}</span>
+          }
+        </div>
+
+        @if (isEditMode) {
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="is_active" />
+              <span>Empresa Activa</span>
+            </label>
+          </div>
+        }
+      </div>
+
+      <!-- ── Acciones ─────────────────────────────────────────────────── -->
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="onCancel()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-primary" [disabled]="loading()">
+          @if (loading()) {
+            <span class="material-symbols-outlined icon-sm spin">progress_activity</span>
+          } @else {
+            <span class="material-symbols-outlined icon-sm">save</span>
+          }
+          {{ isEditMode ? 'Guardar Cambios' : 'Crear Empresa' }}
+        </button>
+      </div>
+
+    </form>
+  }
+
+</div>

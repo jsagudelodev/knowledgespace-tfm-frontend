@@ -1,0 +1,252 @@
+<div class="wl-container">
+
+  <!-- ── Header ─────────────────────────────────────────────── -->
+  <div class="wl-header">
+    <div class="wl-header-left">
+      <h1 class="wl-title">Widgets</h1>
+      <p class="wl-subtitle">Gestión de asistentes embebibles para tu sitio web</p>
+    </div>
+    <button class="wl-btn-create" (click)="openCreate()">
+      <span class="material-symbols-outlined icon-sm">add</span>
+      Nuevo widget
+    </button>
+  </div>
+
+  <!-- ── Filtros ────────────────────────────────────────────── -->
+  <div class="wl-filters">
+
+    <div class="wl-filter-search">
+      <span class="material-symbols-outlined icon-sm wl-filter-search__icon">search</span>
+      <input
+        class="wl-filter-search__input"
+        type="text"
+        placeholder="Buscar por nombre o bot..."
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+        autocomplete="off"
+      />
+      @if (searchTerm()) {
+        <button class="wl-filter-search__clear" (click)="clearSearch()">
+          <span class="material-symbols-outlined icon-sm">close</span>
+        </button>
+      }
+    </div>
+
+    <div class="wl-filter-group">
+      <label class="wl-filter-label">Estado:</label>
+      <select class="wl-filter-select" [value]="selectedStatus()" (change)="onStatusChange($event)">
+        <option value="">Todos</option>
+        <option value="active">Activo</option>
+        <option value="inactive">Inactivo</option>
+      </select>
+    </div>
+
+  </div>
+
+  <!-- ── Chips de filtros activos ────────────────────────────── -->
+  @if (hasActiveFilters()) {
+    <div class="wl-filter-chips">
+      <span class="wl-filter-chips__label">Filtros activos:</span>
+
+      @if (selectedStatus()) {
+        <span class="wl-filter-chip wl-filter-chip--status">
+          <span class="material-symbols-outlined icon-sm">filter_alt</span>
+          {{ selectedStatus() === 'active' ? 'Activo' : 'Inactivo' }}
+          <button class="wl-filter-chip__remove" (click)="clearStatus()">
+            <span class="material-symbols-outlined icon-sm">close</span>
+          </button>
+        </span>
+      }
+
+      @if (searchTerm().trim()) {
+        <span class="wl-filter-chip wl-filter-chip--search">
+          <span class="material-symbols-outlined icon-sm">search</span>
+          "{{ searchTerm() }}"
+          <button class="wl-filter-chip__remove" (click)="clearSearch()">
+            <span class="material-symbols-outlined icon-sm">close</span>
+          </button>
+        </span>
+      }
+
+      <button class="wl-filter-chips__clear-all" (click)="clearAllFilters()">
+        <span class="material-symbols-outlined icon-sm">close</span>
+        Limpiar todos
+      </button>
+    </div>
+  }
+
+  <!-- ── Loading ────────────────────────────────────────────── -->
+  @if (loading) {
+    <div class="wl-state">
+      <span class="wl-spinner"></span>
+      <p>Cargando widgets...</p>
+    </div>
+  }
+
+  <!-- ── Error ──────────────────────────────────────────────── -->
+  @if (!loading && error) {
+    <div class="wl-state wl-state--error">
+      <span class="material-symbols-outlined icon-sm wl-state-icon">warning</span>
+      <p>{{ error }}</p>
+      <button class="wl-btn-retry" (click)="load()">
+        <span class="material-symbols-outlined icon-sm">refresh</span> Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- ── Empty: sin datos ───────────────────────────────────── -->
+  @if (!loading && !error && widgets().length === 0) {
+    <div class="wl-state">
+      <span class="material-symbols-outlined icon-sm wl-state-icon">forum</span>
+      <p class="wl-state-title">No hay widgets todavía</p>
+      <p class="wl-state-sub">Crea el primer widget para embeber el chat en un sitio web</p>
+      <button class="wl-btn-create" (click)="openCreate()">
+        <span class="material-symbols-outlined icon-sm">add</span> Crear primer widget
+      </button>
+    </div>
+  }
+
+  <!-- ── Empty: sin resultados con filtros ──────────────────── -->
+  @if (!loading && !error && widgets().length > 0 && filteredWidgets().length === 0) {
+    <div class="wl-state">
+      <span class="material-symbols-outlined icon-sm wl-state-icon">search</span>
+      <p class="wl-state-title">Sin resultados</p>
+      <p class="wl-state-sub">No hay widgets que coincidan con los filtros activos</p>
+      <button class="wl-btn-retry" (click)="clearAllFilters()">
+        <span class="material-symbols-outlined icon-sm">close</span> Limpiar filtros
+      </button>
+    </div>
+  }
+
+  <!-- ── Contador de resultados ──────────────────────────────── -->
+  @if (!loading && !error && widgets().length > 0 && filteredWidgets().length > 0 && hasActiveFilters()) {
+    <p class="wl-results-count">
+      Mostrando {{ filteredWidgets().length }} de {{ widgets().length }} widgets
+    </p>
+  }
+
+  <!-- ── Grid de cards ──────────────────────────────────────── -->
+  @if (!loading && !error && filteredWidgets().length > 0) {
+    <div class="wl-grid">
+
+      @for (w of filteredWidgets(); track w.id) {
+        <div class="wl-card" [class.wl-card--deleting]="deletingId === w.id">
+
+          <!-- Franja de color -->
+          <div class="wl-card-stripe" [style.background]="w.theme_config.primary_color"></div>
+
+          <!-- Cabecera de la card -->
+          <div class="wl-card-header">
+            <div class="wl-card-avatar" [style.background]="w.theme_config.primary_color">
+              {{ w.bot_name.charAt(0).toUpperCase() }}
+            </div>
+            <div class="wl-card-meta">
+              <p class="wl-card-botname">{{ w.bot_name }}</p>
+              <p class="wl-card-name">{{ w.name }}</p>
+            </div>
+            <span class="wl-badge" [class.wl-badge--active]="w.is_active" [class.wl-badge--inactive]="!w.is_active">
+              {{ w.is_active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+
+          <!-- Asistente vinculado -->
+          @if (w.assistant_id) {
+            <div class="wl-assistant-pill">
+              <span class="material-symbols-outlined icon-sm">smart_toy</span>
+              Asistente #{{ w.assistant_id }}
+            </div>
+          }
+
+          <!-- Info pills -->
+          <div class="wl-card-pills">
+            <span class="wl-pill">
+              <span class="material-symbols-outlined icon-sm">psychology</span> {{ w.model_name }}
+            </span>
+            <span class="wl-pill">
+              <span class="material-symbols-outlined icon-sm">location_on</span> {{ positionLabel(w.position) }}
+            </span>
+            <span class="wl-pill">
+              <span class="material-symbols-outlined icon-sm">bolt</span> {{ w.quick_replies.length }} respuestas
+            </span>
+          </div>
+
+          <!-- Prompt preview -->
+          <p class="wl-card-prompt">{{ w.system_prompt }}</p>
+
+          <!-- Acciones -->
+          @if (deleteConfirmId !== w.id) {
+            <div class="wl-card-actions">
+              <button class="wl-action-btn wl-action-btn--manage" (click)="openDetail(w.id)" title="Gestionar widget">
+                <span class="material-symbols-outlined icon-sm">settings</span> Gestionar
+              </button>
+
+              <button class="wl-action-btn wl-action-btn--embed"
+                [class.wl-action-btn--copied]="copiedId === w.id"
+                (click)="copyEmbedCode(w)"
+                title="Copiar código de integración">
+                <span class="material-symbols-outlined icon-sm">code</span>
+                {{ copiedId === w.id ? 'Copiado' : 'Embed' }}
+              </button>
+
+              <button class="wl-action-btn" (click)="openEdit(w.id)" title="Editar widget">
+                <span class="material-symbols-outlined icon-sm">edit</span>
+              </button>
+
+              <button class="wl-action-btn wl-action-btn--delete" (click)="confirmDelete(w.id)"
+                [disabled]="!!deletingId"
+                title="Eliminar widget">
+                <span class="material-symbols-outlined icon-sm">delete</span>
+              </button>
+            </div>
+          }
+
+          <!-- Confirmación de eliminación -->
+          @if (deleteConfirmId === w.id) {
+            <div class="wl-card-confirm">
+              <span class="wl-confirm-text">¿Eliminar este widget?</span>
+              <button class="wl-action-btn wl-action-btn--confirm" (click)="deleteWidget(w.id)">
+                <span class="material-symbols-outlined icon-sm">check</span> Confirmar
+              </button>
+              <button class="wl-action-btn" (click)="cancelDelete()">
+                <span class="material-symbols-outlined icon-sm">close</span>
+              </button>
+            </div>
+          }
+
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- ── Modal Crear ─────────────────────────────────────────── -->
+@if (showCreateModal) {
+  <div class="wl-modal-overlay" (click)="closeModals()"></div>
+  <div class="wl-modal">
+    <div class="wl-modal-header">
+      <h2 class="wl-modal-title"><span class="material-symbols-outlined icon-sm">add_circle</span> Nuevo widget</h2>
+      <button class="wl-modal-close" (click)="closeModals()"><span class="material-symbols-outlined icon-sm">close</span></button>
+    </div>
+    <div class="wl-modal-body">
+      <app-widget-form (widgetSaved)="onSaved()" (cancel)="closeModals()"></app-widget-form>
+    </div>
+  </div>
+}
+
+<!-- ── Modal Editar ────────────────────────────────────────── -->
+@if (showEditModal) {
+  <div class="wl-modal-overlay" (click)="closeModals()"></div>
+  <div class="wl-modal">
+    <div class="wl-modal-header">
+      <h2 class="wl-modal-title"><span class="material-symbols-outlined icon-sm">edit</span> Editar widget</h2>
+      <button class="wl-modal-close" (click)="closeModals()"><span class="material-symbols-outlined icon-sm">close</span></button>
+    </div>
+    <div class="wl-modal-body">
+      <app-widget-form
+        [widgetId]="selectedWidgetId"
+        (widgetSaved)="onSaved()"
+        (cancel)="closeModals()">
+      </app-widget-form>
+    </div>
+  </div>
+}

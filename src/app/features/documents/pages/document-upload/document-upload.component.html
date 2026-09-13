@@ -1,0 +1,121 @@
+<div class="upload-container">
+  <div class="upload-header">
+    <h1>Subir Documento</h1>
+    <button routerLink="/documents" class="back-button">← Volver a Documentos</button>
+  </div>
+
+  <div class="upload-content">
+    <div class="upload-selectors">
+      <div class="upload-category">
+        <label for="upload-assistant-select">Asistente <span class="upload-category__optional">(opcional)</span></label>
+        <select
+          id="upload-assistant-select"
+          [disabled]="uploading"
+          (change)="onAssistantChange($event)"
+        >
+          <option value="">Sin asistente</option>
+          @for (a of availableAssistants; track a.id) {
+            <option [value]="a.id">{{ a.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="upload-category">
+        <label for="upload-category-select">Categoría <span class="upload-category__optional">(opcional)</span></label>
+        <select
+          id="upload-category-select"
+          [disabled]="uploading"
+          (change)="onCategoryChange($event)"
+        >
+          <option value="">Sin categoría</option>
+          @for (cat of availableCategories; track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <p class="upload-category__hint">Se asignará a todos los archivos de esta carga.</p>
+
+    <div
+      class="drop-zone"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+      [class.has-files]="selectedFiles.length > 0"
+    >
+      @if (selectedFiles.length === 0) {
+        <div class="drop-zone-content">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <p>Arrastra tus archivos aquí</p>
+          <p>o</p>
+          <input type="file" id="file-input" (change)="onFileSelected($event)" accept=".pdf,.docx,.txt" multiple style="display: none;">
+          <label for="file-input" class="browse-button">Buscar archivos</label>
+          <p class="file-info">Formatos soportados: PDF, DOCX, TXT (máx. 10MB)</p>
+        </div>
+      }
+
+      @if (selectedFiles.length > 0) {
+        <div class="file-list">
+          <h3>{{ selectedFiles.length }} archivo(s) seleccionado(s)</h3>
+          @for (file of selectedFiles; track file.name; let i = $index) {
+            <div class="file-item">
+              <div class="file-icon">
+                <span class="material-symbols-outlined icon-lg">{{ getFileIcon(file.name) }}</span>
+              </div>
+              <div class="file-info">
+                <span class="file-name">{{ file.name }}</span>
+                <span class="file-size">{{ formatFileSize(file.size) }}</span>
+              </div>
+              @if (uploading) {
+                <div class="file-progress">
+                  <div class="progress-bar-small">
+                    <div class="progress-fill" [style.width.%]="uploadProgressMap.get(file.name) || 0"></div>
+                  </div>
+                  <span class="progress-text">{{ uploadProgressMap.get(file.name) || 0 }}%</span>
+                </div>
+              }
+              @if (!uploading) {
+                <button (click)="removeFile(i)" class="remove-button">×</button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (error) {
+      <div class="error-message">{{ error }}</div>
+    }
+
+    @if (success) {
+      <div class="success-message">¡Documentos subidos correctamente! Redirigiendo...</div>
+    }
+
+    @if (selectedFiles.length > 0 && !success) {
+      <div class="upload-actions">
+        <button
+          (click)="uploadFiles()"
+          [disabled]="uploading"
+          class="upload-button"
+        >
+          {{ uploading ? 'Subiendo (' + uploadedCount + '/' + totalFiles + ')...' : 'Subir Documentos' }}
+        </button>
+        @if (!uploading) {
+          <button (click)="cancelUpload()" class="cancel-button">Cancelar</button>
+        }
+      </div>
+    }
+
+    @if (uploading) {
+      <div class="overall-progress">
+        <div class="progress-label">Progreso total: {{ uploadProgress }}%</div>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

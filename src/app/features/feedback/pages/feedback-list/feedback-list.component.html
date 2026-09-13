@@ -1,0 +1,457 @@
+<div class="fb-page">
+
+  <!-- ── Encabezado ───────────────────────────────────────────────── -->
+  <header class="fb-header">
+    <div class="fb-header__title-block">
+      <h1 class="fb-header__h1">Feedback</h1>
+      <p class="fb-header__sub">
+        Cómo califican tus usuarios las respuestas del asistente, y qué hacer con eso.
+      </p>
+    </div>
+
+    <div class="fb-header__controls">
+      <!-- Selector de período -->
+      <div class="seg-control">
+        @for (p of periodOptions; track p.value) {
+          <button
+            class="seg-control__btn"
+            [class.seg-control__btn--active]="period() === p.value"
+            (click)="selectPeriod(p.value)"
+          >{{ p.label }}</button>
+        }
+      </div>
+
+      <!-- Dropdown asistente -->
+      <div class="asst-drop">
+        <button class="asst-drop__trigger" (click)="toggleAssistantDropdown()">
+          <span class="asst-drop__label">Asistente:</span>
+          <span>{{ assistantName() }}</span>
+          <span class="asst-drop__arrow">&#9662;</span>
+        </button>
+
+        @if (assistOpen()) {
+          <div class="asst-drop__menu">
+            <button
+              class="asst-drop__item"
+              [class.asst-drop__item--active]="selectedAssistant() === null"
+              (click)="selectAssistantFromDropdown(null)"
+            >
+              Todos
+              @if (selectedAssistant() === null) {
+                <span class="asst-drop__check">&#10003;</span>
+              }
+            </button>
+            @for (a of assistantOptions(); track a.id) {
+              <button
+                class="asst-drop__item"
+                [class.asst-drop__item--active]="selectedAssistant() === a.id"
+                (click)="selectAssistantFromDropdown(a.id)"
+              >
+                {{ a.name }}
+                @if (selectedAssistant() === a.id) {
+                  <span class="asst-drop__check">&#10003;</span>
+                }
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Exportar comentarios -->
+      <button class="btn-export" (click)="exportCsv()">
+        <span class="icon-sm">&#8595;</span>
+        Exportar comentarios
+      </button>
+    </div>
+  </header>
+
+  <!-- ── KPIs ─────────────────────────────────────────────────────── -->
+  @if (loadingStats()) {
+    <div class="kpi-grid">
+      <div class="kpi-skeleton"></div>
+      <div class="kpi-skeleton"></div>
+      <div class="kpi-skeleton"></div>
+    </div>
+  } @else if (errorStats()) {
+    <p class="fb-inline-error">No se pudieron cargar las métricas. Intenta de nuevo.</p>
+  } @else if (stats(); as s) {
+    <div class="kpi-grid">
+
+      <!-- 1. Satisfacción -->
+      <div class="kpi-card">
+        <span class="kpi-card__label">Satisfacción</span>
+        <div class="kpi-card__value-row">
+          <span class="kpi-card__value">{{ s.average_rating | number:'1.1-1' }}</span>
+          <span class="kpi-stars">{{ stars(roundRating(s.average_rating)) }}</span>
+        </div>
+        <div class="kpi-card__note">
+          @if (s.average_rating_delta !== null) {
+            <span
+              class="kpi-delta"
+              [class.kpi-delta--pos]="deltaIsPositive(s.average_rating_delta)"
+              [class.kpi-delta--neg]="deltaIsNegative(s.average_rating_delta)"
+            >{{ deltaSign(s.average_rating_delta) }}</span>
+            {{ deltaPeriodLabel() }} ·
+          }
+          {{ s.rated_count | number:'':'es-CO' }} calificaciones
+        </div>
+      </div>
+
+      <!-- 2. Negativas -->
+      <div class="kpi-card">
+        <span class="kpi-card__label">Negativas</span>
+        <div class="kpi-card__value-row">
+          <span class="kpi-card__value kpi-card__value--neg">{{ s.negatives }}</span>
+        </div>
+        <div class="kpi-card__note">1 y 2 estrellas {{ periodSuffix() }}</div>
+      </div>
+
+      <!-- 3. En seguimiento -->
+      <div class="kpi-card">
+        <span class="kpi-card__label">En seguimiento</span>
+        <div class="kpi-card__value-row">
+          <span class="kpi-card__value kpi-card__value--gap">{{ s.with_gap }}</span>
+        </div>
+        <div class="kpi-card__note">negativas convertidas en tarea</div>
+      </div>
+
+    </div>
+  }
+
+  <!-- ── Cuerpo ────────────────────────────────────────────────────── -->
+  <div class="fb-body">
+
+    <!-- ── Columna izquierda — distribución ─────────────────────── -->
+    <div class="fb-left">
+      <div class="fb-card">
+        <div class="fb-card__head">
+          <span class="fb-card__title">Distribución</span>
+          <span class="fb-card__hint">
+            {{ mode() === 'comments' ? 'clic para filtrar' : 'clic para ver comentarios' }}
+          </span>
+        </div>
+
+        @if (loadingStats()) {
+          @for (i of [1,2,3,4,5]; track i) {
+            <div class="dist-skeleton"></div>
+          }
+        } @else if (stats(); as s) {
+          <div class="dist-rows">
+            @for (star of [5,4,3,2,1]; track star) {
+              <button
+                class="dist-row"
+                [class.dist-row--selected]="ratingFilter() === star"
+                (click)="toggleRating(star)"
+              >
+                <span class="dist-stars">{{ stars(star) }}</span>
+                <div class="dist-bar-wrap">
+                  <div
+                    class="dist-bar"
+                    [class.dist-bar--positive]="star >= 4"
+                    [class.dist-bar--neutral]="star === 3"
+                    [class.dist-bar--negative]="star <= 2"
+                    [style.width.%]="((s.distribution[star] ?? 0) / maxDistCount()) * 100"
+                  ></div>
+                </div>
+                <span class="dist-count">{{ (s.distribution[star] ?? 0) | number:'':'es-CO' }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── Columna derecha ──────────────────────────────────────── -->
+    <div class="fb-right">
+
+      <!-- Barra de control del listado -->
+      <div class="list-bar">
+        <div class="seg-control">
+          <button
+            class="seg-control__btn"
+            [class.seg-control__btn--active]="mode() === 'comments'"
+            (click)="selectMode('comments')"
+          >Comentarios</button>
+          <button
+            class="seg-control__btn"
+            [class.seg-control__btn--active]="mode() === 'themes'"
+            (click)="selectMode('themes')"
+          >Temas</button>
+        </div>
+
+        <span class="mode-sep"></span>
+
+        <span class="list-bar__count">{{ listCountLabel() }}</span>
+
+        @if (ratingFilter() !== null) {
+          <button class="list-bar__clear" (click)="clearRatingFilter()">
+            Quitar filtro &#215;
+          </button>
+        }
+
+        <span class="list-bar__order">
+          {{ mode() === 'comments' ? 'Ordenado por más reciente' : 'Ordenado por volumen' }}
+        </span>
+      </div>
+
+      <!-- ══ MODO COMENTARIOS ════════════════════════════════════════ -->
+      @if (mode() === 'comments') {
+
+        @if (loadingList()) {
+          @for (i of [1,2,3]; track i) {
+            <div class="comment-skeleton">
+              <div class="comment-skeleton__row">
+                <div class="comment-skeleton__line comment-skeleton__line--short"></div>
+                <div class="comment-skeleton__line comment-skeleton__line--short"></div>
+                <div class="comment-skeleton__line comment-skeleton__line--medium"></div>
+              </div>
+              <div class="comment-skeleton__line comment-skeleton__line--full"></div>
+              <div class="comment-skeleton__line comment-skeleton__line--medium"></div>
+              <div class="comment-skeleton__row">
+                <div class="comment-skeleton__line comment-skeleton__line--btn"></div>
+              </div>
+            </div>
+          }
+        } @else if (errorList()) {
+          <div class="fb-card">
+            <p class="fb-inline-error">No se pudo cargar la lista de comentarios.</p>
+          </div>
+        } @else if (filteredList().length === 0) {
+          <div class="fb-empty"><p>No hay calificaciones con este filtro.</p></div>
+        } @else {
+          @for (fb of filteredList(); track fb.id) {
+            <div class="comment-card">
+
+              <!-- Cabecera -->
+              <div class="comment-card__head">
+                <div class="comment-card__meta">
+                  <div class="comment-card__identity">
+                    <span class="comment-user">
+                      {{ fb.user_full_name || (fb.widget_id ? 'Anónimo · widget' : 'Anónimo') }}
+                    </span>
+                    <span
+                      class="comment-stars"
+                      [class.comment-stars--positive]="fb.rating >= 4"
+                      [class.comment-stars--neutral]="fb.rating === 3"
+                      [class.comment-stars--negative]="fb.rating <= 2"
+                    >{{ stars(fb.rating) }}</span>
+                    <span class="comment-meta-info">
+                      {{ fb.created_at | date:'d MMM yyyy · HH:mm':'':'es-CO' }}
+                      @if (fb.assistant_name) { · {{ fb.assistant_name }} }
+                      @if (fb.conversation_id) { · conv #{{ fb.conversation_id }} }
+                    </span>
+                    @if (fb.status === 'stale') {
+                      <span class="status-pill status-pill--stale">Obsoleto</span>
+                    }
+                  </div>
+                  <p
+                    class="comment-text"
+                    [class.comment-text--empty]="!fb.comment"
+                  >{{ fb.comment || 'Sin comentario' }}</p>
+                </div>
+              </div>
+
+              <!-- Respuesta calificada (solo si rating ≤ 3) -->
+              @if (isNegOrNeutral(fb.rating) && fb.answer) {
+                <div class="comment-card__answer">
+                  <span class="answer-label">Respuesta calificada</span>
+                  <p class="answer-text">{{ fb.answer }}</p>
+                  @if (fb.sources_count != null || fb.rag_score != null) {
+                    <span class="answer-meta">
+                      @if (fb.sources_count != null) { {{ fb.sources_count }} fuentes }
+                      @if (fb.rag_score != null) { · score {{ fb.rag_score | number:'1.2-2' }} }
+                    </span>
+                  }
+                </div>
+              }
+
+              <!-- Aviso de obsoleto: no mostrar si hay gap abierto (se contradiría con la píldora) -->
+              @if (fb.status === 'stale' && (!fb.knowledge_gap_id || fb.knowledge_gap_status === 'resolved')) {
+                <div class="stale-notice">
+                  <span class="stale-dot"></span>
+                  La fuente de esta respuesta se reindexó después. La queja puede estar resuelta.
+                </div>
+              }
+
+              <!-- Barra de acciones -->
+              <div class="comment-card__actions">
+
+                @if (fb.conversation_id) {
+                  <a
+                    class="action-btn action-btn--secondary"
+                    [routerLink]="['/conversations', fb.conversation_id]"
+                  >Ver conversación</a>
+                }
+
+                @if (isNegative(fb.rating)) {
+                  <button
+                    class="action-btn action-btn--gap"
+                    (click)="openConvertDialog(fb)"
+                  >Enviar a preguntas sin respuesta</button>
+                }
+
+                <span class="action-spacer"></span>
+
+                @if (fb.knowledge_gap_id) {
+                  <span [class]="gapPillClass(fb)">
+                    @if (fb.knowledge_gap_status === 'resolved') {
+                      Pregunta #{{ fb.knowledge_gap_id }} resuelta
+                    } @else {
+                      Pregunta #{{ fb.knowledge_gap_id }} abierta
+                    }
+                  </span>
+                } @else {
+                  <span [class]="gapPillClass(fb)">{{ statusLabel(fb.status) }}</span>
+                }
+
+              </div>
+            </div>
+          }
+        }
+      }
+
+      <!-- ══ MODO TEMAS ═════════════════════════════════════════════ -->
+      @if (mode() === 'themes') {
+
+        <!-- Buscador -->
+        <div class="theme-search-bar">
+          <span>&#128269;</span>
+          <input
+            type="text"
+            [placeholder]="'Buscar en ' + ((stats()?.total ?? 0) | number:'':'es-CO') + ' comentarios…'"
+            [value]="themeSearch()"
+            (input)="themeSearch.set($any($event.target).value)"
+          />
+          @if (stats()) {
+            <span class="theme-search-bar__period">{{ periodSuffix() }}</span>
+          }
+        </div>
+
+        @if (loadingStats()) {
+          @for (i of [1,2,3]; track i) {
+            <div class="comment-skeleton">
+              <div class="comment-skeleton__row">
+                <div class="comment-skeleton__line comment-skeleton__line--medium"></div>
+                <div class="comment-skeleton__line comment-skeleton__line--short"></div>
+              </div>
+            </div>
+          }
+        } @else if (!stats()?.themes?.length) {
+          <div class="fb-empty"><p>No hay temas identificados en este período.</p></div>
+        } @else {
+          @for (theme of stats()!.themes; track theme.label) {
+            @if (!themeSearch() || theme.label.toLowerCase().includes(themeSearch().toLowerCase())) {
+              <div class="theme-row">
+
+                <!-- Cabecera clicable -->
+                <button class="theme-row__head" (click)="toggleTheme(theme.label)">
+                  <span
+                    class="theme-row__chevron"
+                    [class.theme-row__chevron--open]="openTheme() === theme.label"
+                  >&#8250;</span>
+                  <div class="theme-row__body">
+                    <div class="theme-row__name-row">
+                      <span class="theme-row__name">{{ theme.label }}</span>
+                      @if (theme.trend === 'up') {
+                        <span class="trend-chip trend-chip--up">
+                          +{{ theme.trend_pct != null ? theme.trend_pct : '' }}%
+                        </span>
+                      } @else if (theme.trend === 'down') {
+                        <span class="trend-chip trend-chip--down">
+                          &#8722;{{ theme.trend_pct != null ? theme.trend_pct : '' }}%
+                        </span>
+                      }
+                    </div>
+                    <span class="theme-row__share">
+                      {{ stats()!.negatives > 0
+                        ? ((theme.count / stats()!.negatives) * 100 | number:'1.0-0')
+                        : 0 }}% de las quejas
+                    </span>
+                  </div>
+                  <div class="theme-row__volume-block">
+                    <span class="theme-row__volume">{{ theme.count | number:'':'es-CO' }}</span>
+                    <span class="theme-row__vol-label">comentarios</span>
+                  </div>
+                </button>
+
+                <!-- Detalles expandidos -->
+                @if (openTheme() === theme.label) {
+                  <div class="theme-row__expand">
+                    @if (theme.summary) {
+                      <p class="theme-row__summary">{{ theme.summary }}</p>
+                    }
+
+                    @if (theme.samples?.length) {
+                      <span class="theme-row__samples-label">Comentarios representativos</span>
+                      @for (sample of theme.samples; track sample.id) {
+                        <div class="theme-sample">
+                          <span
+                            class="theme-sample__stars"
+                            [class.comment-stars--positive]="sample.rating >= 4"
+                            [class.comment-stars--neutral]="sample.rating === 3"
+                            [class.comment-stars--negative]="sample.rating <= 2"
+                          >{{ stars(sample.rating) }}</span>
+                          <p class="theme-sample__text">{{ sample.comment }}</p>
+                          <span class="theme-sample__meta">
+                            {{ sample.created_at | date:'d MMM':'':'es-CO' }}
+                          </span>
+                        </div>
+                      }
+                    }
+
+                    <div class="theme-row__actions">
+                      <button
+                        class="action-btn action-btn--gap"
+                        (click)="openThemeConvertDialog(theme)"
+                      >Enviar tema a preguntas sin respuesta</button>
+                      <button class="theme-row__see-all">
+                        Ver los {{ theme.count | number:'':'es-CO' }} comentarios &#8594;
+                      </button>
+                    </div>
+                  </div>
+                }
+
+              </div>
+            }
+          }
+        }
+      }
+
+    </div><!-- /fb-right -->
+  </div><!-- /fb-body -->
+
+</div><!-- /fb-page -->
+
+<!-- ── Modal: Enviar a preguntas sin respuesta ───────────────────── -->
+@if (modalOpen()) {
+  <div class="modal-overlay" (click)="cancelConvert()"></div>
+  <div class="modal">
+    <h2 class="modal__title">Enviar a preguntas sin respuesta</h2>
+    <p class="modal__desc">
+      @if (convertingTheme()) {
+        Edita el tema que se registrará como pregunta sin respuesta en bloque.
+      } @else {
+        Edita la pregunta que se registrará. El equipo podrá añadir una respuesta y publicarla
+        en la base de conocimiento.
+      }
+    </p>
+    <textarea
+      class="modal__textarea"
+      rows="4"
+      [value]="convertQuestion()"
+      (input)="convertQuestion.set($any($event.target).value)"
+    ></textarea>
+    <div class="modal__footer">
+      <button class="modal__btn modal__btn--cancel" (click)="cancelConvert()">
+        Cancelar
+      </button>
+      <button
+        class="modal__btn modal__btn--confirm"
+        [disabled]="!convertQuestion().trim() || converting()"
+        (click)="confirmConvert()"
+      >
+        {{ converting() ? 'Enviando…' : 'Enviar pregunta' }}
+      </button>
+    </div>
+  </div>
+}

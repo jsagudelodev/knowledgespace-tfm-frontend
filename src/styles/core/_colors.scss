@@ -1,0 +1,70 @@
+// ==========================================================================
+// PALETA CRUDA — DEEP BLUE PREMIUM
+// Fuente única de verdad para todos los colores del sistema.
+// No usar directamente en componentes — consumir siempre a través de _variables.scss
+// ==========================================================================
+
+// ── Familia Azul Marina (Identidad corporativa) ───────────────────────────
+$navy-900:      #0F172A;  // Fondo sidebar — azul noche profundo
+$navy-800:      #172554;  // Hover primario — institucional y serio
+$navy-700:      #1E3A8A;  // ★ COLOR IDENTIDAD: azul marino de las burbujas del usuario
+$navy-600:      #1E40AF;  // Active / focus — transición suave desde el primario
+$navy-500:      #2563EB;  // ★ COLOR PRIMARIO: azul corporativo (botones, links, burbujas usuario)
+$navy-hover:    #1D4ED8;  // Hover del primario — un tono más oscuro que $navy-500
+$navy-400:      #3B82F6;  // Azul medio — badges, estados activos, selecciones
+$navy-300:      #60A5FA;  // Barra activa sidebar, iconos sobre fondo oscuro
+$navy-200:      #BFDBFE;  // Borders de chips y contexto activo
+$navy-100:      #DBEAFE;  // Fondo de estados seleccionados (tabla, chip)
+$navy-50:       #EFF6FF;  // Fondo azul premium extra suave — destaca sin gritar
+$navy-light:    #F0F5FF;  // Alternativa más cálida al navy-50 para fondos de tarjeta
+
+// ── Familia Slate (Grises azulados — cero grises fríos neutros) ───────────
+$slate-950:     #020617;
+$slate-900:     #0F172A;
+$slate-800:     #1E293B;  // Títulos fuertes — no negro puro, azul oscuro suave
+$slate-700:     #334155;
+$slate-600:     #475569;
+$slate-500:     #64748B;
+$slate-400:     #94A3B8;  // Iconos en reposo, placeholders
+$slate-300:     #CBD5E1;
+$slate-200:     #E2E8F0;  // ★ Borde de layout — línea ultrafina y limpia
+$slate-100:     #F1F5F9;
+$slate-50:      #F8FAFC;  // ★ Fondo general del dashboard — descansa la vista
+
+// Aliases semánticos (los que usará _variables.scss)
+$navy-darktext: $slate-800;  // Títulos principales — sin negro puro
+$navy-chat:     $navy-700;   // ★ Azul preferido del chat — identidad del software
+$navy-accent:   $navy-400;   // Azul medio para badges y estados secundarios
+
+$slate-text:    #57657A;     // Gris azulado premium para párrafos
+$slate-muted:   $slate-400;  // Placeholders, iconos secundarios en reposo
+$slate-border:  $slate-200;  // Divisores y bordes de layout
+$slate-bg:      $slate-50;   // Fondo general del dashboard
+
+// ── Estados semánticos ────────────────────────────────────────────────────
+$green-active:  #10B981;     // Activo / listo / éxito
+$green-hover:   #059669;
+$green-600:     #16A34A;     // Texto éxito (score alto)
+$green-light:   #D1FAE5;
+$green-text:    #065F46;
+
+$amber-500:     #F59E0B;     // Advertencia
+$amber-600:     #D97706;     // Texto advertencia (score medio)
+$amber-light:   #FEF3C7;
+$amber-text:    #92400E;
+
+$yellow-200:    #FEF08A;     // Fondo highlight de búsqueda
+$yellow-900:    #713F12;     // Texto highlight de búsqueda
+
+$red-50:        #FEF2F2;     // Hover fondo danger dropdown / alertas muy suaves
+$red-300:       #FCA5A5;     // Sidebar logout hover text
+$red-500:       #EF4444;     // Peligro / error
+$red-600:       #B91C1C;     // Texto danger dropdown hover
+$red-hover:     #DC2626;
+$red-light:     #FEE2E2;
+$red-text:      #991B1B;
+
+// ── Familia Violeta y Cyan (logo dots) ───────────────────────────────────────
+$violet-500:    #8B5CF6;     // Logo dot violeta
+$cyan-500:      #06B6D4;     // Logo dot cyan
+$navy-250:      #93C5FD;     // Sidebar avatar text / icono activo claro

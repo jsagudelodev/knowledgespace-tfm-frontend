@@ -1,0 +1,121 @@
+<!-- Estado de carga (solo edición mientras se obtienen los datos) -->
+@if (loading && isEditMode && !fullNameValue) {
+  <div class="form-loading">
+    <span class="material-symbols-outlined icon-sm" [class.pi-spin]="true">progress_activity</span>
+    <span>Cargando usuario...</span>
+  </div>
+}
+
+<!-- Banner de error -->
+@if (error) {
+  <div class="form-error">
+    <span class="material-symbols-outlined icon-sm">error</span>
+    <span>{{ error }}</span>
+  </div>
+}
+
+<!-- Formulario principal -->
+@if (!loading || !isEditMode) {
+  <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="user-form">
+
+    <!-- ── Email ──────────────────────────────────────────────────────── -->
+    <div class="form-group">
+      <label for="email">Email <span class="required">*</span></label>
+      <div class="input-icon-wrapper">
+        <span class="material-symbols-outlined icon-sm input-icon">email</span>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="correo@empresa.com"
+          [class.is-invalid]="isFieldInvalid('email')"
+          [attr.disabled]="isEditMode ? true : null"
+          autocomplete="off"
+        />
+      </div>
+      @if (isFieldInvalid('email')) {
+        <span class="field-error">{{ getErrorMessage('email') }}</span>
+      }
+    </div>
+
+    <!-- ── Nombre Completo ────────────────────────────────────────────── -->
+    <div class="form-group">
+      <label for="full_name">Nombre Completo <span class="required">*</span></label>
+      <div class="input-icon-wrapper">
+        <span class="material-symbols-outlined icon-sm input-icon">person</span>
+        <input
+          id="full_name"
+          type="text"
+          formControlName="full_name"
+          placeholder="Ej: Juan García López"
+          [class.is-invalid]="isFieldInvalid('full_name')"
+          autocomplete="off"
+        />
+      </div>
+      @if (isFieldInvalid('full_name')) {
+        <span class="field-error">{{ getErrorMessage('full_name') }}</span>
+      }
+    </div>
+
+    <!-- ── Contraseña (solo en creación) ─────────────────────────────── -->
+    @if (!isEditMode) {
+      <div class="form-group">
+        <label for="password">Contraseña <span class="required">*</span></label>
+        <div class="input-icon-wrapper">
+          <span class="material-symbols-outlined icon-sm input-icon">lock</span>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="Mínimo 8 caracteres"
+            [class.is-invalid]="isFieldInvalid('password')"
+            autocomplete="new-password"
+          />
+        </div>
+        @if (isFieldInvalid('password')) {
+          <span class="field-error">{{ getErrorMessage('password') }}</span>
+        }
+      </div>
+    }
+
+    <!-- ── Rol y Estado ───────────────────────────────────────────────── -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="role">Rol <span class="required">*</span></label>
+        <div class="input-icon-wrapper">
+          <span class="material-symbols-outlined icon-sm input-icon">vpn_key</span>
+          <select id="role" formControlName="role">
+            <option value="user">Usuario</option>
+            <option value="admin">Administrador</option>
+            <option value="superadmin">Superadministrador</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="status">Estado</label>
+        <div class="input-icon-wrapper">
+          <span class="material-symbols-outlined icon-sm input-icon">circle</span>
+          <select id="status" formControlName="status">
+            <option value="active">Activo</option>
+            <option value="inactive">Inactivo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Acciones ───────────────────────────────────────────────────── -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="onCancel()">Cancelar</button>
+      <button type="submit" class="btn-primary" [disabled]="loading">
+        @if (loading) {
+          <span class="material-symbols-outlined icon-sm" [class.pi-spin]="true">progress_activity</span>
+        } @else {
+          <span class="material-symbols-outlined icon-sm">save</span>
+        }
+        {{ isEditMode ? 'Guardar Cambios' : 'Crear Usuario' }}
+      </button>
+    </div>
+
+  </form>
+}

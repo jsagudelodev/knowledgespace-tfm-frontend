@@ -1,0 +1,313 @@
+// ── Page container ────────────────────────────────────────────────────────────
+.notif-page {
+  padding: 28px 26px 44px;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.notif-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.notif-header__left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.notif-h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: #101828;
+}
+
+.notif-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #667085;
+}
+
+.mark-all-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #e3e6eb;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #344054;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.13s;
+
+  &:hover:not(:disabled) { background: #f7f8fa; }
+  &:disabled             { cursor: not-allowed; }
+  &--dim                 { color: #98a2b3; }
+}
+
+// ── Filter chips ──────────────────────────────────────────────────────────────
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  border-radius: 99px;
+  font-size: 12.5px;
+  cursor: pointer;
+  border: 1px solid #e3e6eb;
+  background: #fff;
+  color: #475467;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+
+  &:hover { background: #f7f8fa; }
+
+  &--active {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 500;
+
+    .chip-count { color: #60a5fa; }
+  }
+}
+
+.chip-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #b6bcc7;
+}
+
+// ── Card container ────────────────────────────────────────────────────────────
+.notif-card {
+  background: #fff;
+  border: 1px solid #e8eaee;
+  border-radius: 11px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  overflow: hidden;
+}
+
+// ── Day separator ─────────────────────────────────────────────────────────────
+.day-sep {
+  padding: 11px 20px 9px;
+  background: #fbfcfd;
+  border-bottom: 1px solid #f1f2f5;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #98a2b3;
+}
+
+// ── Notification row ──────────────────────────────────────────────────────────
+.notif-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 15px 20px 15px 14px;
+  border-bottom: 1px solid #f1f2f5;
+  cursor: pointer;
+  background: #fff;
+  width: 100%;
+  text-align: left;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  outline: none;
+  transition: background 0.12s;
+  font-family: inherit;
+
+  &:last-child   { border-bottom: none; }
+  &:hover        { background: #f8fafc; }
+  &--unread      { background: #fcfdff; }
+
+  &--sk {
+    pointer-events: none;
+    &:hover { background: #fff; }
+    &--unread { background: #fff; }
+  }
+}
+
+// ── Unread dot ────────────────────────────────────────────────────────────────
+.unread-dot {
+  width: 5px;
+  height: 5px;
+  min-width: 5px;
+  margin-top: 7px;
+  border-radius: 99px;
+  background: transparent;
+  flex-shrink: 0;
+
+  &--on { background: #2563eb; }
+}
+
+// ── Type icon ─────────────────────────────────────────────────────────────────
+.type-icon {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+// ── Notification body ─────────────────────────────────────────────────────────
+.notif-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.notif-title-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.notif-title {
+  font-size: 13.5px;
+  color: #101828;
+  font-weight: 500;
+
+  &--unread { font-weight: 600; }
+}
+
+.type-pill {
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 10.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.notif-msg {
+  margin: 0;
+  font-size: 12.5px;
+  color: #667085;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+// ── Meta column (right) ───────────────────────────────────────────────────────
+.notif-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.notif-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: #98a2b3;
+}
+
+.notif-action {
+  font-size: 12px;
+  font-weight: 500;
+  color: #2563eb;
+
+  &:hover { text-decoration: underline; color: #1d4ed8; }
+}
+
+// ── Inner states (empty / error) ──────────────────────────────────────────────
+.notif-inner-state {
+  padding: 46px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #98a2b3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.retry-btn {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2563eb;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+// ── Load more ─────────────────────────────────────────────────────────────────
+.load-more {
+  display: flex;
+  justify-content: center;
+  padding: 16px 20px;
+  border-top: 1px solid #f1f2f5;
+}
+
+.load-more-btn {
+  padding: 8px 20px;
+  border: 1px solid #e3e6eb;
+  border-radius: 99px;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #344054;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s;
+
+  &:hover:not(:disabled) { background: #f7f8fa; }
+  &:disabled             { opacity: 0.6; cursor: not-allowed; }
+}
+
+// ── Skeleton animation ────────────────────────────────────────────────────────
+@keyframes sk-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+.sk-block {
+  background: #eef1f6;
+  border-radius: 4px;
+  animation: sk-pulse 1.4s ease-in-out infinite;
+  display: block;
+
+  &--dot   { width: 5px;  height: 5px;  min-width: 5px; margin-top: 7px; border-radius: 99px; flex-shrink: 0; }
+  &--icon  { width: 30px; height: 30px; min-width: 30px; border-radius: 8px; flex-shrink: 0; }
+  &--title { height: 11px; width: 55%; }
+  &--msg   { height: 9px;  width: 80%; margin-top: 5px; }
+  &--time  { height: 10px; width: 48px; }
+}
+
+.sk-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sk-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}

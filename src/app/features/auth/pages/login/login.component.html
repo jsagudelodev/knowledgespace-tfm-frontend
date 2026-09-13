@@ -1,0 +1,109 @@
+<div class="auth-page">
+
+  <!-- ── Panel izquierdo: branding ────────────────────────────────────────── -->
+  <div class="auth-brand">
+    <div class="auth-brand__decoration" aria-hidden="true"></div>
+    <div class="auth-brand__content">
+
+      <div class="auth-brand__logo">
+        <span class="auth-brand__logo-icon">KS</span>
+        <span class="auth-brand__logo-text">KnowledgeSpace</span>
+      </div>
+
+      <h2 class="auth-brand__title">
+        Convierte tu documentación en conocimiento inteligente
+      </h2>
+      <p class="auth-brand__sub">
+        Plataforma IA para equipos que aprenden de su propio contenido corporativo
+      </p>
+
+      <ul class="auth-brand__features">
+        <li class="auth-brand__feature">
+          <span class="material-symbols-outlined icon-sm">check_circle</span>
+          <span>RAG sobre documentos internos</span>
+        </li>
+        <li class="auth-brand__feature">
+          <span class="material-symbols-outlined icon-sm">check_circle</span>
+          <span>Búsqueda semántica avanzada</span>
+        </li>
+        <li class="auth-brand__feature">
+          <span class="material-symbols-outlined icon-sm">check_circle</span>
+          <span>Asistentes por empresa, sin compartir datos</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ── Panel derecho: formulario ─────────────────────────────────────────── -->
+  <div class="auth-form-panel">
+    <div class="auth-form-card">
+
+      <div class="auth-form-header">
+        <h1>Bienvenido de nuevo</h1>
+        <p>Inicia sesión en tu cuenta para continuar</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+
+        <div *ngIf="error" class="auth-alert auth-alert--error">
+          <span class="material-symbols-outlined icon-sm">error</span>
+          <span>{{ error }}</span>
+        </div>
+
+        <!-- Email -->
+        <div class="form-field">
+          <label class="form-field__label" for="username">Correo electrónico</label>
+          <div class="form-field__control"
+               [class.form-field__control--error]="loginForm.get('username')?.touched && loginForm.get('username')?.invalid">
+            <span class="material-symbols-outlined icon-sm form-field__icon">email</span>
+            <input
+              id="username"
+              type="email"
+              class="form-field__input"
+              formControlName="username"
+              placeholder="tu@empresa.com"
+              autocomplete="email"
+            />
+          </div>
+          <span *ngIf="loginForm.get('username')?.touched && loginForm.get('username')?.errors?.['required']"
+                class="form-field__error">
+            El correo es requerido
+          </span>
+          <span *ngIf="loginForm.get('username')?.touched && loginForm.get('username')?.errors?.['email']"
+                class="form-field__error">
+            Ingresa un correo válido
+          </span>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="form-field">
+          <label class="form-field__label" for="password">Contraseña</label>
+          <div class="form-field__control"
+               [class.form-field__control--error]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
+            <span class="material-symbols-outlined icon-sm form-field__icon">lock</span>
+            <input
+              id="password"
+              type="password"
+              class="form-field__input"
+              formControlName="password"
+              placeholder="Mínimo 8 caracteres"
+              autocomplete="current-password"
+            />
+          </div>
+          <span *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
+                class="form-field__error">
+            La contraseña debe tener al menos 8 caracteres
+          </span>
+        </div>
+
+        <button type="submit" class="btn-login" [disabled]="loading">
+          <span class="material-symbols-outlined icon-sm" [class.pi-spin]="loading" [class.material-symbols-outlined--login]="!loading">login</span>
+          {{ loading ? 'Iniciando sesión...' : 'Iniciar sesión' }}
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+</div>

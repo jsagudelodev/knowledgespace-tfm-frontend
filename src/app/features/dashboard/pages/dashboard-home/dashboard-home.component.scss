@@ -1,0 +1,262 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+
+.dashboard-container {
+  padding: $sp-8;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  margin-bottom: $sp-8;
+
+  h1 {
+    font-size: $size-4xl;
+    color: $font-title;
+    margin: 0 0 $sp-2;
+    font-weight: $w-semibold;
+  }
+
+  p { color: $font-body; font-size: $size-lg; margin: 0; }
+}
+
+// ── Loading ───────────────────────────────────────────────────────────────
+.loading-state {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+  padding: $sp-10;
+  color: $font-muted;
+  font-size: $size-sm;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid $border-flat;
+  border-top-color: $color-primary;
+  border-radius: $radius-circle;
+  animation: spin 0.7s linear infinite;
+}
+
+// ── Métricas ──────────────────────────────────────────────────────────────
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: $sp-6;
+  margin-bottom: $sp-8;
+}
+
+.metric-card {
+  background: $bg-card;
+  padding: $sp-6;
+  border-radius: $radius-lg;
+  border: 1px solid $border-flat;
+  box-shadow: $shadow-xs;
+  position: relative;
+  transition: box-shadow $motion-base, transform $motion-base;
+
+  &:hover { box-shadow: $shadow-md; transform: translateY(-2px); }
+
+  h3 {
+    font-size: $size-base;
+    color: $font-body;
+    margin: 0 0 $sp-4;
+    text-transform: uppercase;
+    letter-spacing: $letter-spacing-wide;
+    font-weight: $w-medium;
+  }
+}
+
+.metric-icon {
+  position: absolute;
+  top: $sp-6;
+  right: $sp-6;
+  width: 40px;
+  height: 40px;
+  border-radius: $radius-md;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .material-symbols-outlined { font-size: $size-xl; }
+
+  &--documents   { background: $color-primary-light; color: $color-accent; }
+  &--users       { background: $green-light;          color: $color-success; }
+  &--conversations { background: $amber-light;        color: $color-warning; }
+  &--messages    { background: $red-light;             color: $color-danger;  }
+}
+
+.metric-value {
+  font-size: 2.5rem;
+  font-weight: $w-bold;
+  color: $font-title;
+  margin-bottom: $sp-3;
+  line-height: 1;
+}
+
+.metric-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-1;
+  font-size: $size-sm;
+  color: $font-muted;
+}
+
+// ── Onboarding ────────────────────────────────────────────────────────────
+.onboarding-card {
+  background: $bg-card;
+  border-radius: $radius-xl;
+  border: 1px solid $field-border-focus;
+  box-shadow: $shadow-sm;
+  padding: $sp-8;
+  margin-bottom: $sp-8;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-4;
+    margin-bottom: $sp-8;
+  }
+
+  &__icon { font-size: 2.5rem; color: $color-primary; flex-shrink: 0; }
+  &__title { font-size: $size-xl; font-weight: $w-semibold; color: $font-title; margin: 0 0 $sp-1; }
+  &__subtitle { font-size: $size-base; color: $font-muted; margin: 0; }
+}
+
+.onboarding-steps { display: flex; flex-direction: column; gap: $sp-4; }
+
+.onboarding-step {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  padding: $sp-4 $sp-5;
+  border-radius: $radius-lg;
+  border: 1px solid $border-flat;
+  background: $bg-app;
+  transition: border-color $motion-fast, box-shadow $motion-fast;
+
+  &:hover { border-color: $field-border-focus; box-shadow: $shadow-xs; }
+
+  &--done {
+    border-color: $badge-active-bg;
+    background: $color-primary-light;
+    .onboarding-step__indicator { background: $color-success; }
+    .onboarding-step__title { color: $color-success; }
+  }
+
+  &__indicator {
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    color: $font-on-primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: $size-sm;
+  }
+
+  &__number { font-weight: $w-bold; font-size: $size-base; }
+  &__body   { flex: 1; min-width: 0; }
+  &__title  { font-size: $size-base; font-weight: $w-semibold; color: $font-title; margin: 0 0 $sp-1; }
+  &__desc   { font-size: $size-sm; color: $font-muted; margin: 0; }
+
+  &__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-1;
+    padding: $sp-2 $sp-4;
+    background: $btn-primary-bg;
+    color: $btn-primary-text;
+    border-radius: $radius-md;
+    font-size: $size-sm;
+    font-weight: $w-semibold;
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background $motion-fast;
+
+    &:hover { background: $btn-primary-hover; }
+  }
+}
+
+// ── Actividad reciente ────────────────────────────────────────────────────
+.recent-activity {
+  background: $bg-card;
+  padding: $sp-6;
+  border-radius: $radius-lg;
+  border: 1px solid $border-flat;
+  box-shadow: $shadow-xs;
+
+  h2 { font-size: $size-2xl; color: $font-title; margin: 0 0 $sp-6; font-weight: $w-semibold; }
+}
+
+.activity-table { display: flex; flex-direction: column; }
+
+.activity-table-header {
+  display: grid;
+  grid-template-columns: 60px 1fr 140px;
+  gap: $sp-4;
+  padding: $sp-3 $sp-4;
+  background: $bg-app;
+  border-radius: $radius-md;
+  font-size: $size-xs;
+  font-weight: $w-semibold;
+  color: $font-muted;
+  text-transform: uppercase;
+  letter-spacing: $letter-spacing-wide;
+  margin-bottom: $sp-2;
+}
+
+.activity-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 140px;
+  gap: $sp-4;
+  padding: $sp-3 $sp-4;
+  border-bottom: 1px solid $border-flat;
+  align-items: center;
+  transition: background $motion-fast;
+
+  &:hover { background: $bg-app; }
+  &:last-child { border-bottom: none; }
+}
+
+.activity-icon-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-md;
+  background: $badge-neutral-bg;
+  color: $badge-neutral-text;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activity-description {
+  color: $font-title;
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.activity-date {
+  color: $font-muted;
+  font-size: $size-xs;
+}
+
+.activity-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-2;
+  padding: $sp-10;
+  color: $font-muted;
+  font-size: $size-sm;
+
+  .material-symbols-outlined { font-size: 2rem; opacity: 0.4; }
+  p { margin: 0; }
+}

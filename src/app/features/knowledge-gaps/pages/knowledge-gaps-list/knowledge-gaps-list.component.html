@@ -1,0 +1,460 @@
+<div class="gaps-page">
+
+  <!-- ══ Encabezado ══════════════════════════════════════════════════════════ -->
+  <div class="gaps-header">
+    <div class="gaps-title-block">
+      <h1 class="gaps-h1">Preguntas sin respuesta</h1>
+      <p class="gaps-subtitle">Lo que tus usuarios preguntaron y la documentación no pudo responder, agrupado por intención.</p>
+    </div>
+    <button class="btn-report" type="button">Informe mensual</button>
+  </div>
+
+  <!-- ══ Línea de resumen ════════════════════════════════════════════════════ -->
+  @if (summary(); as s) {
+    <div class="gaps-summary">
+      <span class="sum-num">{{ s.open_count }}</span>
+      <span class="sum-label">preguntas sin responder</span>
+      <span class="sum-dot">·</span>
+      <span class="sum-num">{{ s.open_volume }}</span>
+      <span class="sum-label">consultas afectadas este mes</span>
+      <span class="sum-dot">·</span>
+      <span class="sum-num">{{ s.resolved_this_period }}</span>
+      <span class="sum-label">resueltas en el periodo</span>
+      <span class="sum-dot">·</span>
+      <span class="sum-num">{{ s.coverage_pct }}%</span>
+      <span class="sum-label">de las consultas encuentran fuente</span>
+    </div>
+  }
+
+  <!-- ══ Barra de control ════════════════════════════════════════════════════ -->
+  <div class="gaps-controls">
+
+    <!-- Pestañas de estado -->
+    <div class="gaps-tabs">
+      <button class="tab-chip" [class.tab-chip--active]="gapTab() === 'open'"
+              (click)="setTab('open')" type="button">
+        Abiertas
+        <span class="tab-count" [class.tab-count--active]="gapTab() === 'open'">{{ tabCount('open') }}</span>
+      </button>
+      <button class="tab-chip" [class.tab-chip--active]="gapTab() === 'resolved'"
+              (click)="setTab('resolved')" type="button">
+        Resueltas
+        <span class="tab-count" [class.tab-count--active]="gapTab() === 'resolved'">{{ tabCount('resolved') }}</span>
+      </button>
+      <button class="tab-chip" [class.tab-chip--active]="gapTab() === 'ignored'"
+              (click)="setTab('ignored')" type="button">
+        Ignoradas
+        <span class="tab-count" [class.tab-count--active]="gapTab() === 'ignored'">{{ tabCount('ignored') }}</span>
+      </button>
+    </div>
+
+    <!-- Buscador -->
+    <input
+      class="gaps-search"
+      type="text"
+      placeholder="Buscar pregunta, asistente o canal"
+      [ngModel]="gapQuery()"
+      (ngModelChange)="onSearchChange($event)"
+    />
+
+    <!-- Orden -->
+    <div class="sort-control">
+      <span class="sort-label">Ordenar por</span>
+      <div class="sort-seg">
+        <button class="sort-opt" [class.sort-opt--active]="gapSort() === 'impact'"
+                (click)="setSort('impact')" type="button">Impacto</button>
+        <button class="sort-opt" [class.sort-opt--active]="gapSort() === 'age'"
+                (click)="setSort('age')" type="button">Antigüedad</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Dos columnas ════════════════════════════════════════════════════════ -->
+  <div class="gaps-layout">
+
+    <!-- ── Lista ─────────────────────────────────────────────────────────── -->
+    <div class="gaps-list-col">
+      <div class="gaps-card">
+
+        <div class="gaps-list-scroll" (scroll)="onListScroll($event)">
+
+          @if (loading()) {
+            <!-- Skeleton -->
+            @for (sk of [1,2,3,4,5,6,7]; track sk) {
+              <div class="gap-row gap-row--skeleton">
+                <div class="gap-row-rail"></div>
+                <div class="gap-row-body">
+                  <div class="sk-line sk-line--title"></div>
+                  <div class="sk-line sk-line--ctx"></div>
+                </div>
+                <div class="gap-row-right">
+                  <div class="sk-line sk-line--vol"></div>
+                  <div class="sk-line sk-line--pill"></div>
+                </div>
+              </div>
+            }
+
+          } @else if (error()) {
+            <div class="gaps-empty">{{ error() }}</div>
+
+          } @else if (!gaps().length) {
+            <div class="gaps-empty">
+              @if (gapQuery()) {
+                Ninguna pregunta coincide con la búsqueda.
+              } @else {
+                Nada pendiente en este estado.
+              }
+            </div>
+
+          } @else {
+            @for (gap of gaps(); track gap.id) {
+              <button
+                class="gap-row"
+                [class.gap-row--selected]="selectedId() === gap.id"
+                (click)="selectGap(gap)"
+                type="button"
+              >
+                <div class="gap-row-rail" [class.gap-row-rail--active]="selectedId() === gap.id"></div>
+
+                <div class="gap-row-body">
+                  <!-- Título con píldoras -->
+                  <div class="gap-row-title">
+                    <span class="pill" [class.pill--hard]="gap.gap_type === 'hard'" [class.pill--soft]="gap.gap_type === 'soft'">
+                      {{ gapTypeLabel(gap) }}
+                    </span>
+                    @if (isInProgress(gap)) {
+                      <span class="pill pill--inprogress">en curso</span>
+                    }
+                    @if (isRecurrent(gap)) {
+                      <span class="pill pill--recurrent">reincidente</span>
+                    }
+                    <span class="gap-question">{{ gap.question }}</span>
+                  </div>
+                  <!-- Contexto -->
+                  <div class="gap-row-ctx">
+                    {{ (gap.variants?.length ?? 0) + ' variantes' }}
+                    &nbsp;·&nbsp;{{ channelLabel(gap) }}
+                    @if (gap.assistant_name) { &nbsp;·&nbsp;{{ gap.assistant_name }} }
+                    @if (trendLabel(gap)) { &nbsp;·&nbsp;{{ trendLabel(gap) }} }
+                    &nbsp;·&nbsp;{{ relativeTime(gap.created_at) }}
+                  </div>
+                </div>
+
+                <!-- Derecha: volumen + prioridad + acción rápida -->
+                <div class="gap-row-right">
+                  <div class="gap-row-volume">
+                    <span class="vol-num">{{ gap.volume || 1 }}</span>
+                    <span class="vol-label">consultas</span>
+                  </div>
+                  <span class="pill pill--priority"
+                        [class.pill--prio-high]="priorityOf(gap) === 'alta'"
+                        [class.pill--prio-med]="priorityOf(gap) === 'media'"
+                        [class.pill--prio-low]="priorityOf(gap) === 'baja'">
+                    prioridad {{ priorityOf(gap) }}
+                  </span>
+                  @if (gapTab() === 'open' && !isInProgress(gap)) {
+                    @if (hasCandidates(gap)) {
+                      <button class="quick-action" (click)="quickLink(gap, $event)" type="button">Vincular</button>
+                    } @else {
+                      <button class="quick-action" (click)="openRequestPanel(gap, $event)" type="button">Pedir doc</button>
+                    }
+                  }
+                </div>
+              </button>
+            }
+            @if (loadingMore()) {
+              <div class="gaps-loading-more">Cargando más...</div>
+            }
+          }
+
+        </div>
+
+        <!-- Pie de lista -->
+        <div class="gaps-list-footer">
+          <span>{{ footerLabel() }}</span>
+          <span>Agrupadas por similitud semántica</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Panel de resolución ────────────────────────────────────────────── -->
+    <div class="gaps-panel-col">
+
+      @if (selectedGap(); as gap) {
+        <div class="gaps-card">
+
+          <!-- ─ Cabecera del panel ─ -->
+          <div class="panel-header">
+            <div class="panel-meta-row">
+              <span class="pill" [class.pill--hard]="gap.gap_type === 'hard'" [class.pill--soft]="gap.gap_type === 'soft'">
+                {{ gapTypeLabel(gap) }}
+              </span>
+              <span class="panel-id">#{{ gap.id }}&nbsp;·&nbsp;{{ statusLabel(gap.status) }}</span>
+            </div>
+
+            <p class="panel-question">{{ gap.question }}</p>
+
+            <p class="panel-volume-line">
+              <strong>{{ gap.volume || 1 }}</strong> consultas
+              @if (trendLabel(gap)) { &nbsp;·&nbsp;{{ trendLabel(gap) }} }
+            </p>
+
+            <div class="panel-age-row">
+              <span class="panel-age">{{ relativeTime(gap.created_at) }}</span>
+              @if (gap.conversation_id) {
+                <a [routerLink]="['/chat', gap.conversation_id]" class="panel-link">Ver conversación</a>
+              }
+            </div>
+
+            @if (isInProgress(gap)) {
+              <div class="panel-badge panel-badge--inprogress">
+                <span class="badge-dot badge-dot--blue"></span>
+                Documento solicitado&nbsp;&mdash;&nbsp;pendiente de recibir
+              </div>
+            }
+
+            @if (isRecurrent(gap)) {
+              <div class="panel-badge panel-badge--recurrent">
+                <strong>Reincidente:</strong> se resolvió anteriormente y volvió a fallar.
+              </div>
+            }
+          </div>
+
+          <!-- ─ Cómo se preguntó ─ -->
+          @if (gap.variants?.length) {
+            <div class="panel-section">
+              <div class="section-title">CÓMO SE PREGUNTÓ</div>
+              @for (v of variantTop3(gap); track v.text) {
+                <div class="variant-row">
+                  <span class="variant-count">{{ v.count }}&times;</span>
+                  <span class="variant-text">{{ v.text }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- ─ Lo mejor que encontró el índice ─ (oculto en modo vincular) -->
+          @if (resMode() !== 'link') {
+            <div class="panel-section">
+              <div class="section-title">LO MEJOR QUE ENCONTRÓ EL ÍNDICE</div>
+              @if (gap.candidates?.length) {
+                @for (c of gap.candidates!; track c.document_id) {
+                  <div class="candidate-display-row">
+                    <span class="candidate-display-name">{{ c.name }}</span>
+                    <span class="candidate-score">{{ c.score.toFixed(2) }}</span>
+                  </div>
+                }
+              } @else {
+                <p class="no-candidates-text">Ningún chunk pasó el umbral: falta el documento.</p>
+              }
+            </div>
+          }
+
+          <!-- ─ Zona de resolución (solo si abierta) ─ -->
+          @if (isOpen(gap)) {
+            <div class="panel-resolution">
+
+              <!-- Recomendación -->
+              <div class="recommendation-row">
+                <p class="recommendation-text">{{ recommendationText(gap) }}</p>
+                @if (!showModes()) {
+                  <button class="btn-other" (click)="showModes.set(true)" type="button">Otra opción</button>
+                }
+              </div>
+
+              <!-- Selector de modo (desplegable) -->
+              @if (showModes()) {
+                <div class="mode-seg">
+                  <button class="mode-opt" [class.mode-opt--active]="resMode() === 'link'"
+                          (click)="resMode.set('link')" type="button">Vincular documento</button>
+                  <button class="mode-opt" [class.mode-opt--active]="resMode() === 'answer'"
+                          (click)="resMode.set('answer')" type="button">Escribir respuesta</button>
+                  <button class="mode-opt" [class.mode-opt--active]="resMode() === 'request'"
+                          (click)="resMode.set('request')" type="button">Pedir documento</button>
+                </div>
+              }
+
+              <!-- ── Modo: Vincular documento ── -->
+              @if (resMode() === 'link') {
+                @if (gap.candidates?.length) {
+                  <div class="link-mode">
+                    @for (c of gap.candidates!; track c.document_id; let i = $index) {
+                      <label
+                        class="candidate-radio"
+                        [class.candidate-radio--selected]="linkSel() === i"
+                        (click)="linkSel.set(i)"
+                      >
+                        <span class="radio-circle" [class.radio-circle--on]="linkSel() === i"></span>
+                        <span class="candidate-radio-name">{{ c.name }}</span>
+                        <span class="candidate-score">{{ c.score.toFixed(2) }}</span>
+                      </label>
+                    }
+                    <div class="res-actions">
+                      <button class="btn-primary" [disabled]="submitting()" (click)="doLink()" type="button">
+                        {{ submitting() ? 'Vinculando...' : 'Vincular y reindexar' }}
+                      </button>
+                      <button class="btn-secondary" (click)="ignoring.set(true)" type="button">Ignorar</button>
+                    </div>
+                    <p class="res-note">Al reindexar se reejecutan las variantes y se registra el score resultante.</p>
+                  </div>
+                } @else {
+                  <p class="no-candidates-text">No hay documentos candidatos disponibles.</p>
+                }
+              }
+
+              <!-- ── Modo: Escribir respuesta ── -->
+              @if (resMode() === 'answer') {
+                <div class="answer-mode">
+                  <textarea
+                    class="res-textarea"
+                    [(ngModel)]="answerText"
+                    placeholder="Escribe la respuesta que se indexará como conocimiento..."
+                    rows="4"
+                  ></textarea>
+                  <div class="res-actions">
+                    <button class="btn-primary" [disabled]="submitting() || !answerText.trim()"
+                            (click)="doAnswer()" type="button">
+                      {{ submitting() ? 'Guardando...' : 'Guardar respuesta' }}
+                    </button>
+                    <button class="btn-secondary" (click)="ignoring.set(true)" type="button">Ignorar</button>
+                  </div>
+                </div>
+              }
+
+              <!-- ── Modo: Pedir documento ── -->
+              @if (resMode() === 'request') {
+                <div class="request-mode">
+                  <select
+                    class="assignee-select"
+                    [ngModel]="assigneeId()"
+                    (ngModelChange)="assigneeId.set($event)"
+                  >
+                    <option [ngValue]="null" disabled>Selecciona un responsable</option>
+                    @for (u of assignees(); track u.id) {
+                      <option [ngValue]="u.id">{{ u.full_name }}</option>
+                    }
+                  </select>
+                  <textarea
+                    class="res-textarea"
+                    [(ngModel)]="requestNote"
+                    placeholder="Nota para el responsable (opcional)..."
+                    rows="3"
+                  ></textarea>
+                  <div class="res-actions">
+                    <button class="btn-primary" [disabled]="submitting() || !assigneeId()"
+                            (click)="doRequestDocument()" type="button">
+                      {{ submitting() ? 'Solicitando...' : 'Solicitar documento' }}
+                    </button>
+                    <button class="btn-secondary" (click)="ignoring.set(true)" type="button">Ignorar</button>
+                  </div>
+                  <p class="res-note">No resuelve la pregunta: la deja en curso hasta que llegue el documento.</p>
+                </div>
+              }
+
+              <!-- ── Bloque de ignorar (superpuesto) ── -->
+              @if (ignoring()) {
+                <div class="ignore-block">
+                  <p class="ignore-question">
+                    &#191;Por qu&#233; se ignora? El motivo decide si cuenta como vac&#237;o de conocimiento en el informe.
+                  </p>
+                  <div class="ignore-chips">
+                    <button class="ignore-chip" [class.ignore-chip--active]="ignoreReason() === 'out_of_scope'"
+                            (click)="ignoreReason.set('out_of_scope')" type="button">Fuera de alcance</button>
+                    <button class="ignore-chip" [class.ignore-chip--active]="ignoreReason() === 'one_off'"
+                            (click)="ignoreReason.set('one_off')" type="button">Puntual, no se repite</button>
+                    <button class="ignore-chip" [class.ignore-chip--active]="ignoreReason() === 'duplicate'"
+                            (click)="ignoreReason.set('duplicate')" type="button">Duplicada</button>
+                  </div>
+                  <div class="ignore-actions">
+                    <button class="btn-dark" [disabled]="submitting()" (click)="doIgnore()" type="button">
+                      {{ submitting() ? 'Ignorando...' : 'Confirmar' }}
+                    </button>
+                    <button class="btn-secondary" (click)="ignoring.set(false)" type="button">Cancelar</button>
+                  </div>
+                </div>
+              }
+
+            </div>
+          }
+
+          <!-- ─ Panel de pregunta cerrada ─ -->
+          @if (!isOpen(gap)) {
+
+            <!-- Bloque de cierre -->
+            <div class="panel-section">
+              @if (gap.status === 'resolved') {
+                <div class="resolved-block">
+                  @if (gap.resolved_document_name) {
+                    <p class="resolved-title">Vinculado a &#8220;{{ gap.resolved_document_name }}&#8221;</p>
+                    <p class="resolved-note">El contenido exist&#237;a. Se reindex&#243; con las variantes de esta pregunta.</p>
+                  } @else if (gap.answer_text) {
+                    <p class="resolved-title">Resuelto con respuesta directa</p>
+                    <p class="resolved-note">{{ gap.answer_text }}</p>
+                  } @else {
+                    <p class="resolved-title">Resuelta</p>
+                  }
+                </div>
+              }
+              @if (gap.status === 'ignored') {
+                <div class="ignored-block">
+                  <p class="ignored-reason">Motivo: {{ ignoreReasonLabel(gap.ignore_reason) }}</p>
+                  <p class="ignored-note">No cuenta como vac&#237;o de conocimiento en el informe mensual: la plataforma no deb&#237;a responderla.</p>
+                </div>
+              }
+            </div>
+
+            <!-- Bloque de verificación -->
+            @if (gap.status === 'resolved') {
+              <div class="verify-block">
+                <div class="verify-header-row">
+                  <span class="section-title">VERIFICACI&#211;N</span>
+                  @if (gap.verify_passed !== null) {
+                    <span class="verify-pill" [class.verify-pill--ok]="gap.verify_passed!" [class.verify-pill--warn]="!gap.verify_passed">
+                      {{ gap.verify_passed ? 'Verificada' : 'Bajo umbral' }}
+                    </span>
+                  }
+                </div>
+
+                @if (gap.verify_score_before !== null && gap.verify_score_after !== null) {
+                  <div class="verify-scores">
+                    <span class="score score--before">{{ gap.verify_score_before!.toFixed(2) }}</span>
+                    <span class="score-arrow">&#8594;</span>
+                    <span class="score" [class.score--ok]="gap.verify_passed!" [class.score--warn]="!gap.verify_passed">
+                      {{ gap.verify_score_after!.toFixed(2) }}
+                    </span>
+                  </div>
+                  <p class="verify-note">
+                    @if (gap.verify_passed) {
+                      Las variantes ya citan esta fuente correctamente.
+                    } @else {
+                      La respuesta se public&#243; pero el &#237;ndice a&#250;n no la recupera bien.
+                    }
+                  </p>
+                  @if (gap.verified_at) {
+                    <p class="verify-footer">reejecutada {{ relativeTime(gap.verified_at) }}</p>
+                  }
+                  <p class="verify-footer">Se reejecuta cada lunes. Si vuelve a caer bajo el umbral, la pregunta se reabre sola.</p>
+                } @else {
+                  <div class="verify-pending">
+                    <p class="verify-pending-text">Sin verificar todav&#237;a.</p>
+                    <button class="btn-secondary" [disabled]="submitting()" (click)="doVerify()" type="button">
+                      {{ submitting() ? 'Verificando...' : 'Reverificar ahora' }}
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+          }
+
+        </div>
+
+      } @else {
+        <div class="gaps-card panel-empty">
+          <p>Selecciona una pregunta para ver el detalle.</p>
+        </div>
+      }
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,354 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+@use 'styles/core/mixins'    as *;
+
+$sidebar-w:            240px;
+$sidebar-w-collapsed:   64px;
+
+// ── Grid raíz ─────────────────────────────────────────────────────────────
+.dashboard-container {
+  display: grid;
+  grid-template-columns: $sidebar-w 1fr;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: $bg-app;
+  transition: grid-template-columns $motion-base;
+
+  &.sidebar-collapsed {
+    grid-template-columns: $sidebar-w-collapsed 1fr;
+  }
+}
+
+// ==========================================================================
+// SIDEBAR
+// ==========================================================================
+
+.dashboard-sidebar {
+  @include flex-col;
+  width: 100%;
+  background-color: $sidebar-bg;
+  overflow: hidden;
+  height: 100vh;
+  flex-shrink: 0;
+}
+
+// ── Marca ─────────────────────────────────────────────────────────────────
+.sidebar-brand {
+  @include flex-start-center;
+  gap: 10px;
+  height: $topbar-height;
+  padding: 0 18px;
+  border-bottom: 1px solid $sidebar-border;
+  flex-shrink: 0;
+}
+
+.logo-mark {
+  @include flex-start-center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: $radius-circle;
+  flex-shrink: 0;
+
+  &--blue   { background: $color-accent;  }
+  &--violet { background: $color-violet;  }
+  &--cyan   { background: $color-cyan;    }
+}
+
+.brand-name {
+  font-size: $size-md;
+  color: $sidebar-text-subtle;
+  font-weight: $w-regular;
+  white-space: nowrap;
+  letter-spacing: $letter-spacing-normal;
+
+  strong { font-weight: $w-bold; color: $sidebar-text-active; }
+}
+
+// ── Menú ──────────────────────────────────────────────────────────────────
+.sidebar-menu {
+  @include flex-col(0);
+  padding: 8px 0;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  &::-webkit-scrollbar { width: 0; }
+}
+
+.menu-group {
+  @include flex-col(0);
+  padding-bottom: 4px;
+
+  & + .menu-group {
+    border-top: 1px solid $sidebar-border;
+    padding-top: 4px;
+    margin-top: 2px;
+  }
+}
+
+.menu-group-header {
+  @include flex-start-center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 14px 2px 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  gap: 4px;
+
+  &:hover .menu-group-label { opacity: 0.8; }
+  &:hover .menu-group-chevron { opacity: 0.7; }
+}
+
+.menu-group-label {
+  margin: 0;
+  font-size: 10px;
+  font-weight: $w-semibold;
+  letter-spacing: $letter-spacing-wider;
+  text-transform: uppercase;
+  color: $sidebar-text;
+  opacity: 0.42;
+  white-space: nowrap;
+  @include transition-fast(opacity);
+}
+
+.menu-group-chevron {
+  font-size: 16px;
+  color: $sidebar-text;
+  opacity: 0.4;
+  flex-shrink: 0;
+  transform: rotate(-90deg);
+  transition: transform $motion-base, opacity $motion-fast;
+
+  .menu-group-header.is-open & { transform: rotate(0deg); }
+}
+
+.menu-group-items {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows $motion-base;
+  overflow: hidden;
+
+  &.collapsed { grid-template-rows: 0fr; }
+}
+
+.menu-group-items-inner {
+  min-height: 0;
+  @include flex-col(0);
+}
+
+.menu-item {
+  position: relative;
+  @include flex-start-center;
+  gap: 12px;
+  padding: 10px 18px;
+  color: $sidebar-text;
+  font-size: 13.5px;
+  font-weight: $w-medium;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  width: 100%;
+  @include transition-fast(color, background);
+
+  span { overflow: hidden; text-overflow: ellipsis; }
+
+  &:hover {
+    color: $sidebar-text-active;
+    background: $sidebar-hover-bg;
+  }
+
+  &.active {
+    color: $sidebar-text-active;
+    background: $sidebar-active-bg;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      background: $sidebar-active-bar;
+      border-radius: 0 3px 3px 0;
+    }
+  }
+}
+
+// ── Notification badge ────────────────────────────────────────────────────
+.sidebar-badge {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: $navy-400;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &--dot {
+    width: 7px;
+    height: 7px;
+    min-width: 7px;
+    padding: 0;
+    margin-left: 0;
+  }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────
+.sidebar-footer {
+  @include flex-start-center;
+  justify-content: space-between;
+  gap: $sp-2;
+  padding: 12px 14px;
+  border-top: 1px solid $sidebar-border;
+  flex-shrink: 0;
+}
+
+.sidebar-user {
+  @include flex-start-center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.user-avatar {
+  @include flex-center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: $radius-circle;
+  background: $sidebar-avatar-bg;
+  border: 1px solid $sidebar-avatar-border;
+  color: $sidebar-avatar-text;
+  font-size: $size-xs;
+  font-weight: $w-bold;
+  flex-shrink: 0;
+
+  &--sm { margin: 0 auto; }
+}
+
+.user-meta { min-width: 0; flex: 1; }
+
+.user-name {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: $w-semibold;
+  color: $sidebar-text-subtle;
+  @include text-ellipsis;
+  line-height: $lh-tight;
+}
+
+.user-role {
+  margin: 0;
+  font-size: $size-xs;
+  color: $sidebar-text;
+  text-transform: capitalize;
+  line-height: $lh-tight;
+  margin-top: 2px;
+}
+
+.sidebar-actions {
+  @include flex-start-center;
+  gap: $sp-2;
+}
+
+.btn-logout {
+  @include flex-center;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  border: none;
+  color: $sidebar-text;
+  cursor: pointer;
+  border-radius: $radius-sm;
+  font-size: $size-base;
+  flex-shrink: 0;
+  @include transition-fast(background, color);
+
+  &:hover {
+    background: $sidebar-logout-hover-bg;
+    color: $sidebar-logout-hover-text;
+  }
+}
+
+// ==========================================================================
+// MAIN
+// ==========================================================================
+
+.dashboard-main {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.dashboard-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: $layout-padding;
+  @include scrollbar-slim(5px);
+}
+
+.content-wrapper {
+  max-width: $layout-max-width;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.content--full { padding: 0; overflow: hidden; }
+.wrapper--full  { height: 100%; max-width: none; margin: 0; }
+
+// ==========================================================================
+// CHAT IA — Drawer CSS desde la derecha
+// ==========================================================================
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: $bg-overlay;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity $motion-base, visibility $motion-base;
+  z-index: $z-lateral;
+
+  &.open { opacity: 1; visibility: visible; }
+}
+
+.chat-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 460px;
+  height: 100%;
+  background: $bg-card;
+  display: flex;
+  flex-direction: column;
+  box-shadow: $shadow-xl;
+  transform: translateX(100%);
+  transition: transform $motion-base;
+  z-index: $z-lateral + 1;
+
+  &.open { transform: translateX(0); }
+}
+
+.chat-drawer-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

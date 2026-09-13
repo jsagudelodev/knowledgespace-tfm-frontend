@@ -1,0 +1,194 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors' as *;
+
+// ==========================================================================
+// ESTADO: CARGA Y ERROR
+// ==========================================================================
+
+.form-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-3;
+  padding: $sp-8;
+  color: $font-muted;
+  font-size: $size-sm;
+
+  .material-symbols-outlined { color: $color-primary; }
+}
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+  padding: $sp-4 $sp-5;
+  background: $red-light;
+  color: $red-text;
+  border-radius: $radius-md;
+  font-size: $size-sm;
+  margin-bottom: $sp-4;
+}
+
+// ==========================================================================
+// FORMULARIO
+// ==========================================================================
+
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-5;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-5;
+}
+
+// ==========================================================================
+// CAMPOS
+// ==========================================================================
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+
+  label {
+    font-size: $size-sm;
+    font-weight: $w-medium;
+    color: $font-body;
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-2;
+  }
+
+  .required {
+    color: $red-text;
+    margin-left: 2px;
+  }
+
+  .field-error {
+    font-size: $size-xs;
+    color: $red-text;
+  }
+}
+
+// ── Input with left icon ───────────────────────────────────────────────────
+
+.input-icon-wrapper {
+  position: relative;
+
+  .input-icon {
+    position: absolute;
+    left: $sp-3;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $font-muted;
+    font-size: $size-sm;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: $sp-3 $sp-4 $sp-3 $sp-8;
+    border: 1px solid $field-border;
+    border-radius: $radius-md;
+    font-size: $size-base;
+    color: $field-text;
+    background: $field-bg;
+    transition: border-color $motion-base, box-shadow $motion-base;
+    box-sizing: border-box;
+
+    &:hover:not(:disabled) { border-color: $field-border-hover; }
+
+    &:focus {
+      outline: none;
+      border-color: $field-border-focus;
+      box-shadow: $field-focus-shadow;
+    }
+
+    &.is-invalid {
+      border-color: $field-border-error;
+      &:focus { box-shadow: 0 0 0 3px rgba($red-500, 0.12); }
+    }
+
+    &::placeholder { color: $font-muted; }
+
+    &:disabled {
+      background: $field-bg-disabled;
+      cursor: not-allowed;
+      color: $font-muted;
+    }
+  }
+
+  select { cursor: pointer; appearance: auto; }
+}
+
+// ==========================================================================
+// BOTONES DE ACCIÓN
+// ==========================================================================
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $sp-3;
+  padding-top: $sp-4;
+  border-top: 1px solid $border-flat;
+}
+
+.btn-secondary,
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-2;
+  padding: $sp-3 $sp-5;
+  border-radius: $radius-md;
+  font-size: $size-base;
+  font-weight: $w-medium;
+  cursor: pointer;
+  transition: background $motion-base, border-color $motion-base, opacity $motion-base;
+  border: 1px solid transparent;
+  line-height: 1;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: $font-body;
+  border-color: $border-flat;
+
+  &:hover { background: $bg-disabled; border-color: $border-strong; }
+}
+
+.btn-primary {
+  background: $btn-primary-bg;
+  color: $btn-primary-text;
+
+  &:hover:not(:disabled) { background: $btn-primary-hover; }
+  &:active:not(:disabled) { background: $btn-primary-active; }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// ==========================================================================
+// RESPONSIVE
+// ==========================================================================
+
+@media (max-width: 500px) {
+  .form-row { grid-template-columns: 1fr; }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
+    .btn-secondary,
+    .btn-primary {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

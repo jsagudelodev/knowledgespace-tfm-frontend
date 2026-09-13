@@ -1,0 +1,131 @@
+<div class="notif-page">
+
+  <!-- ── Encabezado ─────────────────────────────────────────── -->
+  <header class="notif-header">
+    <div class="notif-header__left">
+      <h1 class="notif-h1">Notificaciones</h1>
+      <p class="notif-subtitle">Documentos, presupuesto y preguntas sin respuesta de tu empresa.</p>
+    </div>
+    <button
+      class="mark-all-btn"
+      type="button"
+      [class.mark-all-btn--dim]="counts().unread === 0"
+      [disabled]="markingAll()"
+      (click)="markAllAsRead()"
+    >
+      Marcar todas como leídas
+    </button>
+  </header>
+
+  <!-- ── Chips de filtro ────────────────────────────────────── -->
+  <div class="filter-bar">
+    @for (chip of chips; track chip.mode) {
+      <button
+        class="chip"
+        type="button"
+        [class.chip--active]="filter() === chip.mode"
+        (click)="setFilter(chip.mode)"
+      >
+        {{ chip.label }}
+        <span class="chip-count">{{ counts()[chip.countKey] }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- ── Tarjeta contenedora ────────────────────────────────── -->
+  <div class="notif-card">
+
+    @if (loading()) {
+      @for (i of skeletonRows; track i) {
+        <div class="notif-row notif-row--sk" aria-hidden="true">
+          <span class="sk-block sk-block--dot"></span>
+          <span class="sk-block sk-block--icon"></span>
+          <div class="sk-body">
+            <div class="sk-block sk-block--title"></div>
+            <div class="sk-block sk-block--msg"></div>
+          </div>
+          <div class="sk-meta">
+            <div class="sk-block sk-block--time"></div>
+          </div>
+        </div>
+      }
+
+    } @else if (error()) {
+      <div class="notif-inner-state">
+        No se pudieron cargar las notificaciones.
+        <button class="retry-btn" type="button" (click)="load(true)">Reintentar</button>
+      </div>
+
+    } @else if (groups().length === 0) {
+      <div class="notif-inner-state">No hay notificaciones en este filtro.</div>
+
+    } @else {
+
+      @for (group of groups(); track group.label) {
+
+        <div class="day-sep" role="separator">{{ group.label }}</div>
+
+        @for (n of group.items; track n.id) {
+          <button
+            class="notif-row"
+            type="button"
+            [class.notif-row--unread]="!n.read"
+            [attr.aria-label]="n.title + (!n.read ? ' · No leída' : '')"
+            (click)="rowClick(n)"
+          >
+            <span
+              class="unread-dot"
+              [class.unread-dot--on]="!n.read"
+              aria-hidden="true"
+            ></span>
+
+            <span
+              class="type-icon"
+              [style.background]="typeBg(n)"
+              [style.color]="typeColor(n)"
+              aria-hidden="true"
+            >
+              <span class="material-symbols-outlined" style="font-size:14px">{{ typeIcon(n) }}</span>
+            </span>
+
+            <div class="notif-body">
+              <div class="notif-title-row">
+                <span class="notif-title" [class.notif-title--unread]="!n.read">{{ n.title }}</span>
+                <span
+                  class="type-pill"
+                  [style.background]="typeBg(n)"
+                  [style.color]="typeColor(n)"
+                >{{ n.notification_type.label }}</span>
+              </div>
+              <p class="notif-msg">{{ n.message }}</p>
+            </div>
+
+            <div class="notif-meta">
+              <span class="notif-time">{{ relativeTime(n.created_at) }}</span>
+              @if (entityAction(n); as action) {
+                <span class="notif-action">{{ action.text }} &#8594;</span>
+              }
+            </div>
+          </button>
+        }
+
+      }
+
+      @if (hasMore()) {
+        <div class="load-more">
+          <button
+            class="load-more-btn"
+            type="button"
+            [disabled]="loadingMore()"
+            (click)="loadMore()"
+          >
+            @if (loadingMore()) { Cargando... } @else { Cargar más }
+          </button>
+        </div>
+      }
+
+    }
+
+  </div>
+
+</div>

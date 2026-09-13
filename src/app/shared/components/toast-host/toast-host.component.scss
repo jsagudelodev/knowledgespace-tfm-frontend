@@ -1,0 +1,51 @@
+@use 'styles/core/variables' as *;
+
+.toast-host {
+  position: fixed;
+  top: $sp-6;
+  right: $sp-6;
+  z-index: $z-toast;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: $sp-2;
+  padding: 14px 20px;
+  border-radius: $radius-md;
+  font-size: $size-base;
+  font-weight: $w-medium;
+  box-shadow: $shadow-lg;
+  cursor: pointer;
+  pointer-events: auto;
+  animation: toast-in 0.25s $ease-out;
+
+  .material-symbols-outlined { font-size: 18px; }
+
+  &--success {
+    background: $msg-success-bg;
+    color: $msg-success-text;
+    border: 1px solid $badge-active-text;
+  }
+
+  &--error {
+    background: $msg-error-bg;
+    color: $msg-error-text;
+    border: 1px solid $badge-inactive-text;
+  }
+
+  &--info {
+    background: $badge-info-bg;
+    color: $badge-info-text;
+    border: 1px solid $badge-info-text;
+  }
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

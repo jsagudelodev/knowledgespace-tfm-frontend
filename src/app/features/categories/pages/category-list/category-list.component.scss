@@ -1,0 +1,492 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+@use 'styles/core/mixins'    as *;
+
+// ==========================================================================
+// CONTENEDOR
+// ==========================================================================
+
+.category-list-container {
+  padding: $sp-8;
+  max-width: $layout-max-width;
+  margin: 0 auto;
+}
+
+// ==========================================================================
+// HEADER
+// ==========================================================================
+
+.category-list-header {
+  @include flex-between-center;
+  margin-bottom: $sp-8;
+
+  h1 {
+    font-size: $size-4xl;
+    color: $font-title;
+    margin: 0;
+    font-weight: $w-semibold;
+  }
+}
+
+.btn-primary {
+  @include flex-start-center;
+  gap: $sp-2;
+  background: $btn-primary-bg;
+  color: $btn-primary-text;
+  border: none;
+  padding: $sp-3 $sp-6;
+  border-radius: $radius-md;
+  cursor: pointer;
+  font-size: $size-base;
+  font-weight: $w-medium;
+  @include transition-fast(background);
+
+  &:hover { background: $btn-primary-hover; }
+}
+
+// ==========================================================================
+// FILTROS
+// ==========================================================================
+
+.filters-bar {
+  @include flex-start-center;
+  gap: $sp-3;
+  margin-bottom: $sp-6;
+  flex-wrap: wrap;
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+
+  .search-icon {
+    position: absolute;
+    left: $sp-3;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $font-muted;
+    font-size: $size-sm;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: $sp-3 $sp-10 $sp-3 $sp-8;
+    border: 1px solid $field-border;
+    border-radius: $radius-md;
+    font-size: $size-sm;
+    color: $font-title;
+    background: $bg-card;
+    box-sizing: border-box;
+    @include transition-fast(border-color, box-shadow);
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px $color-primary-light;
+    }
+
+    &::placeholder { color: $font-muted; }
+  }
+
+  .clear-search-btn {
+    position: absolute;
+    right: $sp-3;
+    top: 50%;
+    transform: translateY(-50%);
+    @include flex-center;
+    background: transparent;
+    border: none;
+    color: $font-muted;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: $radius-xs;
+    @include transition-fast(color);
+
+    &:hover { color: $font-title; }
+  }
+}
+
+// ── Tabs de estado ────────────────────────────────────────────────────────
+
+.status-tabs {
+  @include flex-start-center;
+  gap: 2px;
+  background: $bg-disabled;
+  border-radius: $radius-md;
+  padding: 3px;
+}
+
+.status-tab {
+  padding: $sp-2 $sp-4;
+  border: none;
+  border-radius: $radius-sm;
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  color: $font-muted;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  @include transition-fast(background, color);
+
+  &:hover { color: $font-body; }
+
+  &.active {
+    background: $bg-card;
+    color: $font-title;
+    box-shadow: $shadow-xs;
+  }
+}
+
+// ── Chips de filtros activos ───────────────────────────────────────────────
+
+.active-filters {
+  @include flex-start-center;
+  gap: $sp-2;
+  margin-bottom: $sp-4;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  @include flex-start-center;
+  gap: $sp-1;
+  padding: $sp-1 $sp-2 $sp-1 $sp-3;
+  border-radius: $radius-pill;
+  font-size: $size-xs;
+  font-weight: $w-medium;
+  color: $font-body;
+  background: $bg-disabled;
+  border: 1px solid $border-flat;
+
+  .chip-close {
+    @include flex-center;
+    background: transparent;
+    border: none;
+    color: $font-muted;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: $radius-xs;
+    @include transition-fast(color);
+
+    &:hover { color: $font-title; }
+  }
+}
+
+.btn-text-sm {
+  background: transparent;
+  border: none;
+  color: $color-primary;
+  font-size: $size-xs;
+  cursor: pointer;
+  padding: $sp-1 $sp-2;
+  border-radius: $radius-sm;
+  @include transition-fast(background);
+
+  &:hover { background: $color-primary-light; }
+}
+
+// ==========================================================================
+// ESTADOS (cargando / error)
+// ==========================================================================
+
+.state-card {
+  @include flex-col;
+  align-items: center;
+  gap: $sp-4;
+  padding: $sp-16 $sp-8;
+  text-align: center;
+  color: $font-body;
+
+  .state-icon { font-size: 2.5rem; color: $font-muted; }
+  p { margin: 0; font-size: $size-base; }
+
+  &--error {
+    .state-icon { color: $red-500; }
+    p           { color: $red-text; }
+  }
+}
+
+.spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-size: 1.5rem;
+  color: $color-primary;
+}
+
+// ==========================================================================
+// TABLA
+// ==========================================================================
+
+.card-container {
+  background: $bg-card;
+  border-radius: $radius-xl;
+  border: 1px solid $border-flat;
+  box-shadow: $shadow-lg;
+  overflow: hidden;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 2.5fr 80px 70px 90px 110px;
+  gap: $sp-4;
+  padding: $sp-4 $sp-6;
+  background: $table-header-bg;
+  font-size: $size-xs;
+  font-weight: $w-semibold;
+  color: $table-header-text;
+  text-transform: uppercase;
+  letter-spacing: $letter-spacing-wide;
+  border-bottom: 1px solid $border-flat;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 2.5fr 80px 70px 90px 110px;
+  gap: $sp-4;
+  padding: $sp-4 $sp-6;
+  border-bottom: 1px solid $border-flat;
+  align-items: center;
+  @include transition-fast(background);
+
+  &:hover { background: $bg-app; }
+  &:last-child { border-bottom: none; }
+
+  &.row-inactive { opacity: 0.6; }
+}
+
+// ── Celdas ────────────────────────────────────────────────────────────────
+
+.category-pill {
+  @include flex-start-center;
+  gap: $sp-2;
+  display: inline-flex;
+  padding: $sp-1 $sp-3;
+  border-radius: $radius-pill;
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.description-text {
+  font-size: $size-sm;
+  color: $font-body;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.icon-preview {
+  font-size: 20px;
+  display: block;
+}
+
+.order-badge {
+  display: inline-block;
+  padding: 2px $sp-2;
+  background: $bg-disabled;
+  border-radius: $radius-sm;
+  font-size: $size-xs;
+  font-weight: $w-semibold;
+  color: $font-body;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: $sp-1 $sp-3;
+  border-radius: $radius-sm;
+  font-size: $size-xs;
+  font-weight: $w-semibold;
+
+  &.active   { background: $green-light; color: $green-text; }
+  &.inactive { background: $red-light;   color: $red-text;   }
+}
+
+// ── Acciones ──────────────────────────────────────────────────────────────
+
+.col-actions {
+  @include flex-start-center;
+  gap: $sp-2;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  @include flex-center;
+  width: $sp-8;
+  height: $sp-8;
+  background: transparent;
+  border: 1px solid $border-flat;
+  border-radius: $radius-sm;
+  color: $font-body;
+  cursor: pointer;
+  @include transition-fast(background, color, border-color);
+
+  &:hover        { background: $bg-disabled; border-color: $border-strong; }
+  &:disabled     { opacity: 0.5; cursor: not-allowed; }
+
+  &.edit-btn:hover   { background: $color-primary-light; color: $color-primary; border-color: $color-primary; }
+  &.delete-btn:hover { background: $red-light; color: $red-500; border-color: $red-500; }
+
+  &.confirm-btn {
+    border-color: $green-active;
+    color: $green-text;
+    &:hover:not(:disabled) { background: $green-light; }
+  }
+
+  &.cancel-btn:hover { background: $red-light; color: $red-text; border-color: $red-500; }
+}
+
+.delete-confirm-text {
+  font-size: $size-xs;
+  color: $red-text;
+  white-space: nowrap;
+}
+
+// ==========================================================================
+// ESTADO VACÍO
+// ==========================================================================
+
+.btn-secondary-sm {
+  @include flex-start-center;
+  gap: $sp-2;
+  background: transparent;
+  color: $font-body;
+  border: 1px solid $border-flat;
+  padding: $sp-2 $sp-4;
+  border-radius: $radius-md;
+  cursor: pointer;
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  @include transition-fast(background, border-color);
+
+  &:hover { background: $bg-disabled; border-color: $border-strong; }
+}
+
+// ==========================================================================
+// PAGINACIÓN
+// ==========================================================================
+
+.pagination {
+  @include flex-between-center;
+  margin-top: $sp-4;
+  padding: $sp-3 0;
+}
+
+.pagination-info { font-size: $size-sm; color: $font-muted; }
+
+.pagination-controls { @include flex-start-center; gap: $sp-3; }
+
+.page-btn {
+  @include flex-center;
+  width: $sp-8;
+  height: $sp-8;
+  background: $bg-card;
+  border: 1px solid $border-flat;
+  border-radius: $radius-sm;
+  color: $font-body;
+  cursor: pointer;
+  @include transition-fast(border-color, color);
+
+  &:hover:not(:disabled) { border-color: $color-primary; color: $color-primary; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+.page-label {
+  font-size: $size-sm;
+  color: $font-body;
+  min-width: 56px;
+  text-align: center;
+}
+
+// ==========================================================================
+// MODAL — OVERLAY
+// ==========================================================================
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: $overlay-modal;
+  z-index: $z-modal;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity $motion-base, visibility 0s $motion-base;
+
+  &.open {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    transition: opacity $motion-base, visibility 0s;
+  }
+}
+
+// ==========================================================================
+// MODAL — PANEL
+// ==========================================================================
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -52%) scale(0.97);
+  background: $bg-card;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-xl;
+  max-width: 560px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  z-index: $z-modal + 1;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity $motion-base, transform $motion-base, visibility 0s $motion-base;
+  @include scrollbar-slim(4px);
+
+  &.open {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+    transition: opacity $motion-base, transform $motion-base, visibility 0s;
+  }
+}
+
+.modal-header {
+  @include flex-between-center;
+  padding: $sp-6;
+  border-bottom: 1px solid $border-flat;
+
+  h2 {
+    font-size: $size-xl;
+    color: $font-title;
+    margin: 0;
+    font-weight: $w-semibold;
+  }
+}
+
+.modal-close-btn {
+  @include flex-center;
+  background: transparent;
+  border: none;
+  color: $font-muted;
+  cursor: pointer;
+  padding: $sp-2;
+  border-radius: $radius-sm;
+  @include transition-fast(background, color);
+
+  &:hover { background: $bg-disabled; color: $font-body; }
+}
+
+.modal-body { padding: $sp-6; }

@@ -1,0 +1,312 @@
+<div class="document-list-container">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <div class="document-list-header">
+    <h1>Documentos</h1>
+    <div class="header-actions">
+      <button
+        (click)="loadDocuments()"
+        class="refresh-button"
+        [disabled]="loading"
+        title="Actualizar lista de documentos"
+      >
+        <span class="material-symbols-outlined icon-sm" [class.pi-spin]="loading">refresh</span>
+      </button>
+      <button routerLink="/documents/upload" class="btn-primary">
+        <span class="material-symbols-outlined icon-sm">upload_file</span>
+        Subir Documento
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Filters ─────────────────────────────────────────────────────────── -->
+  <div class="filters">
+    <div class="filter-search">
+      <span class="material-symbols-outlined icon-sm filter-search__icon">search</span>
+      <input
+        type="text"
+        class="filter-search__input"
+        placeholder="Buscar por nombre de archivo..."
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+        autocomplete="off"
+      />
+      @if (searchTerm()) {
+        <button class="filter-search__clear" title="Limpiar búsqueda" (click)="clearSearch()">
+          <span class="material-symbols-outlined icon-sm">close</span>
+        </button>
+      }
+    </div>
+    <div class="filter-status">
+      <label for="status-filter">Estado:</label>
+      <select id="status-filter" [value]="selectedStatus()" (change)="onStatusChange($event)">
+        <option value="">Todos</option>
+        <option value="pending">Pendiente</option>
+        <option value="processing">Procesando</option>
+        <option value="completed">Completado</option>
+        <option value="failed">Fallido</option>
+      </select>
+    </div>
+    <div class="filter-status">
+      <label for="category-filter">Categoría:</label>
+      <select id="category-filter" [value]="selectedCategory()" (change)="onCategoryChange($event)">
+        <option value="">Todas</option>
+        @for (cat of activeCategories(); track cat.id) {
+          <option [value]="cat.id">{{ cat.name }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- ── Active filter chips ─────────────────────────────────────────────── -->
+  @if (hasActiveFilters()) {
+    <div class="filter-chips">
+      <span class="filter-chips__label">Filtros activos:</span>
+
+      @if (selectedStatus()) {
+        <span class="filter-chip filter-chip--status">
+          <span class="material-symbols-outlined icon-sm">filter_alt</span>
+          Estado: {{ getStatusChipLabel(selectedStatus()) }}
+          <button class="filter-chip__remove" title="Quitar filtro" (click)="clearStatusFilter()">
+            <span class="material-symbols-outlined icon-sm">close</span>
+          </button>
+        </span>
+      }
+
+      @if (selectedCategory()) {
+        <span class="filter-chip filter-chip--category">
+          <span class="material-symbols-outlined icon-sm">folder</span>
+          Categoría: {{ getCategoryName(+selectedCategory()) }}
+          <button class="filter-chip__remove" title="Quitar filtro" (click)="clearCategoryFilter()">
+            <span class="material-symbols-outlined icon-sm">close</span>
+          </button>
+        </span>
+      }
+
+      @if (searchTerm().trim()) {
+        <span class="filter-chip filter-chip--search">
+          <span class="material-symbols-outlined icon-sm">search</span>
+          "{{ searchTerm() }}"
+          <button class="filter-chip__remove" title="Quitar búsqueda" (click)="clearSearch()">
+            <span class="material-symbols-outlined icon-sm">close</span>
+          </button>
+        </span>
+      }
+
+      <button class="filter-chips__clear-all" (click)="clearAllFilters()">
+        <span class="material-symbols-outlined icon-sm">close</span>
+        Limpiar todos
+      </button>
+    </div>
+  }
+
+  <!-- ── Loading ─────────────────────────────────────────────────────────── -->
+  @if (loading) {
+    <div class="state-container">
+      <span class="state-spinner"></span>
+      <p class="state-text">Cargando documentos...</p>
+    </div>
+  }
+
+  <!-- ── Error ───────────────────────────────────────────────────────────── -->
+  @if (!loading && error) {
+    <div class="state-container state-container--error">
+      <span class="material-symbols-outlined icon-sm state-icon state-icon--error">warning</span>
+      <p class="state-text">{{ error }}</p>
+      <button (click)="loadDocuments()" class="retry-load-btn">
+        <span class="material-symbols-outlined icon-sm">refresh</span>
+        Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- ── Empty state: sin documentos ────────────────────────────────────── -->
+  @if (!loading && !error && originalData().length === 0) {
+    <div class="state-container">
+      <span class="material-symbols-outlined icon-sm state-icon">picture_as_pdf</span>
+      <p class="state-text">No hay documentos todavía</p>
+      <p class="state-sub">Sube tu primer documento para empezar a construir la base de conocimiento</p>
+      <button routerLink="/documents/upload" class="goto-widgets-btn">
+        <span class="material-symbols-outlined icon-sm">upload_file</span>
+        Subir Documento
+      </button>
+    </div>
+  }
+
+  <!-- ── Empty state: sin resultados ─────────────────────────────────────── -->
+  @if (!loading && !error && originalData().length > 0 && filteredData().length === 0) {
+    <div class="state-container">
+      <span class="material-symbols-outlined icon-sm state-icon">search</span>
+      <p class="state-text">Sin resultados</p>
+      <p class="state-sub">No se encontraron documentos que coincidan con los filtros activos</p>
+      <button (click)="clearAllFilters()" class="retry-load-btn">
+        <span class="material-symbols-outlined icon-sm">close</span>
+        Limpiar filtros
+      </button>
+    </div>
+  }
+
+  <!-- ── Table ───────────────────────────────────────────────────────────── -->
+  @if (!loading && !error && filteredData().length > 0) {
+    <div class="documents-table-container">
+      <div class="documents-table">
+        <div class="documents-table-header">
+          <div class="doc-col-id">ID</div>
+          <div class="doc-col-title">Documento</div>
+          <div class="doc-col-category">Categoría</div>
+          <div class="doc-col-status">Estado</div>
+          <div class="doc-col-date">Fecha</div>
+          <div class="doc-col-chunks">Chunks</div>
+          <div class="doc-col-actions">Acciones</div>
+        </div>
+
+        @for (doc of paginatedData(); track doc.id) {
+          <div class="document-row" [class.document-row--busy]="deletingIds.has(doc.id)">
+
+            <div class="doc-col-id">
+              <span class="doc-id-badge">{{ doc.id }}</span>
+            </div>
+
+            <div class="doc-col-title">
+              <div class="doc-title-main" [title]="doc.original_filename">{{ doc.original_filename }}</div>
+              @if (doc.file_size) {
+                <div class="doc-title-sub">{{ formatFileSize(doc.file_size) }}</div>
+              }
+              @if (doc.error_message && doc.status === 'failed') {
+                <div class="doc-error-msg" [title]="doc.error_message">
+                  <span class="material-symbols-outlined icon-sm">info</span>
+                  {{ truncateError(doc.error_message) }}
+                </div>
+              }
+            </div>
+
+            <div class="doc-col-category" (click)="$event.stopPropagation()">
+              <div class="doc-category-wrap">
+                @if (getCategory(doc); as cat) {
+                  <span
+                    class="doc-category-badge"
+                    [class.doc-category-badge--inactive]="!cat.is_active"
+                    [style.background-color]="(cat.color || '#6366f1') + '1a'"
+                    [style.color]="cat.color || '#6366f1'"
+                    [style.border-color]="(cat.color || '#6366f1') + '55'"
+                    [title]="cat.is_active ? cat.name : cat.name + ' (categoría inactiva)'"
+                  >
+                    <span class="material-symbols-outlined icon-sm">folder</span>
+                    {{ cat.name }}
+                    @if (!cat.is_active) {
+                      <span class="doc-category-badge__inactive-tag">inactiva</span>
+                    }
+                  </span>
+                } @else {
+                  <span class="doc-category-empty">Sin categoría</span>
+                }
+
+                <button
+                  class="doc-category-edit"
+                  [class.doc-category-edit--active]="categoryPickerDocId === doc.id"
+                  [disabled]="categoryActionIds.has(doc.id)"
+                  (click)="toggleCategoryPicker(doc.id, $event)"
+                  title="Cambiar categoría"
+                >
+                  <span class="material-symbols-outlined icon-sm">edit</span>
+                </button>
+
+                @if (categoryPickerDocId === doc.id) {
+                  <div class="doc-category-picker" (click)="$event.stopPropagation()">
+                    <button
+                      class="doc-category-option doc-category-option--none"
+                      (click)="setDocumentCategory(doc.id, null, $event)"
+                      [disabled]="doc.category_id == null"
+                    >
+                      <span class="material-symbols-outlined icon-sm">block</span>
+                      Sin categoría
+                    </button>
+                    @for (cat of activeCategories(); track cat.id) {
+                      <button
+                        class="doc-category-option"
+                        (click)="setDocumentCategory(doc.id, cat.id, $event)"
+                        [disabled]="doc.category_id === cat.id"
+                      >
+                        <span class="doc-category-option-dot" [style.background-color]="cat.color || '#6366f1'"></span>
+                        {{ cat.name }}
+                      </button>
+                    }
+                    @if (activeCategories().length === 0) {
+                      <span class="doc-category-picker-empty">No hay categorías</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="doc-col-status">
+              <span [class]="getStatusClass(doc.status)" class="status-badge">
+                <span class="material-symbols-outlined icon-sm">{{ getStatusIcon(doc.status) }}</span>
+                {{ getStatusLabel(doc.status) }}
+              </span>
+            </div>
+
+            <div class="doc-col-date">
+              <span class="doc-date">{{ doc.created_at | date:'dd/MM/yy HH:mm' }}</span>
+            </div>
+
+            <div class="doc-col-chunks">
+              <span class="doc-chunks">
+                {{ doc.chunk_count ? doc.chunk_count + ' chunks' : '—' }}
+              </span>
+            </div>
+
+            <div class="doc-col-actions">
+              @if (deleteConfirmId === doc.id) {
+                <span class="delete-confirm-label">¿Eliminar?</span>
+                <button
+                  class="doc-action-btn doc-action-confirm"
+                  title="Confirmar eliminación"
+                  (click)="deleteDocument(doc.id)"
+                >
+                  <span class="material-symbols-outlined icon-sm">check</span>
+                </button>
+                <button class="doc-action-btn" title="Cancelar" (click)="cancelDelete()">
+                  <span class="material-symbols-outlined icon-sm">close</span>
+                </button>
+              } @else {
+                @if (doc.status === 'completed') {
+                  <button
+                    class="doc-action-btn doc-action-download"
+                    [disabled]="downloadingIds.has(doc.id)"
+                    title="Descargar archivo"
+                    (click)="downloadDocument(doc.id)"
+                  >
+                    <span class="material-symbols-outlined icon-sm">download</span>
+                  </button>
+                }
+                <button
+                  class="doc-action-btn doc-action-delete"
+                  [disabled]="deletingIds.has(doc.id)"
+                  title="Eliminar documento"
+                  (click)="confirmDelete(doc.id)"
+                >
+                  <span class="material-symbols-outlined icon-sm">delete</span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- ── Pagination ────────────────────────────────────────────────── -->
+      @if (filteredData().length > pageSize()) {
+        <div class="ks-paginator">
+          <p-paginator
+            [rows]="pageSize()"
+            [totalRecords]="filteredData().length"
+            [first]="(currentPage() - 1) * pageSize()"
+            [rowsPerPageOptions]="[10, 20, 50, 100]"
+            (onPageChange)="onPageChange($event)"
+          />
+        </div>
+      }
+    </div>
+  }
+
+</div>

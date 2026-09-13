@@ -1,0 +1,430 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+
+.ad-container {
+  padding: $sp-6;
+  max-width: $layout-max-width;
+  margin: 0 auto;
+}
+
+// ── States ────────────────────────────────────────────────────────────────────
+
+.ad-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-3;
+  padding: $sp-16 $sp-6;
+  text-align: center;
+
+  &--inline { padding: $sp-10 $sp-6; }
+  &--error  { color: $color-danger; }
+}
+
+.ad-state-icon  { font-size: 2.5rem; color: $font-muted; }
+.ad-state-title { margin: 0; font-size: $size-lg; font-weight: $w-semibold; color: $font-body; }
+.ad-state-sub   { margin: 0; font-size: $size-sm; color: $font-muted; max-width: 380px; line-height: 1.6; }
+
+.ad-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid $field-border;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+
+  &--sm { width: 20px; height: 20px; border-width: 2px; }
+}
+
+// ── Buttons ───────────────────────────────────────────────────────────────────
+
+.ad-btn-primary {
+  display: inline-flex; align-items: center; gap: $sp-2;
+  padding: $sp-2 $sp-4;
+  background: $btn-primary-bg; color: $btn-primary-text;
+  border: none; border-radius: $radius-md;
+  font-size: $size-sm; font-weight: $w-medium; cursor: pointer;
+  transition: background $motion-fast;
+  &:hover { background: $btn-primary-hover; }
+}
+
+.ad-btn-secondary {
+  display: inline-flex; align-items: center; gap: $sp-2;
+  padding: $sp-2 $sp-4;
+  background: $bg-card; color: $font-body;
+  border: 1px solid $field-border; border-radius: $radius-md;
+  font-size: $size-sm; cursor: pointer;
+  transition: background $motion-fast;
+  &:hover { background: $bg-hover; }
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.ad-header {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+  padding-bottom: $sp-5;
+  margin-bottom: $sp-5;
+  border-bottom: 1px solid $field-border;
+  flex-wrap: wrap;
+}
+
+.ad-back-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border: 1px solid $field-border; border-radius: $radius-md;
+  background: $bg-card; color: $font-muted; cursor: pointer;
+  flex-shrink: 0;
+  transition: background $motion-fast, color $motion-fast;
+  &:hover { background: $bg-hover; color: $font-body; }
+}
+
+.ad-header-avatar {
+  font-size: 1.75rem;
+  width: 48px; height: 48px;
+  background: rgba($color-primary, 0.06);
+  border-radius: $radius-lg;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.ad-header-info { flex: 1; min-width: 0; }
+
+.ad-header-top {
+  display: flex; align-items: center; gap: $sp-3;
+  flex-wrap: wrap;
+}
+
+.ad-header-name {
+  margin: 0;
+  font-size: $size-2xl; font-weight: $w-bold; color: $font-title;
+}
+
+.ad-header-sub {
+  margin: $sp-1 0 0;
+  font-size: $size-sm; color: $font-muted;
+}
+
+.ad-header-actions { margin-left: auto; flex-shrink: 0; }
+
+.ad-badge {
+  padding: 2px $sp-3;
+  border-radius: $radius-pill;
+  font-size: $size-xs; font-weight: $w-semibold;
+
+  &--active   { background: $badge-active-bg;   color: $badge-active-text; }
+  &--inactive { background: $badge-inactive-bg; color: $badge-inactive-text; }
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+
+.ad-tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid $field-border;
+  margin-bottom: $sp-5;
+}
+
+.ad-tab {
+  display: inline-flex; align-items: center; gap: $sp-2;
+  padding: $sp-3 $sp-4;
+  background: none; border: none;
+  color: $font-muted; font-size: $size-sm; font-weight: $w-medium;
+  cursor: pointer; position: relative;
+  transition: color $motion-fast;
+
+  &::after {
+    content: '';
+    position: absolute; bottom: -2px; left: 0; right: 0;
+    height: 2px; background: $color-primary;
+    opacity: 0; transition: opacity $motion-fast;
+  }
+
+  &:hover { color: $font-body; }
+
+  &--active {
+    color: $color-primary;
+    &::after { opacity: 1; }
+  }
+}
+
+.ad-tab-count {
+  background: $badge-neutral-bg; color: $badge-neutral-text;
+  border-radius: $radius-pill;
+  font-size: $size-2xs; font-weight: $w-semibold;
+  padding: 1px 6px;
+  min-width: 20px; text-align: center;
+
+  .ad-tab--active & { background: rgba($color-primary, 0.10); color: $color-primary; }
+}
+
+// ── Category selector ─────────────────────────────────────────────────────────
+
+.ad-category-selector {
+  display: flex; align-items: center; gap: $sp-3;
+  margin-bottom: $sp-4;
+  flex-wrap: wrap;
+
+  label {
+    font-size: $size-sm; font-weight: $w-medium; color: $font-body;
+    white-space: nowrap;
+  }
+
+  select {
+    padding: $sp-2 $sp-3;
+    border: 1px solid $field-border; border-radius: $radius-md;
+    background: $bg-card; color: $font-body;
+    font-size: $size-sm; cursor: pointer;
+    &:focus { outline: none; border-color: $color-primary; }
+  }
+}
+
+.ad-category__optional { font-size: $size-xs; color: $font-muted; font-weight: $w-regular; }
+.ad-category__hint     { margin: 0; font-size: $size-xs; color: $font-muted; }
+
+// ── Upload zone ───────────────────────────────────────────────────────────────
+
+.ad-upload-zone {
+  border: 2px dashed $field-border;
+  border-radius: $radius-lg;
+  padding: $sp-10 $sp-6;
+  text-align: center;
+  cursor: pointer;
+  background: $bg-app;
+  transition: border-color $motion-fast, background $motion-fast;
+  margin-bottom: $sp-5;
+
+  &:hover, &--dragover {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.03);
+  }
+}
+
+.ad-file-input  { display: none; }
+.ad-upload-icon { font-size: 2rem; color: $font-muted; display: block; margin-bottom: $sp-3; }
+.ad-upload-text { margin: 0 0 $sp-1; font-size: $size-base; color: $font-body; }
+.ad-upload-link { color: $color-primary; font-weight: $w-medium; }
+.ad-upload-hint { margin: 0; font-size: $size-xs; color: $font-muted; }
+
+// ── Uploading progress list ───────────────────────────────────────────────────
+
+.ad-uploading-list {
+  display: flex; flex-direction: column; gap: $sp-2;
+  margin-bottom: $sp-4;
+}
+
+.ad-uploading-item {
+  display: flex; align-items: flex-start; gap: $sp-3;
+  padding: $sp-3 $sp-4;
+  background: $bg-card;
+  border: 1px solid $field-border; border-radius: $radius-md;
+
+  &--error { border-color: $color-danger; background: $red-light; }
+}
+
+.ad-uploading-icon  { color: $font-muted; font-size: $size-lg; padding-top: 2px; }
+.ad-uploading-info  { flex: 1; min-width: 0; }
+.ad-uploading-name  { margin: 0 0 $sp-2; font-size: $size-sm; font-weight: $w-medium; color: $font-body; }
+.ad-uploading-pct   { margin: $sp-1 0 0; font-size: $size-xs; color: $font-muted; }
+.ad-uploading-error { margin: 0; font-size: $size-xs; color: $red-text; }
+
+.ad-progress-bar {
+  height: 4px; background: $field-border; border-radius: $radius-pill; overflow: hidden;
+}
+.ad-progress-fill {
+  height: 100%; background: $color-primary; border-radius: $radius-pill;
+  transition: width 0.2s ease;
+}
+
+// ── Document list ─────────────────────────────────────────────────────────────
+
+.ad-doc-list {
+  display: flex; flex-direction: column;
+  border: 1px solid $field-border; border-radius: $radius-lg;
+  overflow: hidden;
+}
+
+.ad-doc-row {
+  display: flex; align-items: center; gap: $sp-3;
+  padding: $sp-4;
+  background: $bg-card;
+  border-bottom: 1px solid $field-border;
+  transition: background $motion-fast;
+
+  &:last-child { border-bottom: none; }
+  &:hover      { background: $bg-hover; }
+  &--deleting  { opacity: 0.4; pointer-events: none; }
+}
+
+.ad-doc-icon-wrap {
+  width: 36px; height: 36px;
+  background: rgba($color-primary, 0.06);
+  border-radius: $radius-md;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+
+  &--widget { background: rgba($color-accent, 0.06); }
+}
+
+.ad-doc-icon { color: $color-primary; font-size: $size-lg; }
+.ad-doc-info { flex: 1; min-width: 0; }
+
+.ad-doc-name {
+  margin: 0 0 2px;
+  font-size: $size-sm; font-weight: $w-medium; color: $font-body;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.ad-doc-meta {
+  display: flex; align-items: center; gap: $sp-2;
+  font-size: $size-xs; color: $font-muted;
+}
+
+.ad-meta-sep { opacity: 0.5; }
+
+// ── Status badges ─────────────────────────────────────────────────────────────
+
+.ad-doc-status { flex-shrink: 0; }
+
+.ad-status {
+  display: inline-flex; align-items: center; gap: $sp-1;
+  padding: 3px $sp-3;
+  border-radius: $radius-pill;
+  font-size: $size-xs; font-weight: $w-medium;
+
+  .material-symbols-outlined { font-size: 13px; }
+
+  &--ok         { background: $badge-active-bg;  color: $badge-active-text;  }
+  &--processing { background: $badge-info-bg;     color: $badge-info-text;    }
+  &--pending    { background: $badge-pending-bg;  color: $badge-pending-text; }
+  &--failed     { background: $badge-inactive-bg; color: $badge-inactive-text; }
+}
+
+// ── Document actions ──────────────────────────────────────────────────────────
+
+.ad-doc-actions {
+  display: flex; align-items: center; gap: $sp-1;
+  flex-shrink: 0;
+}
+
+.ad-doc-confirm {
+  display: flex; align-items: center; gap: $sp-2;
+  flex-shrink: 0;
+}
+
+.ad-confirm-text {
+  font-size: $size-xs; color: $color-danger; font-weight: $w-medium; white-space: nowrap;
+}
+
+.ad-doc-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border: 1px solid $field-border; border-radius: $radius-sm;
+  background: $bg-card; color: $font-muted;
+  cursor: pointer; font-size: $size-sm;
+  transition: background $motion-fast, color $motion-fast, border-color $motion-fast;
+
+  &:hover:not(:disabled) { background: $bg-hover; color: $font-body; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  &--retry:hover:not(:disabled) {
+    background: $badge-info-bg; color: $badge-info-text; border-color: $badge-info-text;
+  }
+  &--download:hover:not(:disabled) {
+    background: $badge-active-bg; color: $badge-active-text; border-color: $badge-active-text;
+  }
+  &--delete:hover:not(:disabled) {
+    background: $badge-inactive-bg; color: $badge-inactive-text; border-color: $badge-inactive-text;
+  }
+  &--confirm:hover:not(:disabled) {
+    background: $badge-active-bg; color: $badge-active-text; border-color: $badge-active-text;
+  }
+}
+
+// ── Paginador ─────────────────────────────────────────────────────────────────
+
+.ad-paginator {
+  border-top: 1px solid $field-border;
+
+  ::ng-deep .p-paginator {
+    display: flex; align-items: center; justify-content: center;
+    gap: $sp-1; padding: $sp-3 $sp-5; background: $bg-card; border: none; flex-wrap: wrap;
+  }
+
+  ::ng-deep .p-paginator-first,
+  ::ng-deep .p-paginator-prev,
+  ::ng-deep .p-paginator-next,
+  ::ng-deep .p-paginator-last,
+  ::ng-deep .p-paginator-page {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 2rem; height: 2rem; padding: 0 $sp-2;
+    border-radius: $radius-sm; border: 1px solid $field-border;
+    background: $bg-card; color: $font-body;
+    font-size: $size-sm; font-family: inherit; cursor: pointer;
+    transition: background $motion-fast, color $motion-fast, border-color $motion-fast;
+
+    &:hover:not(:disabled) {
+      background: $color-primary-light; color: $color-primary; border-color: $color-primary-muted;
+    }
+    &:disabled { opacity: 0.35; cursor: default; }
+  }
+
+  ::ng-deep .p-paginator-page.p-highlight,
+  ::ng-deep .p-paginator-page[aria-current="page"] {
+    background: $color-primary; color: $font-on-primary;
+    border-color: $color-primary; font-weight: $w-semibold;
+  }
+
+  ::ng-deep .p-paginator-rpp-options,
+  ::ng-deep .p-select {
+    height: 2rem; border: 1px solid $field-border; border-radius: $radius-sm;
+    background: $bg-card; color: $font-body; font-size: $size-sm;
+    font-family: inherit; padding: 0 $sp-2; cursor: pointer;
+  }
+}
+
+// ── Info grid ─────────────────────────────────────────────────────────────────
+
+.ad-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $sp-4;
+}
+
+.ad-info-card {
+  background: $bg-card;
+  border: 1px solid $field-border;
+  border-radius: $radius-lg;
+  padding: $sp-5;
+
+  &--full { grid-column: 1 / -1; }
+}
+
+.ad-info-section {
+  margin: 0 0 $sp-4;
+  font-size: $size-xs; font-weight: $w-semibold;
+  text-transform: uppercase; letter-spacing: $letter-spacing-sm;
+  color: $font-muted;
+  padding-bottom: $sp-3;
+  border-bottom: 1px solid $field-border;
+}
+
+.ad-info-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: $sp-3; padding: $sp-2 0;
+  border-bottom: 1px solid $field-border;
+  &:last-child { border-bottom: none; }
+}
+
+.ad-info-label { font-size: $size-sm; color: $font-muted; }
+.ad-info-value { font-size: $size-sm; font-weight: $w-medium; color: $font-body; text-align: right; }
+
+.ad-info-prompt {
+  margin: 0;
+  font-size: $size-sm; color: $font-body;
+  line-height: $lh-relaxed;
+  white-space: pre-wrap;
+}

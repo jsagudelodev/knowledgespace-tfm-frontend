@@ -1,0 +1,207 @@
+<div class="dashboard-container" [class.sidebar-collapsed]="!sidebarOpen()">
+
+  <!-- ══════════════════════════════════════════════════════════
+       SIDEBAR — Azul noche profundo
+  ══════════════════════════════════════════════════════════ -->
+  <aside class="dashboard-sidebar">
+
+    <!-- Marca -->
+    <div class="sidebar-brand">
+      <div class="logo-mark">
+        <span class="logo-dot logo-dot--blue"></span>
+        <span class="logo-dot logo-dot--violet"></span>
+        <span class="logo-dot logo-dot--cyan"></span>
+      </div>
+      @if (sidebarOpen()) {
+        <span class="brand-name">Knowledge<strong>Space</strong></span>
+      }
+    </div>
+
+    <!-- Navegación -->
+    <nav class="sidebar-menu" aria-label="Navegación principal">
+
+      <!-- IA -->
+      <div class="menu-group">
+        @if (sidebarOpen()) {
+          <button class="menu-group-header" [class.is-open]="groupIa()" (click)="groupIa.set(!groupIa())" type="button">
+            <span class="menu-group-label">IA</span>
+            <span class="material-symbols-outlined menu-group-chevron">expand_more</span>
+          </button>
+        }
+        <div class="menu-group-items" [class.collapsed]="sidebarOpen() && !groupIa()">
+          <div class="menu-group-items-inner">
+            <a class="menu-item" routerLink="/chat" routerLinkActive="active" title="Chat IA">
+              <span class="material-symbols-outlined icon-sm">chat</span>
+              @if (sidebarOpen()) { <span>Chat IA</span> }
+            </a>
+            <a class="menu-item" routerLink="/conversations" routerLinkActive="active" title="Conversaciones">
+              <span class="material-symbols-outlined icon-sm">forum</span>
+              @if (sidebarOpen()) { <span>Conversaciones</span> }
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conocimiento -->
+      <div class="menu-group">
+        @if (sidebarOpen()) {
+          <button class="menu-group-header" [class.is-open]="groupConocimiento()" (click)="groupConocimiento.set(!groupConocimiento())" type="button">
+            <span class="menu-group-label">Conocimiento</span>
+            <span class="material-symbols-outlined menu-group-chevron">expand_more</span>
+          </button>
+        }
+        <div class="menu-group-items" [class.collapsed]="sidebarOpen() && !groupConocimiento()">
+          <div class="menu-group-items-inner">
+            <a class="menu-item" routerLink="/documents" routerLinkActive="active" title="Documentos">
+              <span class="material-symbols-outlined icon-sm">description</span>
+              @if (sidebarOpen()) { <span>Documentos</span> }
+            </a>
+            <a class="menu-item" routerLink="/tags" routerLinkActive="active" title="Etiquetas">
+              <span class="material-symbols-outlined icon-sm">label</span>
+              @if (sidebarOpen()) { <span>Etiquetas</span> }
+            </a>
+            <a class="menu-item" routerLink="/categories" routerLinkActive="active" title="Categorías">
+              <span class="material-symbols-outlined icon-sm">sell</span>
+              @if (sidebarOpen()) { <span>Categorías</span> }
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Plataforma -->
+      <div class="menu-group">
+        @if (sidebarOpen()) {
+          <button class="menu-group-header" [class.is-open]="groupPlataforma()" (click)="groupPlataforma.set(!groupPlataforma())" type="button">
+            <span class="menu-group-label">Plataforma</span>
+            <span class="material-symbols-outlined menu-group-chevron">expand_more</span>
+          </button>
+        }
+        <div class="menu-group-items" [class.collapsed]="sidebarOpen() && !groupPlataforma()">
+          <div class="menu-group-items-inner">
+            <a class="menu-item" routerLink="/assistants" routerLinkActive="active" title="Asistentes">
+              <span class="material-symbols-outlined icon-sm">smart_toy</span>
+              @if (sidebarOpen()) { <span>Asistentes</span> }
+            </a>
+            <a class="menu-item" routerLink="/widgets" routerLinkActive="active" title="Widgets">
+              <span class="material-symbols-outlined icon-sm">public</span>
+              @if (sidebarOpen()) { <span>Widgets</span> }
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Administración — solo admin/superadmin -->
+      @if (isAdmin()) {
+        <div class="menu-group">
+          @if (sidebarOpen()) {
+            <button class="menu-group-header" [class.is-open]="groupAdministracion()" (click)="groupAdministracion.set(!groupAdministracion())" type="button">
+              <span class="menu-group-label">Administración</span>
+              <span class="material-symbols-outlined menu-group-chevron">expand_more</span>
+            </button>
+          }
+          <div class="menu-group-items" [class.collapsed]="sidebarOpen() && !groupAdministracion()">
+            <div class="menu-group-items-inner">
+              <a class="menu-item" routerLink="/companies" routerLinkActive="active" title="Empresas">
+                <span class="material-symbols-outlined icon-sm">business</span>
+                @if (sidebarOpen()) { <span>Empresas</span> }
+              </a>
+              <a class="menu-item" routerLink="/users" routerLinkActive="active" title="Usuarios">
+                <span class="material-symbols-outlined icon-sm">person</span>
+                @if (sidebarOpen()) { <span>Usuarios</span> }
+              </a>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Analytics -->
+      <div class="menu-group">
+        @if (sidebarOpen()) {
+          <button class="menu-group-header" [class.is-open]="groupAnalytics()" (click)="groupAnalytics.set(!groupAnalytics())" type="button">
+            <span class="menu-group-label">Analytics</span>
+            <span class="material-symbols-outlined menu-group-chevron">expand_more</span>
+          </button>
+        }
+        <div class="menu-group-items" [class.collapsed]="sidebarOpen() && !groupAnalytics()">
+          <div class="menu-group-items-inner">
+            <a class="menu-item" routerLink="/dashboard" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" title="Dashboard">
+              <span class="material-symbols-outlined icon-sm">bar_chart</span>
+              @if (sidebarOpen()) { <span>Dashboard</span> }
+            </a>
+            <a class="menu-item" routerLink="/feedback" routerLinkActive="active" title="Feedback IA">
+              <span class="material-symbols-outlined icon-sm">rate_review</span>
+              @if (sidebarOpen()) { <span>Feedback IA</span> }
+            </a>
+            <a class="menu-item" routerLink="/notifications" routerLinkActive="active" title="Notificaciones">
+              <span class="material-symbols-outlined icon-sm">notifications</span>
+              @if (sidebarOpen()) {
+                <span>Notificaciones</span>
+                @if (notifUnreadCount() > 0) {
+                  <span class="sidebar-badge">{{ notifUnreadCount() }}</span>
+                }
+              } @else if (notifUnreadCount() > 0) {
+                <span class="sidebar-badge sidebar-badge--dot"></span>
+              }
+            </a>
+            <a class="menu-item" routerLink="/knowledge-gaps" routerLinkActive="active" title="Preguntas sin respuesta">
+              <span class="material-symbols-outlined icon-sm">help</span>
+              @if (sidebarOpen()) { <span>Sin respuesta</span> }
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </nav>
+
+    <!-- Footer: usuario + acciones -->
+    @if (sidebarOpen()) {
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="user-avatar">{{ userInitials() }}</div>
+          <div class="user-meta">
+            <p class="user-name">{{ userName() }}</p>
+            <p class="user-role">{{ userRole() }}</p>
+          </div>
+        </div>
+        <div class="sidebar-actions">
+          <button class="btn-logout" (click)="logout()" title="Cerrar sesión" aria-label="Cerrar sesión">
+            <span class="material-symbols-outlined icon-sm">logout</span>
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="sidebar-footer">
+        <div class="user-avatar user-avatar--sm">{{ userInitials() }}</div>
+      </div>
+    }
+
+  </aside>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MAIN — Header + contenido
+  ══════════════════════════════════════════════════════════ -->
+  <div class="dashboard-main">
+    <app-header [sidebarOpen]="sidebarOpen()" (sidebarToggle)="toggleSidebar()"></app-header>
+
+    <main class="dashboard-content" [class.content--full]="isFullHeightRoute()" id="main-content">
+      <div class="content-wrapper" [class.wrapper--full]="isFullHeightRoute()">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     CHAT IA — Drawer CSS desde la derecha
+══════════════════════════════════════════════════════════ -->
+<div class="drawer-overlay" [class.open]="chatDrawerVisible" (click)="chatDrawerVisible = false"></div>
+
+<aside class="chat-drawer" [class.open]="chatDrawerVisible" aria-label="Chat IA">
+  <div class="chat-drawer-body">
+    <app-chat-detail></app-chat-detail>
+  </div>
+</aside>
+
+<!-- Notificaciones globales (toast) -->
+<app-toast-host></app-toast-host>

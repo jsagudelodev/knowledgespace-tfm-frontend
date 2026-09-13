@@ -1,0 +1,329 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+
+.upload-container {
+  padding: $sp-8;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $sp-8;
+
+  h1 {
+    font-size: $size-4xl;
+    color: $font-title;
+  }
+
+  .back-button {
+    padding: $sp-2 $sp-4;
+    background: transparent;
+    color: $color-primary;
+    border: 1px solid $color-primary;
+    border-radius: $radius-sm;
+    font-size: $size-base;
+    font-weight: $w-semibold;
+    cursor: pointer;
+    transition: all $motion-base;
+
+    &:hover {
+      background: $color-primary;
+      color: $color-primary-text;
+    }
+  }
+}
+
+.upload-content {
+  background: $bg-card;
+  padding: $sp-8;
+  border-radius: $radius-md;
+  box-shadow: $shadow-sm;
+}
+
+.upload-selectors {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-4;
+  margin-bottom: $sp-2;
+}
+
+.upload-category {
+  margin-bottom: $sp-6;
+
+  label {
+    display: block;
+    font-size: $size-base;
+    font-weight: $w-medium;
+    color: $font-title;
+    margin-bottom: $sp-2;
+  }
+
+  &__optional {
+    font-weight: $w-regular;
+    color: $font-muted;
+    font-size: $size-sm;
+  }
+
+  select {
+    width: 100%;
+    padding: $sp-3 $sp-4;
+    border: 1px solid $border-strong;
+    border-radius: $radius-sm;
+    font-size: $size-base;
+    background: $bg-card;
+    color: $font-body;
+    cursor: pointer;
+    transition: border-color $motion-fast;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+      box-shadow: $shadow-focus;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  &__hint {
+    margin: $sp-2 0 0;
+    font-size: $size-xs;
+    color: $font-muted;
+  }
+}
+
+.drop-zone {
+  border: 2px dashed $border-strong;
+  border-radius: $radius-md;
+  padding: $sp-12 $sp-8;
+  text-align: center;
+  transition: all $motion-base;
+  margin-bottom: $sp-6;
+
+  &:hover {
+    border-color: $color-primary;
+    background: $color-primary-light;
+  }
+
+  &.has-files {
+    border-color: $color-primary;
+    background: $color-primary-light;
+    padding: $sp-6;
+  }
+
+  .drop-zone-content {
+    svg {
+      color: $font-muted;
+      margin-bottom: $sp-4;
+    }
+
+    p {
+      color: $font-body;
+      font-size: $size-lg;
+      margin-bottom: $sp-2;
+    }
+
+    .file-info {
+      color: $font-muted;
+      font-size: $size-base;
+      margin-top: $sp-4;
+    }
+
+    .browse-button {
+      display: inline-block;
+      padding: $sp-3 $sp-6;
+      background: linear-gradient(135deg, $color-primary 0%, $color-primary-active 100%);
+      color: $color-primary-text;
+      border-radius: $radius-sm;
+      font-size: $size-lg;
+      font-weight: $w-semibold;
+      cursor: pointer;
+      transition: opacity $motion-base;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+
+  .file-list {
+    h3 {
+      font-size: $size-xl;
+      color: $font-title;
+      margin-bottom: $sp-4;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      gap: $sp-4;
+      padding: $sp-3;
+      background: $bg-app;
+      border-radius: $radius-sm;
+      margin-bottom: $sp-2;
+      border: 1px solid $border-flat;
+
+      .file-icon {
+        color: $color-primary;
+      }
+
+      .file-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: $sp-1;
+
+        .file-name {
+          font-size: $size-base;
+          color: $font-title;
+          font-weight: $w-medium;
+          word-break: break-all;
+        }
+
+        .file-size {
+          font-size: $size-xs;
+          color: $font-muted;
+        }
+      }
+
+      .file-progress {
+        display: flex;
+        align-items: center;
+        gap: $sp-2;
+        min-width: 120px;
+
+        .progress-bar-small {
+          width: 80px;
+          height: 4px;
+          background: $border-flat;
+          border-radius: $radius-xs;
+          overflow: hidden;
+
+          .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, $color-primary 0%, $color-primary-active 100%);
+            transition: width $motion-base;
+          }
+        }
+
+        .progress-text {
+          font-size: $size-xs;
+          color: $font-body;
+          min-width: 35px;
+          text-align: right;
+        }
+      }
+
+      .remove-button {
+        width: 24px;
+        height: 24px;
+        background: $red-500;
+        color: $color-primary-text;
+        border: none;
+        border-radius: $radius-circle;
+        font-size: $size-xl;
+        font-weight: $w-bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: opacity $motion-base;
+
+        &:hover {
+          opacity: 0.8;
+        }
+      }
+    }
+  }
+}
+
+.error-message {
+  background: $red-light;
+  color: $red-text;
+  padding: $sp-3;
+  border-radius: $radius-sm;
+  margin-bottom: $sp-6;
+  text-align: center;
+}
+
+.success-message {
+  background: $green-light;
+  color: $green-text;
+  padding: $sp-3;
+  border-radius: $radius-sm;
+  margin-bottom: $sp-6;
+  text-align: center;
+}
+
+.upload-actions {
+  display: flex;
+  gap: $sp-4;
+  justify-content: center;
+  margin-top: $sp-6;
+
+  .upload-button {
+    padding: 14px $sp-8;
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-active 100%);
+    color: $color-primary-text;
+    border: none;
+    border-radius: $radius-sm;
+    font-size: $size-lg;
+    font-weight: $w-semibold;
+    cursor: pointer;
+    transition: opacity $motion-base;
+
+    &:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .cancel-button {
+    padding: 14px $sp-8;
+    background: $btn-danger-hover-bg;
+    color: $color-primary-text;
+    border: none;
+    border-radius: $radius-sm;
+    font-size: $size-lg;
+    font-weight: $w-semibold;
+    cursor: pointer;
+    transition: opacity $motion-base;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+}
+
+.overall-progress {
+  margin-top: $sp-6;
+
+  .progress-label {
+    font-size: $size-base;
+    color: $font-body;
+    margin-bottom: $sp-2;
+    text-align: center;
+  }
+
+  .progress-bar {
+    height: 8px;
+    background: $border-flat;
+    border-radius: $radius-xs;
+    overflow: hidden;
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(135deg, $color-primary 0%, $color-primary-active 100%);
+      transition: width $motion-base;
+    }
+  }
+}

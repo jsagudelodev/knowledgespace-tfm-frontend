@@ -1,0 +1,388 @@
+<div class="chat-detail-container">
+
+  <!-- ── Header ─────────────────────────────────── -->
+  <header class="chat-detail-header">
+    <div class="header-left">
+      @if (isDrawerMode()) {
+        <button class="btn-icon" (click)="goBack()" aria-label="Cerrar">
+          <span class="material-symbols-outlined icon-sm">close</span>
+        </button>
+      } @else {
+        <button class="btn-back" (click)="goBack()">
+          <span class="material-symbols-outlined icon-sm">arrow_back</span>
+          <span>Volver</span>
+        </button>
+      }
+
+      @if (conversation()) {
+        <div class="header-title-group">
+          <h1>
+            {{ conversation()!.title }}
+            <span class="beta-badge">BETA</span>
+          </h1>
+          <p class="header-subtitle">{{ companyLabel() }}</p>
+        </div>
+      }
+    </div>
+
+    <div class="header-right">
+      <button
+        class="btn-icon"
+        [class.btn-icon--active]="searchActive()"
+        [disabled]="messages().length === 0"
+        (click)="toggleSearch()"
+        [title]="searchActive() ? 'Cerrar búsqueda' : 'Buscar en mensajes'"
+        aria-label="Buscar mensajes"
+      >
+        <span class="material-symbols-outlined icon-sm" [ngClass]="!searchActive() ? 'search' : 'close'"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Barra de búsqueda ──────────────────────── -->
+  @if (searchActive()) {
+    <div class="search-bar">
+      <span class="material-symbols-outlined icon-sm search-bar__icon">search</span>
+      <input
+        type="text"
+        class="search-bar__input"
+        placeholder="Buscar en mensajes..."
+        [value]="searchTerm()"
+        (input)="onSearchInput($event)"
+        autocomplete="off"
+      />
+      @if (searchTerm()) {
+        <span class="search-bar__count">
+          {{ filteredMessages().length }} resultado{{ filteredMessages().length !== 1 ? 's' : '' }}
+        </span>
+        <button class="btn-icon search-bar__clear" title="Limpiar búsqueda" (click)="clearSearch()">
+          <span class="material-symbols-outlined icon-sm">close</span>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ── Toolbar: asistente ─────────────────────── -->
+  @if (assistants().length > 0) {
+    <div class="chat-toolbar">
+      <div class="toolbar-group">
+        <span class="toolbar-label">Asistente</span>
+        <div class="toolbar-chips">
+          @for (assistant of assistants(); track assistant.id) {
+            <button
+              class="chip"
+              [class.active]="selectedAssistant()?.id === assistant.id"
+              (click)="selectAssistant(assistant)"
+            >
+              @if (assistant.avatar) {
+                <img [src]="assistant.avatar" class="assistant-avatar-small" />
+              } @else {
+                <span class="material-symbols-outlined icon-sm assistant-icon-small">smart_toy</span>
+              }
+              <span>{{ assistant.name }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ── Loading ────────────────────────────────── -->
+  @if (loading()) {
+    <div class="loading-state">
+      <span class="spinner"></span>
+      <p>Cargando mensajes...</p>
+    </div>
+  } @else {
+
+    <!-- ── Messages ─────────────────────────────── -->
+    <div class="messages-container" #messagesContainer>
+      <div class="messages-inner">
+
+      @if (messages().length === 0) {
+        <div class="empty-state">
+          <div class="empty-avatar">
+            <span class="material-symbols-outlined">smart_toy</span>
+          </div>
+          <p class="empty-title">
+            @if (selectedAssistant(); as a) { Hablas con {{ a.name }} } @else { ¿En qué puedo ayudarte? }
+          </p>
+          <p class="empty-sub">Consulta la documentación interna, haz preguntas o pide análisis sobre los recursos de {{ companyLabel() }}.</p>
+
+          <div class="empty-suggestions">
+            @for (s of suggestions(); track s.text) {
+              <button type="button" class="suggestion-card" (click)="useSuggestion(s.text)">
+                <span class="material-symbols-outlined icon-sm suggestion-card__icon">{{ s.icon }}</span>
+                <span class="suggestion-card__text">{{ s.text }}</span>
+                <span class="material-symbols-outlined icon-sm suggestion-card__arrow">arrow_forward</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @if (messages().length > 0 && filteredMessages().length === 0 && searchTerm()) {
+        <app-empty-state
+          size="lg"
+          icon="search_off"
+          title="Sin resultados"
+          [subtitle]="'No se encontraron mensajes con &quot;' + searchTerm() + '&quot;'"
+        />
+      }
+
+      <!-- ── Indicador de historial anterior ──── -->
+      @if (currentPage() > 1 && !searchTerm()) {
+        <div class="history-hint">
+          <button class="history-hint__btn" (click)="goToPage(currentPage() - 1)">
+            <span class="material-symbols-outlined icon-sm">expand_less</span>
+            <span>Mensajes anteriores &nbsp;·&nbsp; página {{ currentPage() - 1 }} de {{ totalPages() }}</span>
+          </button>
+        </div>
+      }
+
+      @for (message of paginatedMessages(); track message.id) {
+        <div
+          class="message"
+          [class.user-message]="message.role === 'user'"
+          [class.assistant-message]="message.role === 'assistant'"
+        >
+          @if (message.role === 'assistant') {
+            <div class="assistant-avatar">
+              <span class="material-symbols-outlined icon-sm">smart_toy</span>
+            </div>
+          }
+
+          <div class="message-body">
+            <div class="message-content" [innerHTML]="formatMessageWithHighlight(message.content)"></div>
+
+            <!-- ── Sources ────────────────────── -->
+            @if (message.sources && message.sources.length > 0) {
+              <div class="sources-wrapper">
+                <div class="sources-title">
+                  <span class="material-symbols-outlined icon-sm">menu_book</span>
+                  <span>Fuentes consultadas &nbsp;·&nbsp; {{ message.sources.length }}</span>
+                </div>
+                <div class="sources-table">
+                  @for (source of message.sources; track source.document_id; let i = $index) {
+                    <div class="source-row">
+                      <div class="source-info">
+                        <span class="source-index">{{ i + 1 }}</span>
+                        <span class="material-symbols-outlined icon-sm source-pdf-icon">picture_as_pdf</span>
+                        <div class="source-meta">
+                          <span class="source-name">
+                            {{ source.document_name || 'Documento ' + source.document_id }}
+                          </span>
+                          <div class="source-badges">
+                            @if (source.score !== undefined) {
+                              <span class="source-score" [class.score-high]="source.score >= 0.75" [class.score-mid]="source.score >= 0.5 && source.score < 0.75">
+                                {{ (source.score * 100).toFixed(0) }}% relevancia
+                              </span>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div class="source-actions">
+                        <button class="action-btn" title="Ver fragmento" aria-label="Ver fragmento" (click)="toggleSourcePreview(source)">
+                          <span class="material-symbols-outlined icon-sm">visibility</span>
+                        </button>
+                        <button class="action-btn" title="Descargar documento" aria-label="Descargar documento original" (click)="downloadSource(source)">
+                          <span class="material-symbols-outlined icon-sm">download</span>
+                        </button>
+                      </div>
+                    </div>
+                    @if (expandedSource() === source) {
+                      <div class="source-preview">
+                        <p>{{ source.text }}</p>
+                      </div>
+                    }
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="message-footer">
+              <div class="message-footer-left">
+                <time class="message-time">{{ message.created_at | date:'HH:mm' }}</time>
+                @if (message.role === 'assistant' && message.cost_usd != null) {
+                  <span class="message-cost" title="Costo de esta respuesta en tokens de OpenAI">
+                    &nbsp;·&nbsp;${{ message.cost_usd | number:'1.4-6' }}
+                  </span>
+                }
+              </div>
+              @if (message.role === 'assistant') {
+                <div class="message-actions">
+                  <button
+                    class="btn-copy"
+                    (click)="copyMessage(message.content, message.id)"
+                    [title]="copiedMessageId() === message.id ? '¡Copiado!' : 'Copiar respuesta'"
+                  >
+                    @if (copiedMessageId() === message.id) {
+                      <span class="material-symbols-outlined icon-sm">check</span>
+                      <span>Copiado</span>
+                    } @else {
+                      <span class="material-symbols-outlined icon-sm">content_copy</span>
+                      <span>Copiar</span>
+                    }
+                  </button>
+
+                  <div class="feedback-divider"></div>
+
+                  <div class="feedback-actions">
+                    <button
+                      class="btn-feedback btn-feedback--up"
+                      [class.active]="messageFeedback()[message.id] === 'up'"
+                      (click)="submitFeedback(message.id, 'up')"
+                      title="Respuesta útil"
+                      aria-label="Me gusta esta respuesta"
+                    >
+                      <span class="material-symbols-outlined icon-sm">thumb_up</span>
+                    </button>
+                    <button
+                      class="btn-feedback btn-feedback--down"
+                      [class.active]="messageFeedback()[message.id] === 'down' || feedbackPanelOpen() === message.id"
+                      (click)="openFeedbackPanel(message.id)"
+                      title="Respuesta mejorable"
+                      aria-label="No me gusta esta respuesta"
+                    >
+                      <span class="material-symbols-outlined icon-sm">thumb_down</span>
+                    </button>
+
+                    @if (feedbackSent() === message.id) {
+                      <span class="feedback-thanks">Gracias por tu opinión</span>
+                    }
+                  </div>
+
+                  <!-- Panel de comentario negativo -->
+                  @if (feedbackPanelOpen() === message.id) {
+                    <div class="feedback-panel" (click)="$event.stopPropagation()">
+                      <p class="feedback-panel__title">¿Qué estuvo mal?</p>
+                      <div class="feedback-panel__chips">
+                        @for (opt of feedbackOptions; track opt) {
+                          <button
+                            class="feedback-chip"
+                            [class.selected]="feedbackComment() === opt"
+                            (click)="selectFeedbackOption(opt)"
+                          >{{ opt }}</button>
+                        }
+                      </div>
+                      <textarea
+                        class="feedback-panel__textarea"
+                        placeholder="Cuéntanos más (opcional)..."
+                        rows="2"
+                        [value]="feedbackComment()"
+                        (input)="feedbackComment.set($any($event.target).value)"
+                      ></textarea>
+                      <div class="feedback-panel__actions">
+                        <button class="feedback-panel__cancel" (click)="closeFeedbackPanel()">Cancelar</button>
+                        <button class="feedback-panel__submit" (click)="submitNegativeFeedback(message.id)">Enviar</button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (isTyping()) {
+        <div class="typing-indicator">
+          <div class="assistant-avatar assistant-avatar--typing">
+            <span class="material-symbols-outlined icon-sm">smart_toy</span>
+          </div>
+          <div class="typing-bubble">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      }
+
+      </div>
+    </div>
+
+    <!-- ── Paginación ──────────────────────────── -->
+    @if (totalPages() > 1) {
+      <nav class="msg-pagination" aria-label="Navegación de mensajes">
+        <button
+          class="msg-pagination__btn"
+          [disabled]="currentPage() === 1"
+          (click)="previousPage()"
+          aria-label="Página anterior"
+        >
+          <span class="material-symbols-outlined icon-sm">chevron_left</span>
+          <span>Anterior</span>
+        </button>
+
+        <div class="msg-pagination__pages">
+          @for (page of pageNumbers(); track page) {
+            @if (page === -1) {
+              <span class="msg-pagination__ellipsis">…</span>
+            } @else {
+              <button
+                class="msg-pagination__page"
+                [class.msg-pagination__page--active]="page === currentPage()"
+                (click)="goToPage(page)"
+                [attr.aria-current]="page === currentPage() ? 'page' : null"
+              >{{ page }}</button>
+            }
+          }
+        </div>
+
+        <span class="msg-pagination__info">
+          Pág. {{ currentPage() }} / {{ totalPages() }}
+        </span>
+
+        <button
+          class="msg-pagination__btn"
+          [disabled]="currentPage() === totalPages()"
+          (click)="nextPage()"
+          aria-label="Página siguiente"
+        >
+          <span>Siguiente</span>
+          <span class="material-symbols-outlined icon-sm">chevron_right</span>
+        </button>
+      </nav>
+    }
+
+  }
+
+  <!-- ── Error de envío ───────────────────────── -->
+  @if (sendError()) {
+    <div class="send-error-banner" role="alert">
+      <span class="material-symbols-outlined icon-sm send-error-banner__icon">error</span>
+      <span class="send-error-banner__text">{{ sendError() }}</span>
+      <button class="send-error-banner__close" (click)="dismissError()" aria-label="Cerrar aviso">
+        <span class="material-symbols-outlined icon-sm">close</span>
+      </button>
+    </div>
+  }
+
+  <!-- ── Input ─────────────────────────────────── -->
+  <div class="message-input-container">
+    <div class="input-wrapper">
+      <textarea
+        #messageInput
+        [(ngModel)]="newMessage"
+        (keydown)="handleKeyDown($event)"
+        placeholder="Escribe tu consulta..."
+        class="message-input"
+        [disabled]="sending()"
+        rows="1"
+      ></textarea>
+      <button
+        type="button"
+        class="btn-send"
+        (click)="sendMessage()"
+        [disabled]="sending() || !newMessage.trim()"
+        aria-label="Enviar mensaje"
+      >
+        @if (sending()) {
+          <span class="btn-spinner"></span>
+        } @else {
+          <span class="material-symbols-outlined">send</span>
+        }
+      </button>
+    </div>
+    <p class="input-footer">Enter para enviar &nbsp;·&nbsp; La IA puede cometer errores, verifica la información importante.</p>
+  </div>
+
+</div>

@@ -1,0 +1,458 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+@use 'styles/core/mixins'    as *;
+
+// ==========================================================================
+// MAIN HEADER — Deep Blue Premium
+// ==========================================================================
+
+.main-header {
+  @include flex-between-center;
+  height: $topbar-height;
+  background-color: $bg-card;
+  border-bottom: 1px solid $border-flat;
+  padding: 0 $layout-padding;
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+  flex-shrink: 0;
+}
+
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.header-left {
+  gap: $sp-3;
+}
+
+// ── Toggle sidebar ────────────────────────────────────────────────────────
+.sidebar-toggle-btn {
+  @include flex-center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: $radius-md;
+  color: $font-body;
+  cursor: pointer;
+  flex-shrink: 0;
+  @include transition-fast(background-color, color);
+  @include focus-ring;
+
+  &:hover {
+    background: $bg-hover;
+    color: $font-title;
+  }
+}
+
+.header-right {
+  gap: $sp-1;
+  position: relative;
+}
+
+// ── Context badge ─────────────────────────────────────────────────────────
+.context-badge {
+  @include flex-start-center;
+  gap: $sp-2;
+  padding: $sp-2 $sp-3;
+  border: 1px solid $border-flat;
+  border-radius: $radius-pill;
+  background: transparent;
+}
+
+.context-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: $radius-circle;
+  background-color: $color-success;
+  flex-shrink: 0;
+}
+
+.context-text {
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  color: $font-title;
+  @include text-ellipsis;
+  max-width: 180px;
+}
+
+// ── Botón Chat IA ─────────────────────────────────────────────────────────
+.ia-pill-btn {
+  @include flex-start-center;
+  gap: $sp-2;
+  padding: $sp-2 $sp-3;
+  border: 1px solid $border-flat;
+  border-radius: $radius-pill;
+  background: transparent;
+  cursor: pointer;
+  @include transition-fast(background-color, border-color);
+  @include focus-ring;
+
+  &:hover {
+    background: $bg-hover;
+    border-color: $border-strong;
+  }
+
+  &--active {
+    background: $color-primary-light;
+    border-color: $color-primary-muted;
+  }
+}
+
+.ia-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ia-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: $radius-circle;
+
+  &--blue   { background: $color-primary; }
+  &--violet { background: $color-violet; }
+  &--cyan   { background: $color-cyan; }
+}
+
+.ia-label {
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  color: $font-title;
+}
+
+// ── Campanita de notificaciones ──────────────────────────────────────────
+.notif-bell-btn {
+  position: relative;
+  @include flex-center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: $radius-md;
+  color: $font-body;
+  cursor: pointer;
+  flex-shrink: 0;
+  @include transition-fast(background-color, color);
+  @include focus-ring;
+
+  &:hover,
+  &--active {
+    background: $bg-hover;
+    color: $font-title;
+  }
+}
+
+.notif-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: $radius-pill;
+  background: $color-danger;
+  color: #fff;
+  font-size: 10px;
+  font-weight: $w-bold;
+  line-height: 16px;
+  text-align: center;
+  border: 2px solid $bg-card;
+}
+
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + $sp-2);
+  right: 96px;
+  width: 380px;
+  max-width: 90vw;
+  background: $bg-card;
+  border: 1px solid $border-flat;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  overflow: hidden;
+  animation: dropdown-in $motion-fast both;
+  z-index: $z-dropdown;
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-dropdown__header {
+  @include flex-between-center;
+  gap: $sp-3;
+  padding: $sp-4;
+  border-bottom: 1px solid $border-flat;
+}
+
+.notif-dropdown__title {
+  margin: 0;
+  font-size: $size-sm;
+  font-weight: $w-bold;
+  color: $font-title;
+}
+
+.notif-dropdown__mark-all {
+  background: transparent;
+  border: none;
+  font-size: $size-2xs;
+  font-weight: $w-semibold;
+  color: $color-primary;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover { color: $color-primary-hover; }
+}
+
+.notif-dropdown__list {
+  max-height: 380px;
+  overflow-y: auto;
+  @include scrollbar-slim;
+}
+
+.notif-dropdown__loading,
+.notif-dropdown__empty {
+  @include flex-col($sp-2);
+  align-items: center;
+  justify-content: center;
+  padding: $sp-8 $sp-4;
+  color: $font-muted;
+  font-size: $size-xs;
+}
+
+.notif-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-3;
+  width: 100%;
+  padding: $sp-3 $sp-4;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid $border-flat;
+  text-align: left;
+  cursor: pointer;
+  @include transition-fast(background-color);
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: $bg-hover; }
+  &--unread { background: $bg-selected; }
+}
+
+.notif-item__icon {
+  @include flex-center;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: $radius-md;
+}
+
+.notif-item__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.notif-item__title {
+  font-size: $size-xs;
+  font-weight: $w-semibold;
+  color: $font-title;
+  @include text-ellipsis;
+}
+
+.notif-item__message {
+  font-size: $size-2xs;
+  color: $font-body;
+  line-height: $lh-normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notif-item__time {
+  font-size: 10px;
+  color: $font-muted;
+}
+
+.notif-item__dot {
+  position: absolute;
+  top: $sp-3;
+  right: $sp-3;
+  width: 7px;
+  height: 7px;
+  border-radius: $radius-circle;
+  background: $color-primary;
+  flex-shrink: 0;
+}
+
+.notif-dropdown__footer {
+  @include flex-center;
+  gap: 4px;
+  padding: $sp-3 $sp-4;
+  border-top: 1px solid $border-flat;
+  font-size: $size-xs;
+  font-weight: $w-semibold;
+  color: $color-primary;
+  background: $bg-hover;
+
+  &:hover { color: $color-primary-hover; }
+}
+
+.mini-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba($color-primary, 0.25);
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+// ── Separador ─────────────────────────────────────────────────────────────
+.header-divider {
+  display: block;
+  width: 1px;
+  height: 24px;
+  background-color: $border-flat;
+  margin: 0 $sp-3;
+  flex-shrink: 0;
+}
+
+// ── Perfil ────────────────────────────────────────────────────────────────
+.user-profile {
+  @include flex-start-center;
+  gap: $sp-3;
+  padding: $sp-1 $sp-2 $sp-1 $sp-3;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: $radius-lg;
+  cursor: pointer;
+  @include transition-fast(background-color, border-color);
+  max-width: 260px;
+  @include focus-ring;
+
+  &:hover,
+  &[aria-expanded="true"] {
+    background-color: $bg-hover;
+    border-color: $border-flat;
+  }
+}
+
+.user-info {
+  @include flex-col(2px);
+  text-align: right;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: $size-sm;
+  font-weight: $w-semibold;
+  color: $font-title;
+  @include text-ellipsis;
+  max-width: 140px;
+  line-height: $lh-tight;
+}
+
+.user-company {
+  font-size: $size-xs;
+  color: $font-body;
+  line-height: $lh-tight;
+  @include text-ellipsis;
+  max-width: 140px;
+}
+
+.profile-avatar {
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  border-radius: $radius-circle;
+  background: linear-gradient(135deg, $color-accent, $color-primary);
+  color: $font-on-primary;
+  font-size: $size-xs;
+  font-weight: $w-bold;
+  @include flex-center;
+  flex-shrink: 0;
+}
+
+.profile-chevron {
+  font-size: 11px;
+  color: $font-muted;
+  flex-shrink: 0;
+  @include transition-fast(transform);
+
+  &.is-open { transform: rotate(180deg); }
+}
+
+// ── Dropdown de perfil ────────────────────────────────────────────────────
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + $sp-2);
+  right: 0;
+  width: 220px;
+  background: $bg-card;
+  border: 1px solid $border-flat;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  overflow: hidden;
+  animation: dropdown-in $motion-fast both;
+  z-index: $z-dropdown;
+}
+
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-header {
+  padding: $sp-4 $sp-4 $sp-3;
+}
+
+.dropdown-name {
+  margin: 0 0 2px;
+  font-size: $size-sm;
+  font-weight: $w-semibold;
+  color: $font-title;
+  @include text-ellipsis;
+}
+
+.dropdown-email {
+  margin: 0;
+  font-size: $size-xs;
+  color: $font-muted;
+  @include text-ellipsis;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: $border-flat;
+}
+
+.dropdown-item {
+  @include flex-start-center;
+  gap: $sp-3;
+  width: 100%;
+  padding: $sp-3 $sp-4;
+  background: transparent;
+  border: none;
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  color: $font-body;
+  cursor: pointer;
+  text-align: left;
+  @include transition-fast(background-color, color);
+
+  &:hover {
+    background: $bg-hover;
+    color: $font-title;
+  }
+
+  &--danger:hover {
+    background: $dropdown-danger-hover-bg;
+    color: $dropdown-danger-hover-text;
+  }
+}

@@ -1,0 +1,375 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+
+.af-container {
+  padding: $sp-6;
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-5;
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+
+.af-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-3;
+  padding: $sp-16;
+  color: $font-muted;
+}
+
+.af-spinner {
+  width: 32px; height: 32px;
+  border: 3px solid $field-border;
+  border-top-color: $color-primary;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+
+.af-header {
+  display: flex;
+  align-items: center;
+  gap: $sp-4;
+}
+
+.af-back-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; flex-shrink: 0;
+  border: 1px solid $field-border; border-radius: $radius-md;
+  background: $bg-card; color: $font-muted; cursor: pointer;
+  transition: background $motion-fast, color $motion-fast;
+  &:hover { background: $bg-hover; color: $font-body; }
+}
+
+.af-header-info { flex: 1; min-width: 0; }
+
+.af-title {
+  margin: 0 0 2px;
+  font-size: $size-2xl; font-weight: $w-bold; color: $font-title;
+}
+
+.af-subtitle {
+  margin: 0;
+  font-size: $size-sm; color: $font-muted;
+}
+
+// ── Error message ─────────────────────────────────────────────────────────────
+
+.af-msg-error {
+  display: flex; align-items: center; gap: $sp-2;
+  padding: $sp-3 $sp-4;
+  background: $msg-error-bg; color: $msg-error-text;
+  border-radius: $radius-md;
+  font-size: $size-sm;
+}
+
+// ── Cards ─────────────────────────────────────────────────────────────────────
+
+.af-card {
+  background: $bg-card;
+  border: 1px solid $field-border;
+  border-radius: $radius-lg;
+  padding: $sp-6;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-5;
+}
+
+.af-section-header {
+  display: flex; align-items: center; gap: $sp-2;
+  font-size: $size-xs; font-weight: $w-semibold;
+  text-transform: uppercase; letter-spacing: $letter-spacing-sm;
+  color: $font-muted;
+  padding-bottom: $sp-4;
+  border-bottom: 1px solid $field-border;
+}
+
+// ── Identity section ──────────────────────────────────────────────────────────
+
+.af-identity-layout {
+  display: flex;
+  gap: $sp-6;
+  align-items: flex-start;
+}
+
+.af-avatar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-3;
+  flex-shrink: 0;
+  width: 120px;
+}
+
+.af-avatar-preview {
+  width: 72px; height: 72px;
+  background: rgba($color-primary, 0.06);
+  border: 2px solid $field-border;
+  border-radius: $radius-xl;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.25rem;
+  transition: border-color $motion-fast;
+
+  &:hover { border-color: $color-primary; }
+}
+
+.af-avatar-label {
+  margin: 0;
+  font-size: $size-xs; color: $font-muted; font-weight: $w-medium;
+  text-transform: uppercase; letter-spacing: $letter-spacing-sm;
+}
+
+.af-avatar-presets {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: $sp-1;
+  width: 100%;
+}
+
+.af-avatar-preset {
+  width: 100%; aspect-ratio: 1;
+  background: $bg-app;
+  border: 1px solid $field-border;
+  border-radius: $radius-sm;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color $motion-fast, background $motion-fast;
+
+  &:hover { border-color: $color-primary; background: rgba($color-primary, 0.04); }
+
+  &--active {
+    border-color: $color-primary;
+    background: rgba($color-primary, 0.08);
+    box-shadow: 0 0 0 2px rgba($color-primary, 0.15);
+  }
+}
+
+.af-identity-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-4;
+  min-width: 0;
+}
+
+// ── Fields ────────────────────────────────────────────────────────────────────
+
+.af-field {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+}
+
+.af-label {
+  display: flex; align-items: center; gap: $sp-2;
+  font-size: $size-sm; font-weight: $w-medium; color: $font-body;
+}
+
+.af-required { color: $color-danger; }
+
+.af-input {
+  height: $field-height;
+  padding: 0 $sp-3;
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+  background: $bg-app;
+  color: $font-body;
+  font-size: $size-sm;
+  transition: border-color $motion-fast, box-shadow $motion-fast;
+
+  &:focus { outline: none; border-color: $field-border-focus; box-shadow: $field-focus-shadow; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; background: $bg-disabled; }
+
+  &--small { height: 32px; font-size: $size-xs; }
+}
+
+.af-select {
+  height: $field-height;
+  padding: 0 $sp-3;
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+  background: $bg-app;
+  color: $font-body;
+  font-size: $size-sm;
+  cursor: pointer;
+  transition: border-color $motion-fast;
+
+  &:focus { outline: none; border-color: $field-border-focus; box-shadow: $field-focus-shadow; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.af-textarea {
+  padding: $sp-3;
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+  background: $bg-app;
+  color: $font-body;
+  font-size: $size-sm;
+  font-family: inherit;
+  line-height: $lh-relaxed;
+  resize: vertical;
+  min-height: 140px;
+  transition: border-color $motion-fast, box-shadow $motion-fast;
+
+  &:focus { outline: none; border-color: $field-border-focus; box-shadow: $field-focus-shadow; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; background: $bg-disabled; }
+}
+
+.af-textarea-footer {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.af-hint        { font-size: $size-xs; color: $font-muted; }
+.af-hint--block { display: block; margin-bottom: $sp-1; }
+.af-char-count  { font-size: $size-xs; color: $font-muted; text-align: right; }
+
+// ── Badge count ───────────────────────────────────────────────────────────────
+
+.af-badge-count {
+  margin-left: auto;
+  padding: 1px $sp-2;
+  background: $badge-info-bg; color: $badge-info-text;
+  border-radius: $radius-pill;
+  font-size: $size-xs; font-weight: $w-medium;
+  text-transform: none; letter-spacing: 0;
+}
+
+// ── Quick prompts ─────────────────────────────────────────────────────────────
+
+.af-prompts-list {
+  list-style: none;
+  margin: 0; padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-2;
+}
+
+.af-prompt-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+  padding: $sp-2 $sp-3;
+  background: $bg-app;
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+}
+
+.af-prompt-text {
+  flex: 1;
+  font-size: $size-sm;
+  color: $font-body;
+  word-break: break-word;
+}
+
+.af-prompt-remove {
+  display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; flex-shrink: 0;
+  background: transparent;
+  border: none; border-radius: $radius-sm;
+  color: $font-muted; cursor: pointer;
+  transition: background $motion-fast, color $motion-fast;
+  &:hover:not(:disabled) { background: rgba($color-danger, 0.08); color: $color-danger; }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+.af-prompt-add {
+  display: flex;
+  gap: $sp-3;
+  align-items: flex-start;
+}
+
+.af-btn-add {
+  display: inline-flex; align-items: center; gap: $sp-1;
+  padding: $sp-2 $sp-4;
+  height: $field-height;
+  background: rgba($color-primary, 0.06);
+  border: 1px solid rgba($color-primary, 0.3);
+  border-radius: $radius-md;
+  color: $color-primary;
+  font-size: $size-sm; font-weight: $w-medium; cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background $motion-fast;
+  &:hover:not(:disabled) { background: rgba($color-primary, 0.12); }
+  &:disabled { opacity: 0.4; cursor: not-allowed; }
+}
+
+// ── Model section ─────────────────────────────────────────────────────────────
+
+.af-model-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-6;
+}
+
+// ── Temperature ───────────────────────────────────────────────────────────────
+
+.af-temp-badge {
+  margin-left: auto;
+  padding: 1px $sp-2;
+  border-radius: $radius-pill;
+  font-size: $size-xs; font-weight: $w-bold;
+
+  &--low  { background: $badge-info-bg;    color: $badge-info-text; }
+  &--mid  { background: $badge-pending-bg; color: $badge-pending-text; }
+  &--high { background: rgba($color-danger, 0.08); color: $color-danger; }
+}
+
+.af-range {
+  width: 100%;
+  accent-color: $color-primary;
+  cursor: pointer;
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+.af-range-labels {
+  display: flex; justify-content: space-between;
+  font-size: $size-xs; color: $font-muted;
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+
+.af-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $sp-3;
+}
+
+.af-btn-primary {
+  display: inline-flex; align-items: center; gap: $sp-2;
+  padding: $sp-3 $sp-5;
+  background: $btn-primary-bg; color: $btn-primary-text;
+  border: none; border-radius: $radius-md;
+  font-size: $size-sm; font-weight: $w-medium; cursor: pointer;
+  transition: background $motion-fast;
+  &:hover:not(:disabled) { background: $btn-primary-hover; }
+  &:disabled { background: $btn-disabled-bg; color: $btn-disabled-text; cursor: not-allowed; }
+}
+
+.af-btn-secondary {
+  display: inline-flex; align-items: center; gap: $sp-2;
+  padding: $sp-3 $sp-5;
+  background: $bg-card; color: $font-body;
+  border: 1px solid $field-border; border-radius: $radius-md;
+  font-size: $size-sm; cursor: pointer;
+  transition: background $motion-fast;
+  &:hover:not(:disabled) { background: $bg-hover; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+
+@media (max-width: 600px) {
+  .af-identity-layout { flex-direction: column; align-items: stretch; }
+  .af-avatar-col      { width: 100%; flex-direction: row; flex-wrap: wrap; }
+  .af-model-row       { grid-template-columns: 1fr; }
+}

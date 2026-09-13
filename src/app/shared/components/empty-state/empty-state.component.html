@@ -1,0 +1,12 @@
+<div
+  class="empty-state"
+  [class.empty-state--sm]="size === 'sm'"
+  [class.empty-state--lg]="size === 'lg'"
+>
+  <span class="material-symbols-outlined empty-state__icon">{{ icon }}</span>
+  <p class="empty-state__title">{{ title }}</p>
+  @if (subtitle) {
+    <p class="empty-state__subtitle">{{ subtitle }}</p>
+  }
+  <ng-content></ng-content>
+</div>

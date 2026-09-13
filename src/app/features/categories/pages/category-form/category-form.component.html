@@ -1,0 +1,133 @@
+<!-- Cargando en modo edición -->
+@if (loading() && isEditMode && !nameValue) {
+  <div class="form-loading">
+    <span class="material-symbols-outlined spin">progress_activity</span>
+    <span>Cargando categoría...</span>
+  </div>
+}
+
+<!-- Banner de error -->
+@if (error()) {
+  <div class="form-error">
+    <span class="material-symbols-outlined icon-sm">error</span>
+    <span>{{ error() }}</span>
+  </div>
+}
+
+<!-- Formulario -->
+@if (!loading() || !isEditMode) {
+  <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="category-form">
+
+    <!-- ── Nombre ────────────────────────────────────────────────────────── -->
+    <div class="form-group">
+      <label for="name">Nombre <span class="required">*</span></label>
+      <div class="input-icon-wrapper">
+        <span class="material-symbols-outlined icon-sm input-icon">sell</span>
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          placeholder="Ej: Legal, RRHH, Tecnología..."
+          [class.is-invalid]="isFieldInvalid('name')"
+          autocomplete="off"
+        />
+      </div>
+      @if (isFieldInvalid('name')) {
+        <span class="field-error">{{ getErrorMessage('name') }}</span>
+      }
+    </div>
+
+    <!-- ── Descripción ───────────────────────────────────────────────────── -->
+    <div class="form-group">
+      <label for="description">Descripción</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        placeholder="Breve descripción de esta categoría..."
+        rows="2"
+      ></textarea>
+    </div>
+
+    <!-- ── Color e Ícono (fila) ──────────────────────────────────────────── -->
+    <div class="form-row">
+
+      <div class="form-group">
+        <label for="color">
+          <span class="material-symbols-outlined icon-sm label-icon">palette</span>
+          Color
+        </label>
+        <div class="color-picker-row">
+          <input id="color" type="color" formControlName="color" class="color-input" />
+          <span class="color-preview-pill"
+            [style.background]="colorValue + '18'"
+            [style.color]="colorValue">
+            <span class="dot" [style.background]="colorValue"></span>
+            {{ nameValue || 'Vista previa' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="icon">
+          <span class="material-symbols-outlined icon-sm label-icon">interests</span>
+          Ícono
+          <span class="label-hint">(Material Symbols)</span>
+        </label>
+        <div class="icon-input-row">
+          <input
+            id="icon"
+            type="text"
+            formControlName="icon"
+            placeholder="Ej: folder, book, business..."
+            autocomplete="off"
+          />
+          <span class="icon-preview material-symbols-outlined" [style.color]="colorValue">{{ iconValue }}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Orden ─────────────────────────────────────────────────────────── -->
+    <div class="form-group form-group--sm">
+      <label for="sort_order">Orden de visualización</label>
+      <input
+        id="sort_order"
+        type="number"
+        formControlName="sort_order"
+        min="0"
+        class="input-sm"
+        [class.is-invalid]="isFieldInvalid('sort_order')"
+      />
+      @if (isFieldInvalid('sort_order')) {
+        <span class="field-error">{{ getErrorMessage('sort_order') }}</span>
+      }
+    </div>
+
+    <!-- ── Estado (solo en edición) ──────────────────────────────────────── -->
+    @if (isEditMode) {
+      <div class="form-group">
+        <label class="toggle-label">
+          <input type="checkbox" formControlName="is_active" class="toggle-input" />
+          <span class="toggle-track">
+            <span class="toggle-thumb"></span>
+          </span>
+          <span class="toggle-text">{{ categoryForm.get('is_active')?.value ? 'Categoría activa' : 'Categoría inactiva' }}</span>
+        </label>
+      </div>
+    }
+
+    <!-- ── Acciones ───────────────────────────────────────────────────────── -->
+    <div class="form-actions">
+      <button type="button" class="btn-secondary" (click)="onCancel()">Cancelar</button>
+      <button type="submit" class="btn-primary" [disabled]="loading()">
+        @if (loading()) {
+          <span class="material-symbols-outlined icon-sm spin">progress_activity</span>
+        } @else {
+          <span class="material-symbols-outlined icon-sm">save</span>
+        }
+        {{ isEditMode ? 'Guardar Cambios' : 'Crear Categoría' }}
+      </button>
+    </div>
+
+  </form>
+}

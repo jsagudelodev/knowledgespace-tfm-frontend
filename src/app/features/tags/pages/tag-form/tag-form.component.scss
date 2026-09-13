@@ -1,0 +1,213 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+@use 'styles/core/mixins'    as *;
+
+// ==========================================================================
+// ESTADOS: CARGA Y ERROR
+// ==========================================================================
+
+.form-loading {
+  @include flex-center;
+  gap: $sp-3;
+  padding: $sp-8;
+  color: $font-muted;
+  font-size: $size-sm;
+}
+
+.spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-size: $size-xl;
+  color: $color-primary;
+}
+
+.form-error {
+  @include flex-start-center;
+  gap: $sp-3;
+  padding: $sp-4 $sp-5;
+  background: $red-light;
+  color: $red-text;
+  border-radius: $radius-md;
+  font-size: $size-sm;
+  margin-bottom: $sp-6;
+}
+
+// ==========================================================================
+// FORMULARIO
+// ==========================================================================
+
+.tag-form {
+  @include flex-col;
+  gap: $sp-1;
+}
+
+// ==========================================================================
+// CAMPOS
+// ==========================================================================
+
+.form-group {
+  margin-bottom: $sp-5;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: $sp-1;
+    font-size: $size-sm;
+    font-weight: $w-medium;
+    color: $font-body;
+    margin-bottom: $sp-2;
+
+    .label-icon { font-size: 16px; color: $font-muted; }
+  }
+
+  .required { color: $red-text; margin-left: 2px; }
+}
+
+.input-icon-wrapper {
+  position: relative;
+
+  .input-icon {
+    position: absolute;
+    left: $sp-3;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $font-muted;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding: $sp-3 $sp-4 $sp-3 $sp-10;
+    box-sizing: border-box;
+  }
+}
+
+input[type='text'] {
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+  font-size: $size-base;
+  color: $field-text;
+  background: $field-bg;
+  @include transition-fast(border-color, box-shadow);
+
+  &:hover:not(:disabled) { border-color: $field-border-hover; }
+
+  &:focus {
+    outline: none;
+    border-color: $field-border-focus;
+    box-shadow: $field-focus-shadow;
+  }
+
+  &.is-invalid {
+    border-color: $field-border-error;
+    &:focus { box-shadow: 0 0 0 3px rgba($red-500, 0.12); }
+  }
+
+  &::placeholder { color: $font-muted; }
+}
+
+.field-error {
+  color: $red-text;
+  font-size: $size-xs;
+  margin-top: $sp-1;
+  display: block;
+}
+
+// ==========================================================================
+// COLOR PICKER
+// ==========================================================================
+
+.color-picker-row {
+  @include flex-start-center;
+  gap: $sp-4;
+  flex-wrap: wrap;
+}
+
+.color-input {
+  width: 48px;
+  height: 40px;
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+  padding: 2px;
+  cursor: pointer;
+  background: $field-bg;
+  @include transition-fast(border-color);
+
+  &:hover { border-color: $field-border-hover; }
+  &:focus { outline: none; border-color: $field-border-focus; }
+}
+
+.color-preview-pill {
+  @include flex-start-center;
+  gap: $sp-2;
+  padding: $sp-1 $sp-4 $sp-1 $sp-3;
+  border-radius: $radius-pill;
+  font-size: $size-sm;
+  font-weight: $w-medium;
+  transition: background $motion-base, color $motion-base;
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background $motion-base;
+  }
+}
+
+// ==========================================================================
+// BOTONES DE ACCIÓN
+// ==========================================================================
+
+.form-actions {
+  @include flex-start-center;
+  justify-content: flex-end;
+  gap: $sp-4;
+  margin-top: $sp-6;
+  padding-top: $sp-6;
+  border-top: 1px solid $border-flat;
+}
+
+.btn-secondary,
+.btn-primary {
+  @include flex-start-center;
+  gap: $sp-2;
+  padding: $sp-3 $sp-6;
+  border-radius: $radius-md;
+  font-size: $size-base;
+  font-weight: $w-medium;
+  cursor: pointer;
+  border: 1px solid transparent;
+  line-height: 1;
+  @include transition-fast(background, border-color, opacity);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: $font-body;
+  border-color: $border-flat;
+
+  &:hover { background: $bg-disabled; border-color: $border-strong; }
+}
+
+.btn-primary {
+  background: $btn-primary-bg;
+  color: $btn-primary-text;
+
+  &:hover:not(:disabled)  { background: $btn-primary-hover; }
+  &:active:not(:disabled) { background: $btn-primary-active; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+// ==========================================================================
+// RESPONSIVE
+// ==========================================================================
+
+@media (max-width: 480px) {
+  .form-actions {
+    flex-direction: column-reverse;
+
+    .btn-secondary,
+    .btn-primary { width: 100%; justify-content: center; }
+  }
+}

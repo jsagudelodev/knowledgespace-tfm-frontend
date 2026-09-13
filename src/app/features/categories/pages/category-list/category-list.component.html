@@ -1,0 +1,228 @@
+<div class="category-list-container">
+
+  <!-- ── Header ────────────────────────────────────────────────────────────── -->
+  <div class="category-list-header">
+    <h1>Categorías</h1>
+    <button class="btn-primary" (click)="openCreateModal()">
+      <span class="material-symbols-outlined icon-sm">add</span>
+      Nueva Categoría
+    </button>
+  </div>
+
+  <!-- ── Filtros ────────────────────────────────────────────────────────────── -->
+  <div class="filters-bar">
+    <div class="search-wrapper">
+      <span class="material-symbols-outlined icon-sm search-icon">search</span>
+      <input
+        #searchInput
+        type="text"
+        class="search-input"
+        placeholder="Buscar categorías..."
+        (input)="onSearchInput($event)"
+      />
+      @if (searchTerm()) {
+        <button class="clear-search-btn" (click)="clearSearch()" title="Limpiar búsqueda">
+          <span class="material-symbols-outlined icon-sm">close</span>
+        </button>
+      }
+    </div>
+
+    <div class="status-tabs">
+      <button class="status-tab" [class.active]="statusFilter() === 'all'"      (click)="setStatusFilter('all')">Todas</button>
+      <button class="status-tab" [class.active]="statusFilter() === 'active'"   (click)="setStatusFilter('active')">Activas</button>
+      <button class="status-tab" [class.active]="statusFilter() === 'inactive'" (click)="setStatusFilter('inactive')">Inactivas</button>
+    </div>
+  </div>
+
+  <!-- Chips de filtros activos -->
+  @if (hasActiveFilters()) {
+    <div class="active-filters">
+      @if (searchTerm()) {
+        <span class="filter-chip">
+          <span class="material-symbols-outlined icon-xs">search</span>
+          "{{ searchTerm() }}"
+          <button class="chip-close" (click)="clearSearch()">
+            <span class="material-symbols-outlined icon-xs">close</span>
+          </button>
+        </span>
+      }
+      @if (statusFilter() !== 'all') {
+        <span class="filter-chip">
+          {{ statusFilter() === 'active' ? 'Activas' : 'Inactivas' }}
+          <button class="chip-close" (click)="setStatusFilter('all')">
+            <span class="material-symbols-outlined icon-xs">close</span>
+          </button>
+        </span>
+      }
+      <button class="btn-text-sm" (click)="clearFilters()">Limpiar todo</button>
+    </div>
+  }
+
+  <!-- ── Cargando ─────────────────────────────────────────────────────────── -->
+  @if (loading()) {
+    <div class="state-card">
+      <span class="material-symbols-outlined spin">progress_activity</span>
+      <p>Cargando categorías...</p>
+    </div>
+  }
+
+  <!-- ── Error ───────────────────────────────────────────────────────────── -->
+  @if (!loading() && error()) {
+    <div class="state-card state-card--error">
+      <span class="material-symbols-outlined state-icon">warning</span>
+      <p>{{ error() }}</p>
+      <button class="btn-secondary-sm" (click)="loadCategories()">
+        <span class="material-symbols-outlined icon-sm">refresh</span>
+        Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- ── Tabla ───────────────────────────────────────────────────────────── -->
+  @if (!loading() && !error()) {
+    <div class="card-container">
+      <div class="table-header">
+        <div class="col-name">Nombre</div>
+        <div class="col-description">Descripción</div>
+        <div class="col-icon">Ícono</div>
+        <div class="col-order">Orden</div>
+        <div class="col-status">Estado</div>
+        <div class="col-actions">Acciones</div>
+      </div>
+
+      @for (cat of paginatedData(); track cat.id) {
+        <div class="table-row" [class.row-inactive]="!cat.is_active">
+
+          <div class="col-name">
+            <span class="category-pill" [style.background]="getCategoryColor(cat) + '18'" [style.color]="getCategoryColor(cat)">
+              <span class="category-dot" [style.background]="getCategoryColor(cat)"></span>
+              {{ cat.name }}
+            </span>
+          </div>
+
+          <div class="col-description">
+            <span class="description-text">{{ cat.description || '—' }}</span>
+          </div>
+
+          <div class="col-icon">
+            <span
+              class="icon-preview material-symbols-outlined"
+              [style.color]="getCategoryColor(cat)"
+              [title]="getCategoryIcon(cat)"
+            >{{ getCategoryIcon(cat) }}</span>
+          </div>
+
+          <div class="col-order">
+            <span class="order-badge">{{ cat.sort_order }}</span>
+          </div>
+
+          <div class="col-status">
+            <span class="status-badge" [class.active]="cat.is_active" [class.inactive]="!cat.is_active">
+              {{ cat.is_active ? 'Activa' : 'Inactiva' }}
+            </span>
+          </div>
+
+          <div class="col-actions">
+            @if (deleteConfirmId() === cat.id) {
+              <span class="delete-confirm-text">¿Eliminar?</span>
+              <button
+                class="action-btn confirm-btn"
+                (click)="deleteCategory(cat.id)"
+                [disabled]="deletingId() === cat.id"
+                title="Confirmar eliminación"
+              >
+                <span class="material-symbols-outlined icon-sm">check</span>
+              </button>
+              <button class="action-btn cancel-btn" (click)="cancelDelete()" title="Cancelar">
+                <span class="material-symbols-outlined icon-sm">close</span>
+              </button>
+            } @else {
+              <button class="action-btn edit-btn" (click)="openEditModal(cat.id)" title="Editar categoría">
+                <span class="material-symbols-outlined icon-sm">edit</span>
+              </button>
+              <button
+                class="action-btn delete-btn"
+                (click)="confirmDelete(cat.id)"
+                [disabled]="deletingId() === cat.id"
+                title="Eliminar categoría"
+              >
+                <span class="material-symbols-outlined icon-sm">delete</span>
+              </button>
+            }
+          </div>
+
+        </div>
+      } @empty {
+        <app-empty-state
+          icon="sell"
+          [title]="hasActiveFilters() ? 'No se encontraron categorías' : 'No hay categorías registradas'"
+          [subtitle]="hasActiveFilters() ? 'Prueba ajustando los filtros de búsqueda.' : 'Crea categorías para organizar tus documentos por temática.'"
+        >
+          @if (hasActiveFilters()) {
+            <button class="btn-secondary-sm" (click)="clearFilters()">Limpiar filtros</button>
+          }
+        </app-empty-state>
+      }
+    </div>
+
+    <!-- ── Paginación ─────────────────────────────────────────────────── -->
+    @if (filteredData().length > pageSize()) {
+      <div class="pagination">
+        <span class="pagination-info">
+          Mostrando {{ paginationStart() }}–{{ paginationEnd() }} de {{ filteredData().length }} categorías
+        </span>
+        <div class="pagination-controls">
+          <button class="page-btn" (click)="previousPage()" [disabled]="currentPage() === 1" title="Anterior">
+            <span class="material-symbols-outlined icon-sm">chevron_left</span>
+          </button>
+          <span class="page-label">{{ currentPage() }} / {{ totalPages() }}</span>
+          <button class="page-btn" (click)="nextPage()" [disabled]="currentPage() === totalPages()" title="Siguiente">
+            <span class="material-symbols-outlined icon-sm">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+</div>
+
+<!-- ── Overlay ─────────────────────────────────────────────────────────────── -->
+<div
+  class="modal-overlay"
+  [class.open]="showCreateModal() || showEditModal()"
+  (click)="closeModals()"
+></div>
+
+<!-- ── Modal: Nueva Categoría ─────────────────────────────────────────────── -->
+<div class="modal" [class.open]="showCreateModal()">
+  <div class="modal-header">
+    <h2>Nueva Categoría</h2>
+    <button class="modal-close-btn" (click)="closeModals()" title="Cerrar">
+      <span class="material-symbols-outlined icon-sm">close</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    @if (showCreateModal()) {
+      <app-category-form (categorySaved)="onCategorySaved()" (cancel)="closeModals()" />
+    }
+  </div>
+</div>
+
+<!-- ── Modal: Editar Categoría ────────────────────────────────────────────── -->
+<div class="modal" [class.open]="showEditModal()">
+  <div class="modal-header">
+    <h2>Editar Categoría</h2>
+    <button class="modal-close-btn" (click)="closeModals()" title="Cerrar">
+      <span class="material-symbols-outlined icon-sm">close</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    @if (showEditModal() && selectedCategoryId()) {
+      <app-category-form
+        [categoryId]="selectedCategoryId()"
+        (categorySaved)="onCategorySaved()"
+        (cancel)="closeModals()"
+      />
+    }
+  </div>
+</div>
