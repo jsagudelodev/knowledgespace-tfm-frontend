@@ -1,6 +1,6 @@
 import {
   Component, OnInit, Input, Output, EventEmitter,
-  DestroyRef, inject, ChangeDetectorRef, signal, computed
+  DestroyRef, inject, ChangeDetectorRef, signal
 } from '@angular/core';
 import {
   FormGroup, FormBuilder, FormArray, Validators,
@@ -32,7 +32,6 @@ export class WidgetFormComponent implements OnInit {
   newReply   = '';
   readonly assistants = signal<Assistant[]>([]);
 
-  readonly models = ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo'];
   readonly positions = [
     { value: 'bottom-right', label: 'Inferior derecha' },
     { value: 'bottom-left',  label: 'Inferior izquierda' },
@@ -60,12 +59,7 @@ export class WidgetFormComponent implements OnInit {
     // Identidad
     name:             ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
     bot_name:         ['Asistente Virtual', Validators.required],
-    system_prompt:    ['', Validators.required],
     is_active:        [true],
-    // IA
-    model_name:       ['gpt-4o-mini'],
-    temperature:      [0.1, [Validators.min(0), Validators.max(1)]],
-    max_tokens:       [1000, [Validators.min(100), Validators.max(4000)]],
     // Apariencia
     position:         ['bottom-right'],
     widget_size:      ['medium'],
@@ -78,13 +72,9 @@ export class WidgetFormComponent implements OnInit {
     default_language:    ['es'],
     // Quick replies como FormArray
     quick_replies: this.fb.array([]),
-    // Asistente vinculado
-    assistant_id: [null as number | null],
-  });
-
-  // Computed: si hay assistant seleccionado, deshabilitar campos IA
-  readonly hasAssistant = computed(() => {
-    return this.form.get('assistant_id')?.value !== null;
+    // Asistente vinculado — obligatorio: el modelo/prompt/documentos que
+    // usa el widget se heredan de este asistente, no se configuran aquí.
+    assistant_id: [null as number | null, Validators.required],
   });
 
   get quickReplies(): FormArray {
@@ -93,14 +83,6 @@ export class WidgetFormComponent implements OnInit {
 
   get primaryColor(): string {
     return (this.form.get('primary_color')?.value as string) || DEFAULT_PRIMARY_COLOR;
-  }
-
-  get temperatureLabel(): string {
-    const v = this.form.get('temperature')?.value as number;
-    if (v <= 0.2) return 'Preciso';
-    if (v <= 0.5) return 'Balanceado';
-    if (v <= 0.7) return 'Creativo';
-    return 'Muy creativo';
   }
 
   ngOnInit(): void {
@@ -124,11 +106,7 @@ export class WidgetFormComponent implements OnInit {
           this.form.patchValue({
             name:                w.name,
             bot_name:            w.bot_name,
-            system_prompt:       w.system_prompt,
             is_active:           w.is_active,
-            model_name:          w.model_name,
-            temperature:         w.temperature,
-            max_tokens:          w.max_tokens,
             position:            w.position,
             widget_size:         w.widget_size,
             primary_color:       w.theme_config?.primary_color ?? DEFAULT_PRIMARY_COLOR,
@@ -137,7 +115,7 @@ export class WidgetFormComponent implements OnInit {
             border_radius:       w.theme_config?.border_radius ?? '12px',
             daily_message_limit: w.daily_message_limit,
             default_language:    w.default_language,
-            assistant_id:        w.assistant_id ?? null,
+            assistant_id:        w.assistant_id,
           });
           this.quickReplies.clear();
           (w.quick_replies ?? []).forEach(r => this.quickReplies.push(this.fb.control(r)));
@@ -170,12 +148,11 @@ export class WidgetFormComponent implements OnInit {
     this.error   = null;
 
     const v = this.form.value as {
-      name: string; bot_name: string; system_prompt: string; is_active: boolean;
-      model_name: string; temperature: number; max_tokens: number;
+      name: string; bot_name: string; is_active: boolean;
       position: string; widget_size: string; primary_color: string;
       welcome_message: string; placeholder_text: string; border_radius: string;
       daily_message_limit: number; default_language: string; quick_replies: string[];
-      assistant_id: number | null;
+      assistant_id: number;
     };
 
     const theme_config = {
@@ -192,9 +169,8 @@ export class WidgetFormComponent implements OnInit {
     };
 
     const data: WidgetCreate | WidgetUpdate = {
-      name: v.name, bot_name: v.bot_name, system_prompt: v.system_prompt,
-      is_active: v.is_active, model_name: v.model_name,
-      temperature: v.temperature, max_tokens: v.max_tokens,
+      name: v.name, bot_name: v.bot_name,
+      is_active: v.is_active,
       position: v.position, widget_size: v.widget_size,
       theme_config, daily_message_limit: v.daily_message_limit,
       default_language: v.default_language, quick_replies: v.quick_replies,

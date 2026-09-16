@@ -20,28 +20,6 @@
     <!-- Navegación -->
     <nav class="sidebar-menu" aria-label="Navegación principal">
 
-      <!-- IA -->
-      <div class="menu-group">
-        @if (sidebarOpen()) {
-          <button class="menu-group-header" [class.is-open]="groupIa()" (click)="groupIa.set(!groupIa())" type="button">
-            <span class="menu-group-label">IA</span>
-            <span class="material-symbols-outlined menu-group-chevron">expand_more</span>
-          </button>
-        }
-        <div class="menu-group-items" [class.collapsed]="sidebarOpen() && !groupIa()">
-          <div class="menu-group-items-inner">
-            <a class="menu-item" routerLink="/chat" routerLinkActive="active" title="Chat IA">
-              <span class="material-symbols-outlined icon-sm">chat</span>
-              @if (sidebarOpen()) { <span>Chat IA</span> }
-            </a>
-            <a class="menu-item" routerLink="/conversations" routerLinkActive="active" title="Conversaciones">
-              <span class="material-symbols-outlined icon-sm">forum</span>
-              @if (sidebarOpen()) { <span>Conversaciones</span> }
-            </a>
-          </div>
-        </div>
-      </div>
-
       <!-- Conocimiento -->
       <div class="menu-group">
         @if (sidebarOpen()) {

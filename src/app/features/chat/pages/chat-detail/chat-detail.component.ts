@@ -304,6 +304,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
     if (!text || !conv) return;
 
     this.newMessage = '';
+    if (this.messageInput) this.messageInput.nativeElement.style.height = 'auto';
     this.isTyping.set(true);
     this.sending.set(true);
 
@@ -349,7 +350,19 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
 
   useSuggestion(text: string): void {
     this.newMessage = text;
-    setTimeout(() => this.messageInput?.nativeElement.focus(), 0);
+    setTimeout(() => {
+      const el = this.messageInput?.nativeElement;
+      el?.focus();
+      if (el) this.autoResizeTextarea(el);
+    }, 0);
+  }
+
+  /** Crece el textarea con el contenido (hasta el max-height del CSS, 140px),
+   * en vez de quedarse en una línea con scroll interno. Se llama en (input)
+   * y también al setear texto por código (sugerencias, limpiar tras enviar). */
+  autoResizeTextarea(el: HTMLTextAreaElement): void {
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
   }
 
   goBack(): void {

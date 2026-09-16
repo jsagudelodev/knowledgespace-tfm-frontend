@@ -363,6 +363,7 @@
         #messageInput
         [(ngModel)]="newMessage"
         (keydown)="handleKeyDown($event)"
+        (input)="autoResizeTextarea(messageInput)"
         placeholder="Escribe tu consulta..."
         class="message-input"
         [disabled]="sending()"

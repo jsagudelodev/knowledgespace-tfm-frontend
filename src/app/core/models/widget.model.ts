@@ -22,15 +22,13 @@ export interface Widget {
   bot_name: string;
   bot_avatar_url?: string | null;
   company_logo_url?: string | null;
-  system_prompt: string;
-  temperature: number;
-  max_tokens: number;
-  model_name: string;
   quick_replies: string[];
   default_language: string;
   supported_languages: string[];
   daily_message_limit: number;
-  assistant_id?: number | null;
+  // Obligatorio: modelo/prompt/documentos se heredan del Assistant enlazado,
+  // no se duplican en el widget (ver docs/MODELO_DATOS.md §2.9 en el backend).
+  assistant_id: number;
   created_at: string;
   updated_at?: string;
 }
@@ -44,15 +42,11 @@ export interface WidgetCreate {
   bot_name?: string;
   bot_avatar_url?: string | null;
   company_logo_url?: string | null;
-  system_prompt: string;
-  temperature?: number;
-  max_tokens?: number;
-  model_name?: string;
   quick_replies?: string[];
   default_language?: string;
   supported_languages?: string[];
   daily_message_limit?: number;
-  assistant_id?: number | null;
+  assistant_id: number;
 }
 
 export type WidgetUpdate = Partial<WidgetCreate>;

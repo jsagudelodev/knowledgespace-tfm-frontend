@@ -160,18 +160,12 @@
           <!-- Info pills -->
           <div class="wl-card-pills">
             <span class="wl-pill">
-              <span class="material-symbols-outlined icon-sm">psychology</span> {{ w.model_name }}
-            </span>
-            <span class="wl-pill">
               <span class="material-symbols-outlined icon-sm">location_on</span> {{ positionLabel(w.position) }}
             </span>
             <span class="wl-pill">
               <span class="material-symbols-outlined icon-sm">bolt</span> {{ w.quick_replies.length }} respuestas
             </span>
           </div>
-
-          <!-- Prompt preview -->
-          <p class="wl-card-prompt">{{ w.system_prompt }}</p>
 
           <!-- Acciones -->
           @if (deleteConfirmId !== w.id) {

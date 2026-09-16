@@ -39,25 +39,17 @@
       </div>
 
       <div class="wf-field">
-        <label class="wf-label">Prompt del sistema <span class="wf-required">*</span></label>
-        <textarea class="wf-textarea" formControlName="system_prompt" rows="5"
-          placeholder="Eres un asistente virtual de [Empresa]. Responde únicamente con información de los documentos internos..."
-          [class.wf-input--error]="isInvalid('system_prompt')"></textarea>
-        @if (isInvalid('system_prompt')) {
-          <span class="wf-field-error">El prompt es requerido</span>
-        }
-        <span class="wf-field-hint">Define el rol y comportamiento del asistente</span>
-      </div>
-
-      <div class="wf-field">
-        <label class="wf-label">Asistente vinculado</label>
-        <select class="wf-select" formControlName="assistant_id">
-          <option [ngValue]="null">— Sin asistente (empresa general) —</option>
+        <label class="wf-label">Asistente vinculado <span class="wf-required">*</span></label>
+        <select class="wf-select" formControlName="assistant_id" [class.wf-input--error]="isInvalid('assistant_id')">
+          <option [ngValue]="null" disabled>— Selecciona un asistente —</option>
           @for (a of assistants(); track a.id) {
             <option [ngValue]="a.id">{{ a.name }}</option>
           }
         </select>
-        <span class="wf-field-hint">El asistente determina qué documentos consulta este widget</span>
+        @if (isInvalid('assistant_id')) {
+          <span class="wf-field-error">Debes vincular un asistente</span>
+        }
+        <span class="wf-field-hint">El widget hereda el modelo, el prompt y los documentos de este asistente — no se configuran aparte</span>
       </div>
 
       <div class="wf-field wf-field--toggle">
@@ -67,49 +59,6 @@
           <span class="wf-toggle-track"></span>
           <span class="wf-toggle-label">{{ form.get('is_active')?.value ? 'Activo' : 'Inactivo' }}</span>
         </label>
-      </div>
-    </section>
-
-    <!-- ── Configuración IA ────────────────────────────────────── -->
-    <section class="wf-section">
-      <h3 class="wf-section-title">
-        <span class="material-symbols-outlined icon-sm">psychology</span> Configuración IA
-        @if (hasAssistant()) {
-          <span class="wf-section-badge wf-section-badge--info">Desde asistente</span>
-        }
-      </h3>
-
-      @if (hasAssistant()) {
-        <div class="wf-info-box">
-          <span class="material-symbols-outlined icon-sm">info</span>
-          <span>La configuración IA se hereda del asistente vinculado. Los campos están deshabilitados.</span>
-        </div>
-      }
-
-      <div class="wf-row wf-row--3">
-        <div class="wf-field">
-          <label class="wf-label">Modelo</label>
-          <select class="wf-select" formControlName="model_name" [disabled]="hasAssistant()">
-            @for (m of models; track m) {
-              <option [value]="m">{{ m }}</option>
-            }
-          </select>
-        </div>
-
-        <div class="wf-field">
-          <label class="wf-label">Temperatura — <span class="wf-temp-label">{{ temperatureLabel }}</span></label>
-          <div class="wf-range-row">
-            <span class="wf-range-hint">Preciso</span>
-            <input type="range" class="wf-range" formControlName="temperature" min="0" max="1" step="0.05" [disabled]="hasAssistant()" />
-            <span class="wf-range-hint">Creativo</span>
-            <span class="wf-range-value">{{ form.get('temperature')?.value }}</span>
-          </div>
-        </div>
-
-        <div class="wf-field">
-          <label class="wf-label">Máx. tokens por respuesta</label>
-          <input type="number" class="wf-input" formControlName="max_tokens" min="100" max="4000" step="100" [disabled]="hasAssistant()" />
-        </div>
       </div>
     </section>
 

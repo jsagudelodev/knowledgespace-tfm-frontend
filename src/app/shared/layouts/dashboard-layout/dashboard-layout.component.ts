@@ -35,7 +35,6 @@ export class DashboardLayoutComponent {
   readonly sidebarOpen         = signal(true);
   readonly notifUnreadCount    = signal(0);
 
-  readonly groupIa             = signal(true);
   readonly groupConocimiento   = signal(true);
   readonly groupPlataforma     = signal(false);
   readonly groupAdministracion = signal(true);

@@ -71,11 +71,7 @@
         </span>
       </div>
       <div class="wd-info-row"><span class="wd-info-label">Límite diario</span><span class="wd-info-value">{{ widget()!.daily_message_limit }} msgs</span></div>
-    </div>
-
-    <div class="wd-info-card wd-info-card--full">
-      <h3 class="wd-info-section">Prompt del sistema</h3>
-      <p class="wd-info-prompt">{{ widget()!.system_prompt }}</p>
+      <div class="wd-info-row"><span class="wd-info-label">Asistente enlazado</span><span class="wd-info-value">#{{ widget()!.assistant_id }}</span></div>
     </div>
 
     @if (widget()!.quick_replies.length) {
