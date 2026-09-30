@@ -14,6 +14,14 @@
     </div>
   }
 
+  @if (!loading() && error()) {
+    <div class="error-state">
+      <span class="material-symbols-outlined">error</span>
+      <p>{{ error() }}</p>
+      <button type="button" class="error-retry" (click)="load()">Reintentar</button>
+    </div>
+  }
+
   @if (!loading() && metrics()) {
 
     <!-- ── Tarjetas de métricas ──────────────────────────────────────────── -->

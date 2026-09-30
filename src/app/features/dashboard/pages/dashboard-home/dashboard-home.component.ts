@@ -29,11 +29,24 @@ export class DashboardHomeComponent implements OnInit {
   readonly isEmptyState     = computed(() => !!this.metrics() && !this.hasDocuments());
 
   ngOnInit(): void {
+    this.load();
+  }
+
+  load(): void {
+    this.loading.set(true);
+    this.error.set(null);
+
     this.dashboardService.getMetrics()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: data => { this.metrics.set(data); this.loading.set(false); },
-        error: ()   => { this.loading.set(false); }
+        // Sin esto la página quedaba en blanco: toda la plantilla vive dentro
+        // de `@if (!loading() && metrics())`, así que un fallo dejaba las dos
+        // condiciones en falso y no se dibujaba nada, ni un mensaje.
+        error: ()   => {
+          this.error.set('No se pudieron cargar las métricas.');
+          this.loading.set(false);
+        }
       });
   }
 }

@@ -19,6 +19,55 @@ Formato de cada entrada:
 
 ---
 
+## 2026-09-30 — El Dashboard estaba roto: endpoint inexistente
+
+**Hecho (backend `api/`):**
+- **Creado `GET /api/v1/dashboard/metrics`**, que no existía. El frontend lo
+  llamaba desde `dashboard.service.ts` desde siempre y el backend respondía
+  **404**: `main.py` registraba 15 routers y ninguno era `dashboard`.
+  Nuevos `app/routers/v1/dashboard.py` y `app/schemas/dashboard.py`, con el
+  filtrado por `company_id` del JWT como el resto de routers.
+- Decisiones del endpoint: `processing` agrupa `pending` + `processing` (para
+  quien mira el panel, ambos significan "todavía no puedo consultarlo");
+  `total` incluye los `failed` para que cuadre con la lista de `/documents`;
+  los mensajes se cuentan por join con `conversations`, que es lo que garantiza
+  el aislamiento multi-tenant, porque `messages` no tiene `company_id`; la
+  actividad reciente ordena por `coalesce(updated_at, created_at)` porque
+  `updated_at` es NULL hasta la primera modificación.
+- **Nuevo test** `tests/test_dashboard_metrics.py` (4 casos sobre
+  `_metricas_de_documentos`, lógica pura, mismo estilo que los existentes).
+  Suite: 17 → 21 tests, todos pasando.
+
+**Hecho (frontend):**
+- **Corregido el manejo de error del Dashboard**, que era la razón de que el
+  fallo fuera invisible: `error: () => { this.loading.set(false); }` se tragaba
+  el error sin asignar el signal `error`, que además no se renderizaba en
+  ninguna parte de la plantilla. Como todo el contenido vive dentro de
+  `@if (!loading() && metrics())`, un fallo dejaba ambas condiciones en falso y
+  **la página quedaba en blanco**: solo el título y el "Bienvenido, {nombre}".
+  Ahora hay estado de error con botón "Reintentar", y `load()` es reutilizable.
+
+**Decisiones / notas:**
+- Verificado contra la base real: empresa 8 ve sus 12 documentos y 2 usuarios;
+  empresa 3 ve 0 documentos y 4 usuarios. El aislamiento multi-tenant funciona.
+- Los 0 documentos de la empresa 3 (Logit) **no son un fallo**: los 12
+  documentos indexados pertenecen todos a la empresa 8 (KnowledgeSpace Demo).
+- Gravedad: `/dashboard` es la pantalla de aterrizaje tras el login — cuatro
+  sitios redirigen ahí (`login.component.ts:50`, `guest.guard.ts:13`,
+  `admin.guard.ts:14` y el chat al cerrarse). Era lo primero que habría visto
+  un tribunal.
+
+**Pendiente para después:**
+- **865 de las 937 conversaciones de la empresa 3 no tienen ningún mensaje**
+  (y la empresa 8 tiene 1.042 conversaciones con 168 mensajes). Son restos de
+  pruebas. El panel de actividad reciente muestra diez "Chat IA" vacías
+  seguidas, que es justo lo que se vería en una demo en vivo. Conviene
+  limpiarlas antes de la defensa.
+- El resto de módulos no tiene estado de error visible; el Dashboard es el
+  único corregido. Sigue sin haber interceptor global de errores HTTP.
+
+---
+
 ## 2026-09-29 — Recorte de alcance para el TFM: retirada del widget y limpieza de código muerto
 
 **Hecho (frontend):**

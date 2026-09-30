@@ -52,6 +52,13 @@ Login de usuarios con JWT. No existe registro público (el botón "crear cuenta"
 
 Página de inicio con métricas agregadas de la empresa: documentos (totales / completados / en proceso), usuarios totales, conversaciones totales, mensajes totales y actividad reciente. Incluye un estado vacío/onboarding cuando la empresa aún no tiene documentos cargados.
 
+Se alimenta de `GET /v1/dashboard/metrics`, que agrega todas las cifras
+filtrando por el `company_id` del JWT. "En proceso" agrupa los documentos en
+`pending` y `processing`; el total incluye los `failed`, para que cuadre con lo
+que se ve en `/documents`. La actividad reciente son las 10 últimas
+conversaciones de la empresa, ordenadas por `updated_at` con caída a
+`created_at` (ese campo es NULL hasta la primera modificación).
+
 ### 3. Empresas (`/companies`)
 
 Gestión multi-tenant de las empresas clientes del SaaS (visibilidad orientada a `superadmin`).

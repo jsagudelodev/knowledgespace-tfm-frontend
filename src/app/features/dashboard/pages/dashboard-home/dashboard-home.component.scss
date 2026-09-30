@@ -30,6 +30,31 @@
   font-size: $size-sm;
 }
 
+.error-state {
+  display: flex;
+  align-items: center;
+  gap: $sp-3;
+  padding: $sp-10;
+  color: $font-muted;
+  font-size: $size-sm;
+
+  .material-symbols-outlined { color: $color-danger; }
+
+  p { margin: 0; }
+}
+
+.error-retry {
+  background: none;
+  border: 1px solid $border-flat;
+  border-radius: $radius-md;
+  padding: $sp-1 $sp-3;
+  color: $color-primary;
+  font-size: $size-sm;
+  cursor: pointer;
+
+  &:hover { background: $color-primary-light; }
+}
+
 .loading-spinner {
   width: 20px;
   height: 20px;
