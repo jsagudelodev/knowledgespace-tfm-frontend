@@ -19,6 +19,90 @@ Formato de cada entrada:
 
 ---
 
+## 2026-09-29 — Recorte de alcance para el TFM: retirada del widget y limpieza de código muerto
+
+**Hecho (frontend):**
+- **Módulo de widgets retirado por completo** (~2.200 líneas): `features/widgets/`
+  con sus páginas list/form/detail, su servicio y sus rutas; la ruta `widgets`
+  de `app.routes.ts`; la entrada del sidebar en `dashboard-layout.component.html`;
+  y el modelo huérfano `core/models/widget.model.ts`.
+- **Pestaña "Widgets" del detalle de asistente** eliminada: botón, contenido,
+  estilo `&--widget`, el método `loadWidgets()` y `getAssistantWidgets()` de
+  `assistant.service.ts`. También el contador de widgets de las tarjetas del
+  listado de asistentes y la fila "Widgets" de la pestaña de configuración.
+- **Componente compartido `shared/components/select/` eliminado** (72 líneas):
+  su selector `app-select` no aparecía en ninguna plantilla ni lo importaba
+  ningún archivo.
+- **`wsUrl` retirado de los cuatro `environment.*.ts`**: estaba declarado en
+  todos y usado en ninguno, apuntando a un endpoint WebSocket que el backend no
+  expone. El chat es HTTP síncrono.
+- **`adminGuard` enganchado** a las rutas `/companies` y `/users` en
+  `app.routes.ts`. Estaba escrito y exportado, pero su única aparición en el
+  repositorio era su propia definición.
+- **`goToRegister()` eliminado** de `login.component.ts`: navegaba a
+  `/auth/register`, ruta que no existe, y ninguna plantilla lo invocaba.
+- **Notificaciones de presupuesto sin acción**: `entityAction()` devolvía
+  `{ text: 'Ver costos', commands: ['/dashboard'] }`, pero el dashboard solo
+  muestra documentos, usuarios, conversaciones y mensajes. El costo por
+  respuesta se ve en el chat (`message.cost_usd`). Ahora devuelve `null`.
+
+**Hecho (backend `api/`):**
+- Eliminados `routers/v1/widgets.py`, `repositories/widget_repository.py` y
+  `schemas/widget.py`, el registro del router en `main.py` y el endpoint
+  `GET /assistants/{id}/widgets`. Quedan 57 rutas, ninguna con "widget".
+
+**Hecho (documentación):**
+- `ALCANCE_TFM.md` de ambos repos: el widget pasa de "fuera de alcance" a
+  "código retirado", con la justificación de por qué el modelo permanece.
+- `doc/FEATURES.md`: sección 9 reescrita; widget fuera del flujo de valor y de
+  las transversales; corregida la afirmación de que `/knowledge-gaps` no estaba
+  registrada (lo está); eliminada la remisión a `BACKLOG_FRONTEND.md`, que no
+  existe en este repositorio; corregido "Vitest como test runner" — la
+  dependencia está en `package.json` pero no hay ningún `.spec.ts`.
+- `README.md`: el árbol de estructura listaba `features/widgets/`, y bajo
+  `shared/` listaba `pipes/` y `directives/`, que no existen.
+- `CLAUDE.md` del backend: eliminada la instrucción de activar un `venv` que no
+  existe, y añadida la explicación de por qué el `cd api` no es opcional
+  (resuelve `sys.path` **y** el directorio de trabajo del que `config.py` carga
+  el `.env` por ruta relativa).
+
+**Decisiones / notas:**
+- **El modelo de datos del widget se conserva a propósito**: tabla `widgets`,
+  relación `Assistant.widgets`, el `widget_count` que bloquea borrar un
+  asistente con widgets vinculados, y los campos `widget_id` / `channel` en
+  `feedback` y `knowledge_gaps`. El canal de origen (`widget` | `chat`) es lo
+  que permite a Preguntas sin respuesta ponderar distinto lo que llega de un
+  sitio público — retirarlo habría obligado a modificar la contribución que se
+  defiende.
+- **El corte se hizo simétrico en frontend y backend.** Un backend que expone
+  endpoints sin consumidor se lee como "frontend incompleto", no como alcance
+  recortado a propósito.
+- **Notificaciones se evaluó y se descartó como candidato a recorte.** No
+  aparece en el núcleo académico, pero el backend las emite desde el pipeline de
+  documentos (`documents.py:144,158,291`), desde `feedback.py:166` y desde
+  `knowledge_gaps.py:90` — los tres son contribución. Cortarlo obligaba a tocar
+  el núcleo o a crear la asimetría que se quería evitar.
+- `server.js` y el `Dockerfile` del frontend **no** son residuo pese a que el
+  despliegue actual es Vercel: el Dockerfile copia `dist/knowledge-space/browser`
+  a `./public`, que es justo el directorio desde el que sirve `server.js`.
+- Las credenciales `TEST_USER_EMAIL` / `TEST_USER_PASSWORD` de `api/.env`
+  (`admin@test.com` / `test123`) **ya no son válidas**: el login devuelve 401.
+  Los 6 usuarios de la base conservan hashes en el formato antiguo
+  (`sha256_crypt`), que migrarán a bcrypt en su primer login correcto.
+
+**Pendiente para después:**
+- Decidir qué hacer con `doc/ia-handoff/` (932 KB, 13 archivos trackeados,
+  incluido un `.zip`): son maquetas de diseño intermedias, no código ni material
+  de defensa.
+- `objetos.csv` en la raíz del frontend no tiene relación con el proyecto y no
+  está en `.gitignore`.
+- `docs/practica-tfm/sebas/` en el backend contiene un único archivo, copia de
+  ejercicio de otra persona.
+- `docs/tutorials/GLOSARIO_RAG.md` sigue sin commitear.
+- Nada de esta sesión está commiteado; ambos repos siguen en `main`.
+
+---
+
 ## 2026-08-16 — Módulo Notificaciones (handoff completo) + fix httpx backend
 
 **Hecho (backend `api/`):**

@@ -16,9 +16,20 @@ evolucionando por separado. Ver también `ALCANCE_TFM.md` del backend.
 
 ## Explícitamente fuera de alcance de la defensa
 
-- **Widget público embebible** (`features/widgets`): decisión de
-  comercialización, no una limitación técnica no resuelta — así quedó
-  documentado desde el desarrollo original del proyecto.
+- **Widget público embebible**: decisión de comercialización, no una limitación
+  técnica no resuelta — así quedó documentado desde el desarrollo original del
+  proyecto. En esta entrega no solo se declara fuera de alcance: **su código se
+  retiró del repositorio** (el módulo `features/widgets`, su ruta, su entrada en
+  el menú y la pestaña "Widgets" del detalle de asistente), junto con el router
+  y los endpoints correspondientes en el backend.
+
+  Lo que **sí permanece** es el modelo de datos: la tabla `widgets`, la relación
+  `Assistant.widgets` y los campos `widget_id` / `channel` en `feedback` y
+  `knowledge_gaps`. No es residuo olvidado, es una dependencia real del núcleo
+  académico: el canal de origen (`widget` | `chat`) es lo que permite al módulo
+  de Preguntas sin respuesta ponderar de forma distinta las preguntas que
+  llegaron desde un sitio público. Retirarlo habría obligado a modificar la
+  contribución que se defiende.
 - CRUD administrativo de companies/users/notifications: soporte necesario
   para que el multi-tenant funcione, no la contribución de investigación.
 - El campo `plan` (`basic|pro|enterprise`) es un modelo de datos ilustrativo

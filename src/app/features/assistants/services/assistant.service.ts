@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import { CrudService } from '../../../core/services/crud.service';
 import { Assistant, AssistantCreate, AssistantUpdate } from '../../../core/models/assistant.model';
 import { Document } from '../../../core/models/document.model';
-import { Widget } from '../../../core/models/widget.model';
 
 @Injectable({ providedIn: 'root' })
 export class AssistantService extends CrudService<Assistant, AssistantCreate, AssistantUpdate> {
@@ -31,9 +30,5 @@ export class AssistantService extends CrudService<Assistant, AssistantCreate, As
 
   getAssistantDocuments(assistantId: number): Observable<Document[]> {
     return this.api.get<Document[]>(`${this.basePath}/${assistantId}/documents`);
-  }
-
-  getAssistantWidgets(assistantId: number): Observable<Widget[]> {
-    return this.api.get<Widget[]>(`${this.basePath}/${assistantId}/widgets`);
   }
 }

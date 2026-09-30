@@ -9,7 +9,11 @@ Documento de funcionalidades implementadas en KnowledgeSpace Frontend, a la fech
 1. Una empresa cliente sube sus documentos (PDF, DOCX, TXT) a la plataforma.
 2. Los documentos se procesan e indexan de forma asíncrona en el backend.
 3. Se configuran **Asistentes de IA** (agentes conversacionales) sobre ese conocimiento indexado, cada uno con su propio prompt de sistema, modelo LLM y personalidad.
-4. Esos asistentes se exponen al público mediante **Widgets de chat embebibles**, que los clientes de la empresa insertan en sus propios sitios web con un simple snippet de código.
+4. El equipo de la empresa consulta ese conocimiento desde el **Chat IA** interno, con respuestas generadas por RAG y trazabilidad de fuentes.
+
+> En el producto comercial los asistentes también se exponen al público mediante
+> widgets de chat embebibles. Esa parte queda fuera de esta entrega académica
+> (ver `ALCANCE_TFM.md` y la sección 9).
 
 Es una plataforma **multi-tenant** (multiempresa) con roles jerárquicos (`superadmin` > `admin` > `user`) y planes de suscripción con límites (usuarios, documentos, mensajes mensuales).
 
@@ -19,9 +23,11 @@ Es una plataforma **multi-tenant** (multiempresa) con roles jerárquicos (`super
 - **PrimeNG 21** — componentes UI, sin tema preestablecido (estilos sobreescritos globalmente).
 - **Material Symbols** + tipografía **Inter** (Google Fonts).
 - **RxJS 7.8**, **TypeScript 5.9** en modo estricto.
-- **Vitest** como test runner, **Prettier** para formateo.
+- **Prettier** para formateo. `vitest` figura como dependencia de desarrollo,
+  pero **no hay ningún archivo `.spec.ts` en el repositorio**: no existe
+  cobertura de tests. Ver `ALCANCE_TFM.md`.
 - Sistema de diseño propio "Deep Blue Premium" (`#2563EB` primario, sidebar oscuro `#0F172A`), arquitectura SCSS en 3 capas.
-- Multi-entorno: local, development, qa, production (cada uno con su propio `apiUrl` / `wsUrl`).
+- Multi-entorno: local, development, qa, production (cada uno con su propio `apiUrl`).
 
 ### Patrón arquitectónico común
 
@@ -91,26 +97,25 @@ El corazón de la propuesta de valor: creación de agentes de IA tipo RAG config
 - **Formulario** (crear/editar): nombre, descripción, prompt de sistema, selección de modelo (`gpt-4o-mini`, `gpt-4o`, `gpt-4-turbo`, `gpt-3.5-turbo`), temperatura (slider 0–1), avatar (selector de emoji).
 - **Detalle** (`/assistants/:id`), con pestañas:
   - *Documentos*: subida drag & drop de archivos asociados directamente al asistente, con validación, progreso, **polling automático cada 3s** del estado de procesamiento hasta completar o fallar, reintento, descarga y borrado.
-  - *Widgets*: listado (solo lectura) de los widgets de chat vinculados a este asistente.
   - *Info*: datos generales del asistente.
 
-### 9. Widgets de chat embebibles (`/widgets`)
+### 9. Widgets de chat embebibles — fuera de esta entrega
 
-Módulo más reciente en desarrollo activo. Permite crear widgets de chat con IA totalmente personalizables para incrustar en sitios web externos de los clientes — opcionalmente vinculados a un Asistente ya configurado (heredando su lógica de IA) o de forma independiente con su propio prompt y modelo.
+El módulo de gestión de widgets (`/widgets`) **no forma parte de la entrega
+académica**: su interfaz, sus rutas y sus endpoints REST se retiraron de este
+repositorio. Ver `ALCANCE_TFM.md` para el criterio.
 
-- Acceso restringido a roles `admin` / `superadmin`.
-- **Listado**: búsqueda, filtro por estado, botón para **copiar el snippet de embed** (`<script>` + custom element `<knowledgespace-chat-widget>`) listo para pegar en cualquier sitio web.
-- **Formulario**, dividido en:
-  - *Identidad*: nombre, nombre del bot, prompt de sistema, activo/inactivo.
-  - *IA*: modelo, temperatura (con etiquetas Preciso/Balanceado/Creativo/Muy creativo), máximo de tokens — deshabilitado si el widget hereda un Asistente vinculado.
-  - *Apariencia*: posición en pantalla (4 esquinas), tamaño, color primario, mensaje de bienvenida, placeholder, radio de bordes.
-  - *Límites e idioma*: límite diario de mensajes, idioma por defecto (es/en/pt).
-  - *Respuestas rápidas*: hasta 6 sugerencias predefinidas configurables.
-- **Detalle**: vista de solo lectura de un widget.
+Lo que sí permanece es el **modelo de datos**: la tabla `widgets`, la relación
+`Assistant.widgets` y los campos `widget_id` / `channel` en `feedback` y
+`knowledge_gaps`. No es residuo: el canal de origen (`widget` | `chat`) es lo
+que permite al módulo de Preguntas sin respuesta (sección 13) ponderar de forma
+distinta las preguntas llegadas desde un sitio público.
 
 ### 10. Chat IA (`/chat`)
 
-Interfaz conversacional interna (distinta de los widgets embebibles públicos): el equipo de la empresa consulta su propia documentación indexada en lenguaje natural, con respuestas generadas por RAG y trazabilidad de fuentes.
+Interfaz conversacional interna: el equipo de la empresa consulta su propia
+documentación indexada en lenguaje natural, con respuestas generadas por RAG y
+trazabilidad de fuentes.
 
 - **Chat Shell** (`/chat`): layout de dos columnas (lista de conversaciones + panel principal). Pantalla de bienvenida con accesos rápidos cuando no hay una conversación activa.
 - **Chat List**: historial de conversaciones del usuario, resaltando la conversación activa, con acceso directo al dashboard y creación de nuevas conversaciones.
@@ -195,25 +200,37 @@ Diseño high-fidelity conforme al handoff: `max-width: 1000px`, `padding: 28px 2
 - **Actualización optimista** al cambiar la categoría de un documento desde el listado (revierte si falla la petición).
 - **Sistema de notificaciones toast** centralizado (éxito / error / info) — distinto del módulo de notificaciones persistentes de la sección 12.
 - **Notificaciones persistentes de empresa** (sección 12): badge de no leídas sincronizado entre header y sidebar, polling cada 45s.
-- **Snippet de embed copiable** para los widgets de chat.
 - **Sidebar colapsable**: botón ☰ en el header alterna el sidebar entre expandido y modo icon-only (`DashboardLayoutComponent.sidebarOpen`), persistido solo en memoria (se reinicia a expandido en cada navegación entre módulos, ya que cada uno instancia su propio `DashboardLayoutComponent`).
 - **Chat IA flotante**: drawer accesible desde el header en cualquier módulo (ver sección 10), estado centralizado en `UiStatusService`.
 
 ## Pendientes / deuda técnica conocida
 
-Detalle completo por módulo en `BACKLOG_FRONTEND.md`. Resumen de lo no implementado aún:
+Resumen de lo no implementado aún:
 
-- **Auth**: registro (`/auth/register`) y edición de perfil/cambio de contraseña propio (`/profile-settings`) — ambos referenciados desde la UI (botón "crear cuenta" en login) pero sin ruta ni página real.
-- **Conversaciones (vista admin)**: listado/detalle administrativo de conversaciones (distinto del Chat IA de la sección 10) — el link "Ver conversación" de las tarjetas de feedback (sección 11) y el sidebar apuntan a `/conversations`, ruta aún no registrada.
+- **Auth**: registro (`/auth/register`) y edición de perfil/cambio de contraseña
+  propio (`/profile-settings`) no existen como ruta ni como página. El login
+  conservaba un método `goToRegister()` que apuntaba a esa ruta inexistente,
+  sin que ninguna plantilla lo invocara; se retiró.
+- **Conversaciones (vista admin)**: listado/detalle administrativo de conversaciones (distinto del Chat IA de la sección 10) — no implementado.
 - **Notificaciones**: ✅ completado (sección 12, 2026-08-16) — generación automática de eventos en el pipeline de documentos (processed / failed / deleted), listado paginado con 5 chips de filtro, badge en sidebar (grupo Analytics), tiempo relativo preciso, skeleton y estados de error/vacío dentro de la tarjeta.
 - **Feedback IA (vista admin)**: implementado, con redición v2 (sección 11). Ruta `/feedback` activa con analytics completo. Pendiente: verificación end-to-end con datos reales en producción; backend de conversión de tema en bloque (`POST /feedback/theme-convert`); `samples`/`trend` en `/stats` para `ThemeCount` cuando el backend no los provee.
-- **Knowledge Gaps** (preguntas sin respuesta): tanto el feedback (sección 11, "Enviar a preguntas sin respuesta") como las notificaciones (sección 12, tipo `knowledge_gap_found`/`knowledge_gap_resolved`) ya generan/enlazan `KnowledgeGap` y apuntan a `/knowledge-gaps` y `/knowledge-gaps/:id` — ninguna de las dos rutas está registrada todavía; falta el módulo de listado/resolución.
+- **Knowledge Gaps** (preguntas sin respuesta): ✅ implementado. Las rutas
+  `/knowledge-gaps` y `/knowledge-gaps/:id` están registradas en
+  `app.routes.ts`, y tanto el feedback (sección 11, "Enviar a preguntas sin
+  respuesta") como las notificaciones (sección 12, tipos
+  `knowledge_gap_found` / `knowledge_gap_resolved`) generan y enlazan
+  `KnowledgeGap` correctamente.
 - **Presupuesto/Uso**: configuración de límite mensual de gasto y alertas al 80%/100% — no implementado (el tipo de notificación `budget_*` ya existe en el modelo, a la espera del módulo).
 - **Empresas**: `AuthService.selectedCompany` expone la empresa activa (mostrada en el header) pero no hay UI de selector para que `superadmin` cambie de contexto — sigue sin implementar.
-- **Widgets**: el chat público embebido en el sitio del cliente final (`/widgets/:id/config`, `/widgets/:id/chat`) aún depende de endpoints de backend pendientes; hoy el widget solo tiene gestión (CRUD) y snippet de embed.
+- **Widgets**: retirado de esta entrega — ver sección 9 y `ALCANCE_TFM.md`.
 - **404**: la ruta comodín (`**`) redirige a `/auth/login` en vez de mostrar una página "no encontrado".
-- `adminGuard` existe pero no está enganchado a nivel de rutas en `app.routes.ts`; el control de acceso admin se hace manualmente dentro de componentes (ej. `WidgetListComponent`).
-- `wsUrl` está definido en los entornos pero no se usa: el Chat IA (sección 10) quedó implementado sobre HTTP síncrono, no WebSocket. Sigue siendo una mejora candidata para UX de streaming token-por-token.
+- ✅ `adminGuard` quedó enganchado en `app.routes.ts` a las rutas `/companies` y
+  `/users`; antes estaba escrito pero sin usar, y el control de acceso admin
+  dependía solo de comprobaciones dentro de cada componente.
+- **Streaming del Chat IA**: el chat quedó implementado sobre HTTP síncrono, no
+  WebSocket. Sigue siendo una mejora candidata para UX de streaming
+  token-por-token. La variable `wsUrl` que los entornos declaraban para ese fin
+  se retiró: apuntaba a un endpoint que el backend no expone.
 - El estado de `sidebarOpen` no persiste entre navegaciones de módulo ni en `localStorage`.
 - Deuda técnica adicional: sin interceptor global de errores HTTP (401/403/500), sin loading skeletons en todas las listas/dashboard (Feedback ya tiene skeletons propios), sin tests unitarios ni e2e.
 - **Deploy**: el frontend se sirve desde Vercel (`https://knowledge-space-front-end.vercel.app/`, auto-deploy en cada push a `main`), desacoplado del backend en Cloud Run — CORS gestiona la conexión entre ambos (ver `doc/BITACORA.md`, 2026-08-14).

@@ -10,12 +10,11 @@ import { DocumentService } from '../../../documents/services/document.service';
 import { CategoryService } from '../../../categories/services/category.service';
 import { Assistant } from '../../../../core/models/assistant.model';
 import { Document } from '../../../../core/models/document.model';
-import { Widget } from '../../../../core/models/widget.model';
 import { Category } from '../../../../core/models/category.model';
 import { Paginator, PaginatorState } from 'primeng/paginator';
 import { NotificationService } from '../../../../core/services/notification.service';
 
-type Tab = 'documents' | 'widgets' | 'info';
+type Tab = 'documents' | 'info';
 
 interface UploadingFile {
   name: string;
@@ -37,7 +36,6 @@ export class AssistantDetailComponent implements OnInit, OnDestroy {
   // ── Data ──────────────────────────────────────────────────────────────
   readonly assistant  = signal<Assistant | null>(null);
   readonly documents  = signal<Document[]>([]);
-  readonly widgets    = signal<Widget[]>([]);
   readonly categories = signal<Category[]>([]);
   readonly activeTab  = signal<Tab>('documents');
   selectedCategoryId: number | null = null;
@@ -59,10 +57,8 @@ export class AssistantDetailComponent implements OnInit, OnDestroy {
   // ── UI state ──────────────────────────────────────────────────────────
   loadingAssistant = true;
   loadingDocs      = false;
-  loadingWidgets   = false;
   errorAssistant: string | null = null;
   errorDocs: string | null      = null;
-  errorWidgets: string | null   = null;
 
   uploadingFiles: UploadingFile[] = [];
   isDragOver     = false;
@@ -98,7 +94,6 @@ export class AssistantDetailComponent implements OnInit, OnDestroy {
           this.assistant.set(a);
           this.loadingAssistant = false;
           this.loadDocs();
-          this.loadWidgets(id);
           this.cdr.detectChanges();
         },
         error: () => {
@@ -140,25 +135,6 @@ export class AssistantDetailComponent implements OnInit, OnDestroy {
         error: () => {
           this.errorDocs   = 'No se pudieron cargar los documentos.';
           this.loadingDocs = false;
-          this.cdr.detectChanges();
-        }
-      });
-  }
-
-  private loadWidgets(id: number): void {
-    this.loadingWidgets = true;
-    this.errorWidgets   = null;
-    this.assistantService.getAssistantWidgets(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (ws) => {
-          this.widgets.set(ws);
-          this.loadingWidgets = false;
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.errorWidgets   = 'No se pudieron cargar los widgets.';
-          this.loadingWidgets = false;
           this.cdr.detectChanges();
         }
       });

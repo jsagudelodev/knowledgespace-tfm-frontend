@@ -65,12 +65,10 @@ src/
 │   │   ├── users/
 │   │   ├── notifications/
 │   │   ├── knowledge-gaps/
-│   │   ├── widgets/
 │   │   └── feedback/
-│   ├── shared/                # Componentes, pipes y directivas reutilizables
-│   │   ├── components/
-│   │   ├── pipes/
-│   │   └── directives/
+│   ├── shared/                # Componentes y layouts reutilizables
+│   │   ├── components/        # header, empty-state, toast-host
+│   │   └── layouts/           # dashboard-layout
 │   ├── app.config.ts          # Providers globales (router, HTTP, etc.)
 │   ├── app.routes.ts          # Rutas raíz con lazy loading
 │   ├── app.ts                 # Root component

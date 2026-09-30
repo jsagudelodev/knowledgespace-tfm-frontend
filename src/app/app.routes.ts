@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './core/guards/admin.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 
@@ -16,12 +17,12 @@ export const routes: Routes = [
   },
   {
     path: 'companies',
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
     loadChildren: () => import('./features/companies/companies.routes').then(m => m.COMPANIES_ROUTES)
   },
   {
     path: 'users',
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
     loadChildren: () => import('./features/users/users.routes').then(m => m.USERS_ROUTES)
   },
   {
@@ -48,11 +49,6 @@ export const routes: Routes = [
     path: 'assistants',
     canActivate: [authGuard],
     loadChildren: () => import('./features/assistants/assistants.routes').then(m => m.ASSISTANTS_ROUTES)
-  },
-  {
-    path: 'widgets',
-    canActivate: [authGuard],
-    loadChildren: () => import('./features/widgets/widgets.routes').then(m => m.WIDGETS_ROUTES)
   },
   {
     path: 'feedback',

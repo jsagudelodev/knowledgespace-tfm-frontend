@@ -49,6 +49,9 @@ desktop.ini
 *.tmp
 *.orig
 
+# Archivos personales, ajenos al proyecto
+objetos.csv
+
 # Environment — nunca commitear overrides locales
 .env
 .env.*

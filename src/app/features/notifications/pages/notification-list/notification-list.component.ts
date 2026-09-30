@@ -169,8 +169,13 @@ export class NotificationListComponent implements OnInit {
     if (type === 'document_processed' || type === 'document_failed' || type === 'document_uploaded') {
       return { text: 'Ver documento', commands: id ? ['/documents', String(id)] : ['/documents'] };
     }
+    // Las notificaciones de presupuesto no ofrecen acción: el módulo de
+    // Presupuesto/Uso no está implementado y el dashboard no muestra costos
+    // (el costo por respuesta se ve en el propio chat). Antes enlazaban a
+    // /dashboard con el texto "Ver costos", que prometía algo que esa página
+    // no tiene.
     if (type.startsWith('budget')) {
-      return { text: 'Ver costos', commands: ['/dashboard'] };
+      return null;
     }
     if (type === 'knowledge_gap_found') {
       return id

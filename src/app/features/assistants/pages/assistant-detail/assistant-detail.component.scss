@@ -265,8 +265,6 @@
   border-radius: $radius-md;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-
-  &--widget { background: rgba($color-accent, 0.06); }
 }
 
 .ad-doc-icon { color: $color-primary; font-size: $size-lg; }
