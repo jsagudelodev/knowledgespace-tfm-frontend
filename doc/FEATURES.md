@@ -50,14 +50,23 @@ Login de usuarios con JWT. No existe registro público (el botón "crear cuenta"
 
 ### 2. Dashboard (`/dashboard`)
 
-Página de inicio con métricas agregadas de la empresa: documentos (totales / completados / en proceso), usuarios totales, conversaciones totales, mensajes totales y actividad reciente. Incluye un estado vacío/onboarding cuando la empresa aún no tiene documentos cargados.
+Página de inicio con tres métricas agregadas de la empresa: documentos
+(totales / completados / en proceso), usuarios totales y mensajes totales.
+Incluye un estado vacío/onboarding cuando la empresa aún no tiene documentos
+cargados.
 
-Se alimenta de `GET /v1/dashboard/metrics`, que agrega todas las cifras
-filtrando por el `company_id` del JWT. "En proceso" agrupa los documentos en
-`pending` y `processing`; el total incluye los `failed`, para que cuadre con lo
-que se ve en `/documents`. La actividad reciente son las 10 últimas
-conversaciones de la empresa, ordenadas por `updated_at` con caída a
-`created_at` (ese campo es NULL hasta la primera modificación).
+Se alimenta de `GET /v1/dashboard/metrics`, que agrega las cifras filtrando por
+el `company_id` del JWT. "En proceso" agrupa los documentos en `pending` y
+`processing`; el total incluye los `failed`, para que cuadre con lo que se ve
+en `/documents`. Los mensajes se cuentan por join con `conversations`, que es
+lo que garantiza el aislamiento multi-tenant, porque la tabla `messages` no
+tiene `company_id`.
+
+**No muestra conversaciones ni actividad reciente**, y es deliberado: abrir el
+chat crea una conversación aunque no se pregunte nada, así que el recuento no
+medía uso real y el listado de actividad se llenaba de conversaciones vacías.
+Por el mismo motivo, el paso "Abre el Chat IA" del onboarding se marca como
+completado según los mensajes, no según las conversaciones.
 
 ### 3. Empresas (`/companies`)
 

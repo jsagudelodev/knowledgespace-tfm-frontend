@@ -51,17 +51,6 @@
       </div>
 
       <div class="metric-card">
-        <div class="metric-icon metric-icon--conversations">
-          <span class="material-symbols-outlined">forum</span>
-        </div>
-        <h3>Conversaciones</h3>
-        <div class="metric-value">{{ metrics()!.conversations.total }}</div>
-        <div class="metric-detail">
-          <span>Total acumuladas</span>
-        </div>
-      </div>
-
-      <div class="metric-card">
         <div class="metric-icon metric-icon--messages">
           <span class="material-symbols-outlined">mail</span>
         </div>
@@ -137,35 +126,6 @@
             </a>
           </div>
 
-        </div>
-      </div>
-
-    } @else {
-
-      <!-- ── Actividad reciente ─────────────────────────────────────────── -->
-      <div class="recent-activity">
-        <h2>Actividad reciente</h2>
-        <div class="activity-table">
-          <div class="activity-table-header">
-            <div>Tipo</div>
-            <div>Descripción</div>
-            <div>Fecha</div>
-          </div>
-          @for (item of metrics()!.recent_activity; track item.id) {
-            <div class="activity-row">
-              <div class="activity-icon-badge">
-                <span class="material-symbols-outlined icon-sm">info</span>
-              </div>
-              <div class="activity-description">{{ item.title }}</div>
-              <div class="activity-date">{{ item.updated_at | date:'short' }}</div>
-            </div>
-          }
-          @empty {
-            <div class="activity-empty">
-              <span class="material-symbols-outlined">hourglass_empty</span>
-              <p>Sin actividad reciente</p>
-            </div>
-          }
         </div>
       </div>
 

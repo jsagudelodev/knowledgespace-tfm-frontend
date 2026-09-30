@@ -1,5 +1,4 @@
 import { Component, OnInit, DestroyRef, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DashboardService } from '../../services/dashboard.service';
@@ -9,7 +8,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-dashboard-home',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './dashboard-home.component.html',
   styleUrls: ['./dashboard-home.component.scss']
 })
@@ -24,8 +23,12 @@ export class DashboardHomeComponent implements OnInit {
 
   readonly currentUser = computed(() => this.authService.getCurrentUserValue());
 
-  readonly hasDocuments     = computed(() => (this.metrics()?.documents.total ?? 0) > 0);
-  readonly hasConversations = computed(() => (this.metrics()?.conversations.total ?? 0) > 0);
+  readonly hasDocuments = computed(() => (this.metrics()?.documents.total ?? 0) > 0);
+
+  // Marca el paso "Abre el Chat IA" como hecho. Se mide por mensajes y no por
+  // conversaciones: abrir el chat crea una conversación vacía al instante, así
+  // que contarlas daba el paso por completado sin haber preguntado nada.
+  readonly hasConversations = computed(() => (this.metrics()?.messages.total ?? 0) > 0);
   readonly isEmptyState     = computed(() => !!this.metrics() && !this.hasDocuments());
 
   ngOnInit(): void {
