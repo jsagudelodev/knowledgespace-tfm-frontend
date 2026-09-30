@@ -225,10 +225,10 @@
 }
 
 .assistant-avatar-small {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  object-fit: cover;
+  // Es un emoji renderizado como texto, no una imagen: se dimensiona por
+  // tipografía y se alinea con .assistant-icon-small, que es la otra rama.
+  font-size: 13px;
+  line-height: 1;
   flex-shrink: 0;
 }
 

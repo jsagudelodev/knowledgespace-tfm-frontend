@@ -74,8 +74,10 @@
               [class.active]="selectedAssistant()?.id === assistant.id"
               (click)="selectAssistant(assistant)"
             >
+              <!-- `avatar` guarda un emoji (ver assistant-form), no una URL:
+                   pintarlo como <img src="🤖"> pedía una imagen inexistente. -->
               @if (assistant.avatar) {
-                <img [src]="assistant.avatar" class="assistant-avatar-small" />
+                <span class="assistant-avatar-small">{{ assistant.avatar }}</span>
               } @else {
                 <span class="material-symbols-outlined icon-sm assistant-icon-small">smart_toy</span>
               }
