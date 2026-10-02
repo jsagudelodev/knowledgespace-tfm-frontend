@@ -1,3 +1,21 @@
+/**
+ * Acceso al chat RAG: conversaciones, mensajes y envío de preguntas.
+ *
+ * No hereda de `CrudService` porque cubre tres recursos distintos del backend
+ * (`/v1/conversations`, `/v1/messages` y `/v1/chat`), de ahí que su `basePath`
+ * sea solo `/v1`.
+ *
+ * **El envío de mensajes es HTTP síncrono, no streaming.** `POST /v1/chat/message`
+ * devuelve la respuesta completa cuando el pipeline RAG ha terminado: embedding
+ * de la pregunta, búsqueda en Pinecone, filtrado por umbral de relevancia y
+ * generación con el LLM. El usuario espera unos segundos sin ver texto parcial.
+ *
+ * Es una limitación asumida, no un olvido: el backend no expone WebSocket ni
+ * SSE, y añadir streaming token por token habría exigido rehacer el transporte
+ * en ambos lados sin aportar nada a la calidad de las respuestas, que es el
+ * objeto del trabajo. La espera se cubre en la UI con el indicador de
+ * escritura. Ver `doc/FEATURES.md`, sección de pendientes.
+ */
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../core/services/api.service';

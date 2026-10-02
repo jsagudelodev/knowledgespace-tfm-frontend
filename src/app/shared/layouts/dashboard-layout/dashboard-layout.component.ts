@@ -1,3 +1,26 @@
+/**
+ * Marco de la aplicación autenticada: sidebar, header y `<router-outlet>`.
+ *
+ * **Dependencia cruzada asumida.** Este componente vive en `shared/` pero
+ * importa dos cosas de `features/`: `ChatDetailComponent` y
+ * `NotificationsService`. Va en el sentido "prohibido" —lo compartido no
+ * debería conocer lo específico— y se aceptó por dos razones concretas:
+ *
+ * - El **drawer de chat** tiene que estar disponible desde cualquier módulo,
+ *   así que se monta aquí de forma permanente. La alternativa —un servicio en
+ *   `core/` que proyectara el componente— añadía indirección para un único
+ *   caso de uso.
+ * - El **contador de notificaciones no leídas** del sidebar necesita el
+ *   servicio de ese módulo. Lo correcto sería centralizar el conteo en
+ *   `core/`; se dejó así por ser suficiente para el alcance del trabajo.
+ *
+ * Consecuencia conocida: el badge no se refresca al marcar notificaciones como
+ * leídas desde `/notifications`, porque esa página y esta layout usan
+ * instancias distintas del servicio. Se actualiza en la siguiente navegación.
+ *
+ * El estado del sidebar (`sidebarOpen`) tampoco persiste: cada módulo instancia
+ * su propia layout, así que vuelve a expandido al cambiar de sección.
+ */
 import {
   Component, inject, signal, computed,
   ViewEncapsulation, ChangeDetectionStrategy

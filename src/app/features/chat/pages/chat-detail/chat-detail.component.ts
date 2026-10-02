@@ -1,3 +1,32 @@
+/**
+ * Conversación del chat RAG: mensajes, fuentes citadas, costo y feedback.
+ *
+ * Tres cosas que conviene saber antes de tocar este archivo:
+ *
+ * **1. Se monta en dos sitios a la vez.** Una instancia vive en la ruta
+ * `/chat/:id` y otra está montada permanentemente en `DashboardLayoutComponent`
+ * como drawer lateral, accesible desde el header en cualquier módulo. Son
+ * instancias **independientes**: cada una mantiene su propia conversación en
+ * memoria y no se sincronizan. Abrir el drawer mientras estás en `/chat` te
+ * deja con dos conversaciones distintas abiertas, y es el comportamiento
+ * esperado.
+ *
+ * **2. El feedback se filtra en cliente.** `restoreFeedbackState()` pide
+ * `/v1/feedback/me` **entero** y descarta en el navegador lo que no
+ * corresponde a los mensajes visibles. No es por descuido: el backend no
+ * expone un endpoint que filtre por lista de `message_id`. Funciona mientras
+ * el historial de feedback de un usuario sea pequeño; con volumen alto habría
+ * que añadir ese endpoint.
+ *
+ * **3. El costo por respuesta se muestra aquí.** El `cost_usd` que viaja en
+ * cada mensaje del asistente es la única superficie de UI del tracking de
+ * costo por solicitud LLM — los endpoints de `/v1/cost-tracking` exponen el
+ * agregado, pero no los consume el frontend.
+ *
+ * Los errores de envío se muestran en un banner con mensaje según el código
+ * HTTP (ver `showSendError`). Las cargas secundarias —historial, asistentes—
+ * fallan en silencio salvo por `console.error`.
+ */
 import {
   Component, OnInit, OnDestroy, ViewChild, ElementRef,
   DestroyRef, inject, signal, computed
