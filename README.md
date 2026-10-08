@@ -211,7 +211,7 @@ Target `ES2022`, `isolatedModules: true`. Los componentes generados usarán SCSS
 
 | Entorno | Script serve | Script build | `environment.ts` activo | `production` flag |
 |---|---|---|---|---|
-| **local** | `npm start` | `npm run build:dev` | `environment.ts` → `localhost:8001` | `false` |
+| **local** | `npm start` | `npm run build:dev` | `environment.ts` → `127.0.0.1:8002` | `false` |
 | **dev** | `npm run start:dev` | `npm run build:dev` | `environment.development.ts` | `false` |
 | **qa** | `npm run start:qa` | `npm run build:qa` | `environment.qa.ts` | `false` |
 | **pdn** | `npm run start:pdn` | `npm run build:pdn` | `environment.production.ts` | `true` |
