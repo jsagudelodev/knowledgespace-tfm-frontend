@@ -153,6 +153,17 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
   private searchSubject = new Subject<string>();
   private errorTimer?: ReturnType<typeof setTimeout>;
 
+  /**
+   * Error de **carga** de la conversación, distinto de `sendError`.
+   *
+   * No se autodescarta a los 5 segundos como el del envío: si la conversación
+   * no se pudo cargar, la pantalla está vacía y el usuario necesita ver el
+   * motivo y poder reintentar. Antes esto solo se registraba con
+   * `console.error`, así que un fallo de red dejaba el chat en blanco sin
+   * ninguna explicación — en el módulo que es el núcleo del proyecto.
+   */
+  readonly loadError = signal<string | null>(null);
+
   constructor(
     private chatService:      ChatService,
     private feedbackService:  FeedbackService,
@@ -196,6 +207,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
           this.searchActive.set(false);
           this.currentPage.set(1);
           this.loading.set(true);
+          this.loadError.set(null);
 
           return forkJoin({
             conversation: this.chatService.getConversation(+id),
@@ -213,8 +225,8 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
           this.scrollToBottom();
         },
         error: (e) => {
-          console.error('Error cargando conversación:', e);
           this.loading.set(false);
+          this.loadError.set(this.mensajeDeCarga(e));
         }
       });
     }
@@ -287,16 +299,20 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
   }
 
   createNewConversation(): void {
+    this.loadError.set(null);
     this.chatService.createConversation({ title: 'Chat IA' })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (c) => { this.conversation.set(c); this.loadMessages(c.id); },
-        error: (e) => console.error('Error al crear la conversación:', e)
+        // Es el caso del drawer: si no hay conversación, no hay dónde escribir.
+        // Dejarlo en console.error dejaba el chat en blanco sin explicación.
+        error: (e) => this.loadError.set(this.mensajeDeCarga(e))
       });
   }
 
   loadMessages(conversationId: number): void {
     this.loading.set(true);
+    this.loadError.set(null);
     this.chatService.getMessages(conversationId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -306,7 +322,10 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
           this.currentPage.set(this.totalPages());
           this.restoreFeedbackState(msgs.map(m => m.id));
         },
-        error: (e) => { console.error('Error al cargar mensajes:', e); this.loading.set(false); }
+        error: (e) => {
+          this.loading.set(false);
+          this.loadError.set(this.mensajeDeCarga(e));
+        }
       });
   }
 
@@ -528,6 +547,51 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
   dismissError(): void {
     clearTimeout(this.errorTimer);
     this.sendError.set(null);
+  }
+
+  /**
+   * Traduce un fallo de carga a un mensaje accionable.
+   *
+   * Mismo criterio que `showSendError`, pero con textos propios: aquí lo que
+   * falló fue abrir la conversación, no enviar un mensaje, y el 404 es un caso
+   * real —un enlace a una conversación borrada— que en el envío no se da.
+   */
+  private mensajeDeCarga(e: unknown): string {
+    const status = (e as { status?: number })?.status;
+    if (!status || status === 0) return 'Sin conexión. Verifica tu red y vuelve a intentarlo.';
+    if (status === 404)          return 'Esta conversación ya no existe.';
+    if (status === 403)          return 'No tienes acceso a esta conversación.';
+    if (status >= 500)           return 'El servidor no responde. Intenta de nuevo en unos segundos.';
+    return 'No se pudo cargar la conversación.';
+  }
+
+  /** Reintenta la carga de la conversación que está en la ruta. */
+  reintentarCarga(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) return;
+
+    this.loading.set(true);
+    this.loadError.set(null);
+
+    forkJoin({
+      conversation: this.chatService.getConversation(+id),
+      messages:     this.chatService.getMessages(+id)
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ conversation, messages }) => {
+          this.conversation.set(conversation);
+          this.messages.set(messages);
+          this.loading.set(false);
+          this.currentPage.set(this.totalPages());
+          this.restoreFeedbackState(messages.map(m => m.id));
+          this.scrollToBottom();
+        },
+        error: (e) => {
+          this.loading.set(false);
+          this.loadError.set(this.mensajeDeCarga(e));
+        }
+      });
   }
 
   private showSendError(e: unknown): void {

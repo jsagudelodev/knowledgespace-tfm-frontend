@@ -249,6 +249,38 @@
   font-size: 13px;
 }
 
+// Error de carga con reintento. Mismas clases y mismo aspecto que en el
+// Dashboard (`.error-state` / `.error-retry`): son estilos de componente, no
+// globales, asi que hay que declararlos aqui para que las dos pantallas se
+// vean igual.
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 24px;
+  color: $font-muted;
+  font-size: 13px;
+  text-align: center;
+
+  .material-symbols-outlined { color: $color-danger; }
+
+  p { margin: 0; }
+}
+
+.error-retry {
+  background: none;
+  border: 1px solid $border-flat;
+  border-radius: $radius-md;
+  padding: $sp-1 $sp-3;
+  color: $color-primary;
+  font-family: inherit;
+  font-size: $size-sm;
+  cursor: pointer;
+
+  &:hover { background: $color-primary-light; }
+}
+
 .spinner {
   display: inline-block;
   width: 26px;

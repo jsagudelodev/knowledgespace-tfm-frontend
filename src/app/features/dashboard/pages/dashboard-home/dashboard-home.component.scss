@@ -188,6 +188,10 @@
   &__title  { font-size: $size-base; font-weight: $w-semibold; color: $font-title; margin: 0 0 $sp-1; }
   &__desc   { font-size: $size-sm; color: $font-muted; margin: 0; }
 
+  // Se aplica a <a> (pasos 1 y 2, navegan) y a <button> (paso 3, abre el
+  // drawer del chat). De ahi el reset de `border`, `font-family` y `cursor`:
+  // sin el, el boton nativo saldria con borde del navegador y otra tipografia
+  // justo al lado de dos enlaces identicos.
   &__cta {
     display: inline-flex;
     align-items: center;
@@ -195,12 +199,15 @@
     padding: $sp-2 $sp-4;
     background: $btn-primary-bg;
     color: $btn-primary-text;
+    border: none;
     border-radius: $radius-md;
+    font-family: inherit;
     font-size: $size-sm;
     font-weight: $w-semibold;
     text-decoration: none;
     white-space: nowrap;
     flex-shrink: 0;
+    cursor: pointer;
     transition: background $motion-fast;
 
     &:hover { background: $btn-primary-hover; }

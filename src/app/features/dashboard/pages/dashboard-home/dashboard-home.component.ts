@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DashboardService } from '../../services/dashboard.service';
 import { DashboardMetrics } from '../../../../core/models/dashboard.model';
 import { AuthService } from '../../../../core/services/auth.service';
+import { UiStatusService } from '../../../../core/services/ui-status.service';
 
 @Component({
   selector: 'app-dashboard-home',
@@ -16,6 +17,7 @@ export class DashboardHomeComponent implements OnInit {
   private readonly destroyRef      = inject(DestroyRef);
   private readonly dashboardService = inject(DashboardService);
   private readonly authService      = inject(AuthService);
+  private readonly uiStatus         = inject(UiStatusService);
 
   metrics = signal<DashboardMetrics | null>(null);
   loading = signal(true);
@@ -33,6 +35,20 @@ export class DashboardHomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+  }
+
+  /**
+   * Abre el drawer de chat del layout.
+   *
+   * No navega a `/chat` porque esa ruta no existe como página: `CHAT_ROUTES`
+   * solo declara `:id`, para que los enlaces a una conversación concreta
+   * sigan resolviendo. Un `routerLink="/chat"` caía en la ruta comodín y
+   * acababa de vuelta en el dashboard sin abrir nada — y como este paso del
+   * onboarding solo se muestra cuando no hay documentos, el fallo aparecía
+   * justo en el primer uso de un espacio nuevo.
+   */
+  abrirChat(): void {
+    this.uiStatus.openChat();
   }
 
   load(): void {

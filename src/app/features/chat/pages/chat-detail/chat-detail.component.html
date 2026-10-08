@@ -95,6 +95,16 @@
       <span class="spinner"></span>
       <p>Cargando mensajes...</p>
     </div>
+  } @else if (loadError()) {
+    <!-- Error de carga: persiste hasta que el usuario actúe, al contrario que
+         el banner de envío, que se autodescarta. Si la conversación no cargó
+         no hay nada en pantalla, así que el motivo y el reintento son lo
+         único que el usuario puede usar. -->
+    <div class="error-state">
+      <span class="material-symbols-outlined">error</span>
+      <p>{{ loadError() }}</p>
+      <button type="button" class="error-retry" (click)="reintentarCarga()">Reintentar</button>
+    </div>
   } @else {
 
     <!-- ── Messages ─────────────────────────────── -->

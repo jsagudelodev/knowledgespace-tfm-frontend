@@ -120,10 +120,13 @@
               <p class="onboarding-step__title">Abre el Chat IA</p>
               <p class="onboarding-step__desc">Haz tu primera pregunta al asistente sobre tus documentos.</p>
             </div>
-            <a class="onboarding-step__cta" routerLink="/chat">
+            <!-- Abre el drawer global en vez de navegar: el chat no es una
+                 página, vive en el drawer del layout (ver CHAT_ROUTES, que solo
+                 declara `:id` para los enlaces a una conversación concreta). -->
+            <button type="button" class="onboarding-step__cta" (click)="abrirChat()">
               Ir al chat
               <span class="material-symbols-outlined icon-sm">arrow_forward</span>
-            </a>
+            </button>
           </div>
 
         </div>
