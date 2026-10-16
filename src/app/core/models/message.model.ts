@@ -3,6 +3,15 @@ export interface Source {
   text: string;
   document_name?: string;
   score?: number;
+  /**
+   * Qué fragmento del documento sustenta la respuesta, no solo de qué
+   * documento procede. Una consulta recupera a menudo varios fragmentos del
+   * mismo PDF —en la evaluación ocurrió en la mitad de los casos—, y sin este
+   * dato son indistinguibles entre sí.
+   */
+  chunk_index?: number;
+  /** Identificador del vector, `doc-{id}-chunk-{i}`. Único por fragmento. */
+  chunk_id?: string;
 }
 
 export interface Message {

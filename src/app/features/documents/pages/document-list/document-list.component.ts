@@ -10,7 +10,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Paginator, PaginatorState } from 'primeng/paginator';
 import { DocumentService } from '../../services/document.service';
 import { CategoryService } from '../../../categories/services/category.service';
-import { Document } from '../../../../core/models/document.model';
+import { Document, DocumentChunks } from '../../../../core/models/document.model';
 import { Category } from '../../../../core/models/category.model';
 import { NotificationService } from '../../../../core/services/notification.service';
 
@@ -327,6 +327,49 @@ export class DocumentListComponent implements OnInit, OnDestroy {
           this.downloadingIds.delete(id);
           this.downloadingIds = new Set(this.downloadingIds);
           this.notifications.error('Error al generar el enlace de descarga.');
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  // ── Fragmentos indexados ──────────────────────────────────────────────
+  //
+  // Permite ver en qué quedó dividido un documento tras la ingesta. Hasta
+  // ahora la lista decía cuántos fragmentos tenía, pero no cuáles, de modo que
+  // un troceado defectuoso —un corte a mitad de una tabla, una sección que la
+  // extracción del PDF se dejó— solo se notaba por sus efectos en las
+  // respuestas del chat.
+
+  /** Documento cuyos fragmentos están desplegados, o null. Solo uno a la vez. */
+  readonly chunksAbiertos = signal<number | null>(null);
+  readonly chunksCargando = signal(false);
+  readonly chunksDatos    = signal<DocumentChunks | null>(null);
+
+  toggleChunks(id: number): void {
+    if (this.chunksAbiertos() === id) {
+      this.chunksAbiertos.set(null);
+      this.chunksDatos.set(null);
+      return;
+    }
+
+    // Se piden bajo demanda: un documento puede tener decenas de fragmentos
+    // con su texto, y traerlos para toda la lista sería un gasto inútil.
+    this.chunksAbiertos.set(id);
+    this.chunksDatos.set(null);
+    this.chunksCargando.set(true);
+
+    this.documentService.getChunks(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: datos => {
+          this.chunksCargando.set(false);
+          this.chunksDatos.set(datos);
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.chunksCargando.set(false);
+          this.chunksAbiertos.set(null);
+          this.notifications.error('No se pudieron leer los fragmentos del índice.');
           this.cdr.detectChanges();
         }
       });

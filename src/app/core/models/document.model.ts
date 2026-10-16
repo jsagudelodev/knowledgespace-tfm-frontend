@@ -19,3 +19,29 @@ export interface Document {
 export interface DocumentUpdate {
   category_id?: number | null;
 }
+
+/** Un fragmento indexado, tal como lo guarda el índice vectorial. */
+export interface DocumentChunk {
+  chunk_id: string;
+  chunk_index: number;
+  text: string;
+  caracteres: number;
+}
+
+/**
+ * En qué quedó dividido un documento tras la ingesta.
+ *
+ * Los fragmentos se leen del índice vectorial y no de la base de datos,
+ * porque es el índice el que responde a las consultas. `sincronizado` compara
+ * ambos recuentos: que no coincidan es la señal de que el índice ha divergido
+ * del registro, algo que el sistema no avisaba de ninguna otra forma.
+ */
+export interface DocumentChunks {
+  document_id: number;
+  document_name: string;
+  status: Document['status'];
+  chunk_count_registrado: number;
+  chunk_count_indexado: number;
+  sincronizado: boolean;
+  chunks: DocumentChunk[];
+}

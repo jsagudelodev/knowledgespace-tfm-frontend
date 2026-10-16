@@ -580,6 +580,17 @@
   &.score-mid  { color: $score-mid-text; }
 }
 
+// Qué fragmento del documento es. Se distingue de la relevancia por ser un
+// dato de localización y no de calidad: por eso va en gris y entre corchetes
+// visuales, sin la escala de color de la puntuación.
+.source-chunk {
+  font-size: 10px;
+  color: $font-muted;
+  opacity: .75;
+
+  &::before { content: '· '; }
+}
+
 .source-preview {
   padding: 10px 12px;
   background: $bg-card;

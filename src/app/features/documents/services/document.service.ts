@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CrudService } from '../../../core/services/crud.service';
-import { Document, DocumentUpdate } from '../../../core/models/document.model';
+import { Document, DocumentChunks, DocumentUpdate } from '../../../core/models/document.model';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentService extends CrudService<Document, never, DocumentUpdate> {
@@ -22,6 +22,17 @@ export class DocumentService extends CrudService<Document, never, DocumentUpdate
 
   getDownloadUrl(id: number): Observable<{ url: string; filename: string }> {
     return this.api.get<{ url: string; filename: string }>(`${this.basePath}/${id}/download`);
+  }
+
+  /**
+   * Los fragmentos en que quedó dividido el documento.
+   *
+   * Se consultan bajo demanda y no junto al listado: un documento puede tener
+   * decenas de fragmentos con su texto completo, y traerlos para todos cada
+   * vez que se abre la pantalla sería un gasto inútil.
+   */
+  getChunks(id: number): Observable<DocumentChunks> {
+    return this.api.get<DocumentChunks>(`${this.basePath}/${id}/chunks`);
   }
 
   getDocuments(): Observable<Document[]> {

@@ -175,7 +175,10 @@
                   <span>Fuentes consultadas &nbsp;·&nbsp; {{ message.sources.length }}</span>
                 </div>
                 <div class="sources-table">
-                  @for (source of message.sources; track source.document_id; let i = $index) {
+                  <!-- Se sigue por `chunk_id` y no por `document_id`: una
+                       consulta recupera a menudo varios fragmentos del mismo
+                       documento, y las claves repetidas rompen el bucle. -->
+                  @for (source of message.sources; track source.chunk_id || source.document_id + '-' + $index; let i = $index) {
                     <div class="source-row">
                       <div class="source-info">
                         <span class="source-index">{{ i + 1 }}</span>
@@ -188,6 +191,11 @@
                             @if (source.score !== undefined) {
                               <span class="source-score" [class.score-high]="source.score >= 0.75" [class.score-mid]="source.score >= 0.5 && source.score < 0.75">
                                 {{ (source.score * 100).toFixed(0) }}% relevancia
+                              </span>
+                            }
+                            @if (source.chunk_index !== undefined && source.chunk_index !== null) {
+                              <span class="source-chunk" title="Fragmento del documento en el que se apoya esta respuesta">
+                                fragmento {{ source.chunk_index }}
                               </span>
                             }
                           </div>

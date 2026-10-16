@@ -251,9 +251,21 @@
             </div>
 
             <div class="doc-col-chunks">
-              <span class="doc-chunks">
-                {{ doc.chunk_count ? doc.chunk_count + ' chunks' : '—' }}
-              </span>
+              @if (doc.chunk_count) {
+                <button
+                  class="doc-chunks doc-chunks-btn"
+                  [class.is-open]="chunksAbiertos() === doc.id"
+                  [title]="chunksAbiertos() === doc.id ? 'Ocultar fragmentos' : 'Ver en qué fragmentos quedó dividido'"
+                  (click)="toggleChunks(doc.id)"
+                >
+                  {{ doc.chunk_count }} fragmentos
+                  <span class="material-symbols-outlined icon-sm">
+                    {{ chunksAbiertos() === doc.id ? 'expand_less' : 'expand_more' }}
+                  </span>
+                </button>
+              } @else {
+                <span class="doc-chunks">—</span>
+              }
             </div>
 
             <div class="doc-col-actions">
@@ -291,6 +303,49 @@
               }
             </div>
           </div>
+
+          <!-- ── Fragmentos indexados ──────────────────────────────────
+               Se leen del índice vectorial, no de la base de datos: es el
+               índice quien responde a las consultas del chat, así que es lo
+               que contiene lo que de verdad importa. -->
+          @if (chunksAbiertos() === doc.id) {
+            <div class="doc-chunks-panel">
+              @if (chunksCargando()) {
+                <div class="doc-chunks-estado">Leyendo el índice…</div>
+              } @else if (chunksDatos(); as datos) {
+                <div class="doc-chunks-cabecera">
+                  <span>
+                    {{ datos.chunk_count_indexado }} fragmentos en el índice
+                  </span>
+                  @if (!datos.sincronizado) {
+                    <span class="doc-chunks-alerta" title="El índice y el registro no coinciden">
+                      <span class="material-symbols-outlined icon-sm">warning</span>
+                      el registro dice {{ datos.chunk_count_registrado }}
+                    </span>
+                  }
+                </div>
+
+                @if (datos.chunks.length === 0) {
+                  <div class="doc-chunks-estado">
+                    Este documento no tiene nada indexado. Si su estado es
+                    «completado», el índice y el registro han divergido.
+                  </div>
+                } @else {
+                  <ol class="doc-chunks-lista">
+                    @for (c of datos.chunks; track c.chunk_id) {
+                      <li class="doc-chunk">
+                        <div class="doc-chunk-meta">
+                          <span class="doc-chunk-num">{{ c.chunk_index }}</span>
+                          <span class="doc-chunk-size">{{ c.caracteres }} car.</span>
+                        </div>
+                        <p class="doc-chunk-texto">{{ c.text }}</p>
+                      </li>
+                    }
+                  </ol>
+                }
+              }
+            </div>
+          }
         }
       </div>
 
