@@ -41,6 +41,14 @@ import { ChatService } from '../../services/chat.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { Conversation } from '../../../../core/models/conversation.model';
 import { Message, Source } from '../../../../core/models/message.model';
+
+/** Los fragmentos de un mismo documento, agrupados para no repetir su nombre. */
+interface FuenteAgrupada {
+  documentId: number;
+  nombre: string;
+  mejorScore: number;
+  fragmentos: Source[];
+}
 import { AuthService } from '../../../../core/services/auth.service';
 import { UiStatusService } from '../../../../core/services/ui-status.service';
 import { User } from '../../../../core/models/user.model';
@@ -473,10 +481,63 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
+      // El modelo envuelve a veces los símbolos matemáticos en delimitadores
+      // de LaTeX —`\( z \)`, `\[ x \]`— porque así aparecen en los documentos
+      // del corpus. Aquí no hay nada que los interprete, de modo que se leían
+      // literalmente. Se retiran los delimitadores y se conserva el símbolo,
+      // que es lo que el usuario necesita.
+      .replace(/\\\(\s*(.*?)\s*\\\)/g, '<em>$1</em>')
+      .replace(/\\\[\s*(.*?)\s*\\\]/g, '<em>$1</em>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/`(.*?)`/g, '<code>$1</code>')
       .replace(/\n/g, '<br>');
+  }
+
+  // ── Fuentes agrupadas ─────────────────────────────────────────────────
+  //
+  // Una consulta recupera a menudo varios fragmentos del mismo documento —en
+  // la evaluación ocurrió en la mitad de los casos, y con descomposición de
+  // consultas se recuperan hasta diez—. Listarlos uno por uno repetía el
+  // nombre del PDF hasta nueve veces y convertía el bloque de fuentes en lo
+  // más largo de la respuesta.
+
+  /** Mensajes cuyo bloque de fuentes está plegado. */
+  private readonly fuentesPlegadas = new Set<number>();
+
+  toggleFuentes(messageId: number): void {
+    if (this.fuentesPlegadas.has(messageId)) this.fuentesPlegadas.delete(messageId);
+    else this.fuentesPlegadas.add(messageId);
+  }
+
+  fuentesVisibles(messageId: number): boolean {
+    return !this.fuentesPlegadas.has(messageId);
+  }
+
+  /**
+   * Agrupa las fuentes por documento, conservando el orden de relevancia: el
+   * documento cuyo mejor fragmento puntúa más alto aparece primero.
+   */
+  agruparFuentes(sources: Source[]): FuenteAgrupada[] {
+    const porDocumento = new Map<string, FuenteAgrupada>();
+
+    for (const s of sources) {
+      const clave = s.document_name || `doc-${s.document_id}`;
+      const grupo = porDocumento.get(clave);
+      if (grupo) {
+        grupo.fragmentos.push(s);
+        grupo.mejorScore = Math.max(grupo.mejorScore, s.score ?? 0);
+      } else {
+        porDocumento.set(clave, {
+          documentId: s.document_id,
+          nombre: clave,
+          mejorScore: s.score ?? 0,
+          fragmentos: [s],
+        });
+      }
+    }
+
+    return [...porDocumento.values()].sort((a, b) => b.mejorScore - a.mejorScore);
   }
 
   scrollToBottom(): void {

@@ -170,53 +170,70 @@
             <!-- ── Sources ────────────────────── -->
             @if (message.sources && message.sources.length > 0) {
               <div class="sources-wrapper">
-                <div class="sources-title">
+                <!-- Plegable: con descomposición de consultas una respuesta
+                     puede apoyarse en diez fragmentos, y desplegados ocupan
+                     más que la propia respuesta. -->
+                <button class="sources-title" (click)="toggleFuentes(message.id)">
                   <span class="material-symbols-outlined icon-sm">menu_book</span>
-                  <span>Fuentes consultadas &nbsp;·&nbsp; {{ message.sources.length }}</span>
-                </div>
+                  <span>
+                    Fuentes consultadas &nbsp;·&nbsp;
+                    {{ message.sources.length }} fragmentos
+                    @if (agruparFuentes(message.sources).length > 1) {
+                      de {{ agruparFuentes(message.sources).length }} documentos
+                    }
+                  </span>
+                  <span class="material-symbols-outlined icon-sm sources-caret">
+                    {{ fuentesVisibles(message.id) ? 'expand_less' : 'expand_more' }}
+                  </span>
+                </button>
+                @if (fuentesVisibles(message.id)) {
                 <div class="sources-table">
-                  <!-- Se sigue por `chunk_id` y no por `document_id`: una
-                       consulta recupera a menudo varios fragmentos del mismo
-                       documento, y las claves repetidas rompen el bucle. -->
-                  @for (source of message.sources; track source.chunk_id || source.document_id + '-' + $index; let i = $index) {
+                  <!-- Agrupadas por documento: repetir siete veces el mismo
+                       nombre de PDF convertía el bloque en lo más largo de la
+                       respuesta. -->
+                  @for (grupo of agruparFuentes(message.sources); track grupo.nombre) {
                     <div class="source-row">
                       <div class="source-info">
-                        <span class="source-index">{{ i + 1 }}</span>
                         <span class="material-symbols-outlined icon-sm source-pdf-icon">picture_as_pdf</span>
                         <div class="source-meta">
-                          <span class="source-name">
-                            {{ source.document_name || 'Documento ' + source.document_id }}
-                          </span>
+                          <span class="source-name">{{ grupo.nombre }}</span>
                           <div class="source-badges">
-                            @if (source.score !== undefined) {
-                              <span class="source-score" [class.score-high]="source.score >= 0.75" [class.score-mid]="source.score >= 0.5 && source.score < 0.75">
-                                {{ (source.score * 100).toFixed(0) }}% relevancia
-                              </span>
-                            }
-                            @if (source.chunk_index !== undefined && source.chunk_index !== null) {
-                              <span class="source-chunk" title="Fragmento del documento en el que se apoya esta respuesta">
-                                fragmento {{ source.chunk_index }}
-                              </span>
+                            <span class="source-score"
+                                  [class.score-high]="grupo.mejorScore >= 0.75"
+                                  [class.score-mid]="grupo.mejorScore >= 0.5 && grupo.mejorScore < 0.75">
+                              {{ (grupo.mejorScore * 100).toFixed(0) }}%
+                            </span>
+                            <!-- Un chip por fragmento: al pulsarlo se ve su
+                                 texto, que es lo que permite comprobar la
+                                 cita en el documento original. -->
+                            @for (f of grupo.fragmentos; track f.chunk_id || f.chunk_index) {
+                              <button class="source-chunk"
+                                      [class.is-open]="expandedSource() === f"
+                                      [title]="'Ver el fragmento ' + f.chunk_index"
+                                      (click)="toggleSourcePreview(f)">
+                                {{ f.chunk_index ?? '·' }}
+                              </button>
                             }
                           </div>
                         </div>
                       </div>
                       <div class="source-actions">
-                        <button class="action-btn" title="Ver fragmento" aria-label="Ver fragmento" (click)="toggleSourcePreview(source)">
-                          <span class="material-symbols-outlined icon-sm">visibility</span>
-                        </button>
-                        <button class="action-btn" title="Descargar documento" aria-label="Descargar documento original" (click)="downloadSource(source)">
+                        <button class="action-btn" title="Descargar documento" aria-label="Descargar documento original" (click)="downloadSource(grupo.fragmentos[0])">
                           <span class="material-symbols-outlined icon-sm">download</span>
                         </button>
                       </div>
                     </div>
-                    @if (expandedSource() === source) {
-                      <div class="source-preview">
-                        <p>{{ source.text }}</p>
-                      </div>
+                    @for (f of grupo.fragmentos; track f.chunk_id || f.chunk_index) {
+                      @if (expandedSource() === f) {
+                        <div class="source-preview">
+                          <span class="source-preview-tag">Fragmento {{ f.chunk_index }}</span>
+                          <p>{{ f.text }}</p>
+                        </div>
+                      }
                     }
                   }
                 </div>
+                }
               </div>
             }
 

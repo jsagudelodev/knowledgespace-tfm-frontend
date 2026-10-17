@@ -508,11 +508,21 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  width: 100%;
   padding: 7px 12px;
   background: $slate-100;
+  border: none;
   border-bottom: 1px solid $border-flat;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover { background: $slate-200; }
 
   span { color: $slate-500; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  // La flecha se va al extremo: el bloque se pliega y desplegar diez
+  // fragmentos ocupa más que la propia respuesta.
+  .sources-caret { margin-left: auto; }
 }
 
 .sources-table { display: flex; flex-direction: column; }
@@ -580,15 +590,37 @@
   &.score-mid  { color: $score-mid-text; }
 }
 
-// Qué fragmento del documento es. Se distingue de la relevancia por ser un
-// dato de localización y no de calidad: por eso va en gris y entre corchetes
-// visuales, sin la escala de color de la puntuación.
+// Cada fragmento del documento, como chip pulsable. Se distingue de la
+// relevancia por ser un dato de localización y no de calidad, así que no lleva
+// la escala de color de la puntuación.
 .source-chunk {
+  min-width: 18px;
+  padding: 0 4px;
+  background: none;
+  border: 1px solid $border-flat;
+  border-radius: 3px;
+  font: inherit;
   font-size: 10px;
+  line-height: 15px;
   color: $font-muted;
-  opacity: .75;
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
 
-  &::before { content: '· '; }
+  &:hover { color: $font-title; border-color: $border-strong; }
+
+  &.is-open {
+    background: $color-primary;
+    border-color: $color-primary;
+    color: $font-on-primary;
+  }
+}
+
+.source-preview-tag {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: $color-primary;
 }
 
 .source-preview {
