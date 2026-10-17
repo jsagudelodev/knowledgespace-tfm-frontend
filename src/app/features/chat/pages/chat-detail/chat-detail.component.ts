@@ -476,18 +476,66 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
       .replaceAll(CLOSE, '</mark>');
   }
 
+  /**
+   * Traduce el LaTeX que el modelo emite a texto legible.
+   *
+   * El corpus de este asistente trata de embeddings, distancias y métricas de
+   * similitud, de modo que las respuestas incluyen fórmulas con frecuencia. El
+   * modelo las escribe en LaTeX porque así aparecen en los documentos, y aquí
+   * no hay nada que lo interprete: se leían literalmente, del estilo
+   * `\text{cos } \theta = \frac{x \cdot y}{||x|| \cdot ||y||}`.
+   *
+   * No se incorpora un motor de fórmulas —KaTeX o similar— porque añadiría una
+   * dependencia de peso para una necesidad marginal: las respuestas citan
+   * fórmulas, no las componen. Basta con que se entiendan.
+   *
+   * La traducción es deliberadamente parcial. Cubre lo que este corpus
+   * produce; ante un comando no contemplado se retira la barra invertida y se
+   * conserva el nombre, que es más legible que la notación cruda.
+   */
+  private traducirLatex(texto: string): string {
+    const SIMBOLOS: Record<string, string> = {
+      alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε',
+      theta: 'θ', lambda: 'λ', mu: 'μ', pi: 'π', sigma: 'σ', phi: 'φ',
+      omega: 'ω', Delta: 'Δ', Sigma: 'Σ', Omega: 'Ω',
+      cdot: '·', times: '×', div: '÷', pm: '±',
+      leq: '≤', geq: '≥', neq: '≠', approx: '≈', equiv: '≡',
+      infty: '∞', sum: '∑', prod: '∏', int: '∫', partial: '∂',
+      in: '∈', notin: '∉', subset: '⊂', forall: '∀', exists: '∃',
+      rightarrow: '→', leftarrow: '←', Rightarrow: '⇒',
+      sqrt: '√', angle: '∠', perp: '⊥', parallel: '∥',
+    };
+
+    return texto
+      // `\frac{a}{b}` → `a / b`, con paréntesis solo si hacen falta.
+      .replace(/\\frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}/g,
+        (_, num, den) => `${/[\s+\-]/.test(num.trim()) ? `(${num})` : num} / ` +
+                         `${/[\s+\-]/.test(den.trim()) ? `(${den})` : den}`)
+      // `\text{...}`, `\mathbf{...}` y parientes: solo envuelven texto.
+      .replace(/\\(?:text|mathrm|mathbf|mathit|operatorname)\s*\{([^{}]*)\}/g, '$1')
+      // `\sqrt{x}` → `√(x)`
+      .replace(/\\sqrt\s*\{([^{}]*)\}/g, '√($1)')
+      // Cualquier otro comando con argumento —`\vec{v}`, `\hat{x}`— conserva
+      // el argumento y pierde el comando. Va después de los casos concretos
+      // para que aquellos tengan preferencia.
+      .replace(/\\[a-zA-Z]+\s*\{([^{}]*)\}/g, '$1')
+      // Símbolos con nombre.
+      .replace(/\\([a-zA-Z]+)/g, (completo, nombre) => SIMBOLOS[nombre] ?? nombre)
+      // Dobles barras de la norma: `||x||` → `‖x‖`
+      .replace(/\|\|/g, '‖')
+      // Las llaves que quedan tras lo anterior ya no agrupan nada.
+      .replace(/[{}]/g, '');
+  }
+
   formatMessage(content: string): string {
-    return content
+    return this.traducirLatex(content)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
-      // El modelo envuelve a veces los símbolos matemáticos en delimitadores
-      // de LaTeX —`\( z \)`, `\[ x \]`— porque así aparecen en los documentos
-      // del corpus. Aquí no hay nada que los interprete, de modo que se leían
-      // literalmente. Se retiran los delimitadores y se conserva el símbolo,
-      // que es lo que el usuario necesita.
-      .replace(/\\\(\s*(.*?)\s*\\\)/g, '<em>$1</em>')
-      .replace(/\\\[\s*(.*?)\s*\\\]/g, '<em>$1</em>')
+      // El LaTeX se traduce antes que el Markdown: `\frac{a}{b}` contiene
+      // llaves que el resto de reglas no deben tocar.
+      .replace(/\\\(\s*(.*?)\s*\\\)/g, '$1')
+      .replace(/\\\[\s*(.*?)\s*\\\]/g, '$1')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/`(.*?)`/g, '<code>$1</code>')
