@@ -1,0 +1,51 @@
+<div class="cd-overlay" [class.open]="abierto()" (click)="cerrar()"></div>
+
+<aside class="cd-drawer" [class.open]="abierto()" aria-label="Fragmentos del documento">
+  <header class="cd-head">
+    <div class="cd-title">
+      <span class="material-symbols-outlined icon-sm">dataset</span>
+      <div class="cd-title-text">
+        <p class="cd-name">{{ datos()?.document_name || 'Fragmentos' }}</p>
+        @if (datos(); as d) {
+          <p class="cd-sub">
+            <span>{{ d.chunk_count_indexado }} fragmentos en el índice</span>
+            @if (!d.sincronizado) {
+              <span class="cd-alerta" title="El índice y el registro no coinciden">
+                <span class="material-symbols-outlined icon-sm">warning</span>
+                el registro dice {{ d.chunk_count_registrado }}
+              </span>
+            }
+          </p>
+        }
+      </div>
+    </div>
+    <button class="cd-close" title="Cerrar" aria-label="Cerrar" (click)="cerrar()">
+      <span class="material-symbols-outlined icon-sm">close</span>
+    </button>
+  </header>
+
+  <div class="cd-body">
+    @if (cargando()) {
+      <p class="cd-estado">Leyendo el índice…</p>
+    } @else if (datos(); as d) {
+      @if (d.chunks.length === 0) {
+        <p class="cd-estado">
+          Este documento no tiene nada indexado. Si su estado es «Listo», el
+          índice y el registro han divergido.
+        </p>
+      } @else {
+        <ol class="cd-lista">
+          @for (c of d.chunks; track c.chunk_id) {
+            <li class="cd-chunk">
+              <div class="cd-chunk-head">
+                <span class="cd-chunk-num">Fragmento {{ c.chunk_index }}</span>
+                <span class="cd-chunk-size">{{ c.caracteres }} caracteres</span>
+              </div>
+              <p class="cd-chunk-texto">{{ c.text }}</p>
+            </li>
+          }
+        </ol>
+      }
+    }
+  </div>
+</aside>

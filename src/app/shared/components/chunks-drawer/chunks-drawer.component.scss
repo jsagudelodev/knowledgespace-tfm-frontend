@@ -1,0 +1,122 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+
+// Mismo patrón que el drawer del chat en `dashboard-layout`: una superposición
+// que atenúa el fondo y una lámina que entra desde la derecha.
+
+.cd-overlay {
+  position: fixed;
+  inset: 0;
+  background: $bg-overlay;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity $motion-base, visibility $motion-base;
+  z-index: $z-lateral;
+
+  &.open { opacity: 1; visibility: visible; }
+}
+
+.cd-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  // Más ancho que el drawer del chat: aquí se lee texto corrido de unos mil
+  // caracteres y conviene que las líneas no queden demasiado cortas.
+  width: min(620px, 92vw);
+  height: 100%;
+  background: $bg-card;
+  display: flex;
+  flex-direction: column;
+  box-shadow: $shadow-xl;
+  transform: translateX(100%);
+  transition: transform $motion-base;
+  z-index: $z-lateral + 1;
+
+  &.open { transform: translateX(0); }
+}
+
+.cd-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: $sp-3;
+  padding: $sp-4 $sp-5;
+  border-bottom: 1px solid $field-border;
+}
+
+.cd-title {
+  display: flex; align-items: flex-start; gap: $sp-2;
+  min-width: 0;
+  color: $color-primary;
+}
+
+.cd-title-text { min-width: 0; }
+
+.cd-name {
+  margin: 0;
+  font-size: $size-base; font-weight: $w-semibold; color: $font-title;
+  overflow-wrap: anywhere;
+}
+
+.cd-sub {
+  display: flex; align-items: center; gap: $sp-3; flex-wrap: wrap;
+  margin: 2px 0 0;
+  font-size: $size-xs; color: $font-muted;
+}
+
+.cd-alerta {
+  display: inline-flex; align-items: center; gap: 3px;
+  color: $color-danger; font-weight: $w-semibold;
+}
+
+.cd-close {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: none; border: none; border-radius: $radius-sm;
+  color: $font-muted; cursor: pointer;
+  transition: background $motion-fast, color $motion-fast;
+
+  &:hover { background: $bg-hover; color: $font-title; }
+}
+
+.cd-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: $sp-4 $sp-5 $sp-6;
+}
+
+.cd-estado {
+  margin: 0;
+  font-size: $size-xs; color: $font-muted;
+}
+
+.cd-lista {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: $sp-3;
+}
+
+.cd-chunk {
+  padding: $sp-3;
+  background: $bg-app;
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+}
+
+.cd-chunk-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: $sp-3;
+  margin-bottom: $sp-2;
+  padding-bottom: $sp-2;
+  border-bottom: 1px dashed $field-border;
+}
+
+.cd-chunk-num  { font-weight: $w-semibold; font-size: $size-xs; color: $color-primary; }
+.cd-chunk-size { font-size: $size-2xs; color: $font-muted; white-space: nowrap; }
+
+.cd-chunk-texto {
+  margin: 0;
+  font-size: $size-xs; line-height: $lh-relaxed; color: $font-body;
+  // El texto se conserva tal como se indexó, con sus saltos de línea: así se
+  // ve por dónde cortó el troceado y no una versión maquillada.
+  white-space: pre-wrap;
+  word-break: break-word;
+}

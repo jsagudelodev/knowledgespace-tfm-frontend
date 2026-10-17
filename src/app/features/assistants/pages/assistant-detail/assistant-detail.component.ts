@@ -9,10 +9,11 @@ import { AssistantService } from '../../services/assistant.service';
 import { DocumentService } from '../../../documents/services/document.service';
 import { CategoryService } from '../../../categories/services/category.service';
 import { Assistant } from '../../../../core/models/assistant.model';
-import { Document, DocumentChunks } from '../../../../core/models/document.model';
+import { Document } from '../../../../core/models/document.model';
 import { Category } from '../../../../core/models/category.model';
 import { Paginator, PaginatorState } from 'primeng/paginator';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { ChunksDrawerComponent } from '../../../../shared/components/chunks-drawer/chunks-drawer.component';
 
 type Tab = 'documents' | 'info';
 
@@ -25,7 +26,7 @@ interface UploadingFile {
 @Component({
   selector: 'app-assistant-detail',
   standalone: true,
-  imports: [Paginator],
+  imports: [Paginator, ChunksDrawerComponent],
   templateUrl: './assistant-detail.component.html',
   styleUrls: ['./assistant-detail.component.scss']
 })
@@ -39,17 +40,8 @@ export class AssistantDetailComponent implements OnInit, OnDestroy {
   readonly categories = signal<Category[]>([]);
   readonly activeTab  = signal<Tab>('documents');
 
-  // ── Fragmentos indexados ──────────────────────────────────────────────
-  //
-  // El listado dice cuántos fragmentos tiene un documento, pero no cuáles. Un
-  // troceado defectuoso —un corte a mitad de una tabla, una sección que la
-  // extracción del PDF se dejó— solo se notaba por sus efectos en las
-  // respuestas del chat, que es tarde y es indirecto.
-
-  /** Documento cuyos fragmentos están desplegados, o null. Solo uno a la vez. */
+  /** Documento cuyos fragmentos se muestran en el panel lateral, o null. */
   readonly chunksAbiertos = signal<number | null>(null);
-  readonly chunksCargando = signal(false);
-  readonly chunksDatos    = signal<DocumentChunks | null>(null);
   selectedCategoryId: number | null = null;
 
   readonly docPageSize = signal(10);
@@ -219,36 +211,10 @@ export class AssistantDetailComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ── Fragmentos indexados ──────────────────────────────────────────────
-
+  /** Abre o cierra el panel lateral de fragmentos. La carga la hace el
+   *  propio `app-chunks-drawer` al recibir el identificador. */
   toggleChunks(id: number): void {
-    if (this.chunksAbiertos() === id) {
-      this.chunksAbiertos.set(null);
-      this.chunksDatos.set(null);
-      return;
-    }
-
-    // Se piden bajo demanda: un documento puede tener decenas de fragmentos
-    // con su texto, y traerlos para toda la lista sería un gasto inútil.
-    this.chunksAbiertos.set(id);
-    this.chunksDatos.set(null);
-    this.chunksCargando.set(true);
-
-    this.documentService.getChunks(id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: datos => {
-          this.chunksCargando.set(false);
-          this.chunksDatos.set(datos);
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.chunksCargando.set(false);
-          this.chunksAbiertos.set(null);
-          this.notifications.error('No se pudieron leer los fragmentos del índice.');
-          this.cdr.detectChanges();
-        }
-      });
+    this.chunksAbiertos.set(this.chunksAbiertos() === id ? null : id);
   }
 
   // ── Delete ────────────────────────────────────────────────────────────

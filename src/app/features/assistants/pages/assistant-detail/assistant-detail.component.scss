@@ -297,65 +297,6 @@
   &.is-open { background: $bg-hover; color: $color-primary; }
 }
 
-.ad-chunks-panel {
-  margin: 0 $sp-4 $sp-3;
-  padding: $sp-3;
-  background: $bg-app;
-  border: 1px solid $field-border;
-  border-radius: $radius-md;
-}
-
-.ad-chunks-cabecera {
-  display: flex; align-items: center; gap: $sp-3;
-  margin-bottom: $sp-3;
-  font-size: $size-xs; color: $font-muted;
-}
-
-.ad-chunks-alerta {
-  display: inline-flex; align-items: center; gap: 3px;
-  color: $color-danger; font-weight: $w-semibold;
-}
-
-.ad-chunks-estado {
-  font-size: $size-xs; color: $font-muted;
-  padding: $sp-2 0;
-}
-
-.ad-chunks-lista {
-  list-style: none; margin: 0; padding: 0;
-  display: flex; flex-direction: column; gap: $sp-2;
-  // Un documento puede tener decenas de fragmentos: se acota el alto para que
-  // desplegar uno no empuje el resto de la lista fuera de la pantalla.
-  max-height: 420px;
-  overflow-y: auto;
-}
-
-.ad-chunk {
-  display: flex; gap: $sp-3;
-  padding: $sp-2 $sp-3;
-  background: $bg-card;
-  border: 1px solid $field-border;
-  border-radius: $radius-sm;
-}
-
-.ad-chunk-meta {
-  flex: 0 0 auto;
-  display: flex; flex-direction: column; align-items: center; gap: 1px;
-  min-width: 52px;
-}
-
-.ad-chunk-num  { font-weight: $w-bold; font-size: $size-sm; color: $font-title; }
-.ad-chunk-size { font-size: $size-2xs; color: $font-muted; white-space: nowrap; }
-
-.ad-chunk-texto {
-  margin: 0;
-  font-size: $size-xs; line-height: $lh-relaxed; color: $font-body;
-  // El texto se conserva tal como se indexó, con sus saltos de línea: así se
-  // ve por dónde cortó el troceado y no una versión maquillada.
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
 // ── Status badges ─────────────────────────────────────────────────────────────
 
 .ad-doc-status { flex-shrink: 0; }

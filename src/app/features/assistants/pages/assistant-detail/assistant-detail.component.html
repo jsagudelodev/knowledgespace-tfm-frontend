@@ -242,46 +242,6 @@
 
           </div>
 
-          <!-- ── Fragmentos indexados ──────────────────────────────────
-               Se leen del índice vectorial, no de la base de datos: es el
-               índice quien responde a las consultas del chat, así que lo que
-               contiene es lo que de verdad importa. -->
-          @if (chunksAbiertos() === doc.id) {
-            <div class="ad-chunks-panel">
-              @if (chunksCargando()) {
-                <div class="ad-chunks-estado">Leyendo el índice…</div>
-              } @else if (chunksDatos(); as datos) {
-                <div class="ad-chunks-cabecera">
-                  <span>{{ datos.chunk_count_indexado }} fragmentos en el índice</span>
-                  @if (!datos.sincronizado) {
-                    <span class="ad-chunks-alerta" title="El índice y el registro no coinciden">
-                      <span class="material-symbols-outlined icon-sm">warning</span>
-                      el registro dice {{ datos.chunk_count_registrado }}
-                    </span>
-                  }
-                </div>
-
-                @if (datos.chunks.length === 0) {
-                  <div class="ad-chunks-estado">
-                    Este documento no tiene nada indexado. Si su estado es
-                    «Listo», el índice y el registro han divergido.
-                  </div>
-                } @else {
-                  <ol class="ad-chunks-lista">
-                    @for (c of datos.chunks; track c.chunk_id) {
-                      <li class="ad-chunk">
-                        <div class="ad-chunk-meta">
-                          <span class="ad-chunk-num">{{ c.chunk_index }}</span>
-                          <span class="ad-chunk-size">{{ c.caracteres }} car.</span>
-                        </div>
-                        <p class="ad-chunk-texto">{{ c.text }}</p>
-                      </li>
-                    }
-                  </ol>
-                }
-              }
-            </div>
-          }
         }
       </div>
 
@@ -351,3 +311,5 @@
 
 </div>
 }
+
+<app-chunks-drawer [documentId]="chunksAbiertos()" />
