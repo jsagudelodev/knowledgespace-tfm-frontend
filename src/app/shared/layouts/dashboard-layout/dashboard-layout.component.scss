@@ -333,7 +333,11 @@ $sidebar-w-collapsed:   64px;
   position: fixed;
   top: 0;
   right: 0;
-  width: 460px;
+  // Eran 460 px fijos. Con el relleno, el avatar y el límite de ancho de la
+  // burbuja, al texto le quedaban unos 275 px y las respuestas salían
+  // partidas cada pocas palabras. El bloque de fuentes agravó el efecto al
+  // mostrar nombres largos de documento.
+  width: min(620px, 94vw);
   height: 100%;
   background: $bg-card;
   display: flex;

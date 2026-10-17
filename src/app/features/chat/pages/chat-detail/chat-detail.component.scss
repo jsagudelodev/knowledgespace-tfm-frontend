@@ -388,6 +388,10 @@
 .messages-container {
   flex: 1;
   overflow-y: auto;
+  // Red de seguridad: la conversación nunca debe desplazarse en horizontal.
+  // Si algún contenido futuro vuelve a desbordar, se recorta en vez de
+  // aparecer una barra bajo todos los mensajes.
+  overflow-x: hidden;
   padding: 24px 32px;
   display: flex;
   flex-direction: column;
@@ -398,6 +402,15 @@
   &::-webkit-scrollbar       { width: 4px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb { background: $border-flat; border-radius: 4px; }
+}
+
+// En el panel lateral el ancho es de 460 px fijos, no del tamaño de la
+// ventana, de modo que una media query no lo detecta. Con el relleno y el
+// límite del 80 % pensados para la pantalla completa, a la burbuja le
+// quedaban unos 275 px y el bloque de fuentes iba estrangulado.
+.chat-detail-container.is-drawer {
+  .messages-container { padding: 16px 14px; }
+  .message            { max-width: 100%; }
 }
 
 // Columna central legible — evita líneas demasiado largas en pantallas anchas
@@ -473,6 +486,12 @@
   flex-direction: column;
   gap: 10px;
   padding: 14px 18px;
+  // Un ítem flex no se encoge por debajo del ancho intrínseco de su contenido
+  // mientras conserve el `min-width: auto` que trae por defecto. Sin esto, el
+  // nombre largo de un PDF en el bloque de fuentes ensanchaba la burbuja —aun
+  // teniendo puntos suspensivos— y aparecía un desplazamiento horizontal en
+  // toda la conversación, muy visible con el chat abierto en el panel lateral.
+  min-width: 0;
 }
 
 .message-content {
