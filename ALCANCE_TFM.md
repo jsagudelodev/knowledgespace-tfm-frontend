@@ -34,9 +34,10 @@ evolucionando por separado. Ver también `ALCANCE_TFM.md` del backend.
   para que el multi-tenant funcione, no la contribución de investigación.
 - El campo `plan` (`basic|pro|enterprise`) es un modelo de datos ilustrativo
   de tiering multi-tenant; no hay checkout ni cobro real en este código.
-- URLs y dominios de infraestructura de producción comercial — los
-  `environment.*.ts` de esta entrega apuntan a placeholders, no a servicios
-  reales.
+- URLs y dominios de infraestructura de producción comercial. En esta
+  entrega, `environment.production.ts` apunta al backend de demostración del
+  TFM (desplegado desde `knowledgespace-tfm-backend` en Cloud Run), y
+  `environment.development.ts` y `environment.qa.ts` siguen con placeholders.
 
 ## Limitaciones conocidas
 
