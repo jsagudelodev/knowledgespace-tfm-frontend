@@ -56,7 +56,7 @@ Incluye un estado vacío/onboarding cuando la empresa aún no tiene documentos
 cargados.
 
 Se alimenta de `GET /v1/dashboard/metrics`, que agrega las cifras filtrando por
-el `company_id` del JWT. "En proceso" agrupa los documentos en `pending` y
+el `company_id` del usuario autenticado. "En proceso" agrupa los documentos en `pending` y
 `processing`; el total incluye los `failed`, para que cuadre con lo que se ve
 en `/documents`. Los mensajes se cuentan por join con `conversations`, que es
 lo que garantiza el aislamiento multi-tenant, porque la tabla `messages` no
@@ -248,5 +248,6 @@ Resumen de lo no implementado aún:
   token-por-token. La variable `wsUrl` que los entornos declaraban para ese fin
   se retiró: apuntaba a un endpoint que el backend no expone.
 - El estado de `sidebarOpen` no persiste entre navegaciones de módulo ni en `localStorage`.
-- Deuda técnica adicional: sin interceptor global de errores HTTP (401/403/500), sin loading skeletons en todas las listas/dashboard (Feedback ya tiene skeletons propios), sin tests unitarios ni e2e.
+- ✅ **Interceptor global de errores HTTP** (2026-10-22): `core/interceptors/error.interceptor.ts`. 401 fuera del login fuerza `logout()` + redirección (antes solo pasaba si el usuario pulsaba "cerrar sesión"), 403 y errores de servidor (0 o ≥500) muestran un aviso genérico vía `NotificationService`. No toca los 4xx de negocio (404/409/422), que ya tienen su propio mensaje por componente — relanza el error en todos los casos para no romper ese manejo existente.
+- Deuda técnica adicional: sin loading skeletons en todas las listas/dashboard (Feedback ya tiene skeletons propios), sin tests unitarios ni e2e.
 - **Deploy**: el frontend se sirve desde Vercel (`https://knowledge-space-front-end.vercel.app/`, auto-deploy en cada push a `main`), desacoplado del backend en Cloud Run — CORS gestiona la conexión entre ambos (ver `doc/BITACORA.md`, 2026-08-14).
