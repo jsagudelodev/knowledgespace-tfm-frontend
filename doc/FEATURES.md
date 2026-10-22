@@ -110,7 +110,7 @@ Núcleo de la ingesta de conocimiento: subida, procesamiento asíncrono, categor
 El corazón de la propuesta de valor: creación de agentes de IA tipo RAG configurables por empresa.
 
 - **Listado**: búsqueda, filtro por estado activo/inactivo, paginación.
-- **Formulario** (crear/editar): nombre, descripción, prompt de sistema, selección de modelo (`gpt-4o-mini`, `gpt-4o`, `gpt-4-turbo`, `gpt-3.5-turbo`), temperatura (slider 0–1), avatar (selector de emoji).
+- **Formulario** (crear/editar): nombre, descripción, prompt de sistema, selección de modelo (`gpt-4o-mini`, `gpt-4o`, `gpt-4-turbo`, `gpt-3.5-turbo`), avatar (selector de emoji). La temperatura se muestra bloqueada en 0: no es configurable, y el backend usa siempre `RAG_TEMPERATURA`.
 - **Detalle** (`/assistants/:id`), con pestañas:
   - *Documentos*: subida drag & drop de archivos asociados directamente al asistente, con validación, progreso, **polling automático cada 3s** del estado de procesamiento hasta completar o fallar, reintento, descarga y borrado.
   - *Info*: datos generales del asistente.

@@ -146,15 +146,12 @@
         <span class="af-hint">{{ modelHint() }}</span>
       </div>
 
-      <!-- Temperatura -->
+      <!-- Temperatura: visible pero bloqueada. Es fija (0) para todos los
+           asistentes y la decide el backend con `RAG_TEMPERATURA`. -->
       <div class="af-field">
         <label class="af-label" for="af-temp">
           Temperatura
-          <span class="af-temp-badge" [class.af-temp-badge--low]="temperature <= 0.3"
-            [class.af-temp-badge--mid]="temperature > 0.3 && temperature <= 0.7"
-            [class.af-temp-badge--high]="temperature > 0.7">
-            {{ temperature }}
-          </span>
+          <span class="af-temp-badge">{{ temperature }} · fija</span>
         </label>
         <input
           id="af-temp"
@@ -162,13 +159,13 @@
           class="af-range"
           [value]="temperature"
           min="0" max="1" step="0.1"
-          (input)="onTemperatureInput($event)"
-          [disabled]="saving"
+          disabled
         />
         <div class="af-range-labels">
           <span>🎯 Preciso</span>
           <span>🎨 Creativo</span>
         </div>
+        <span class="af-hint">Fija en 0 para todos los asistentes: es el valor que da respuestas más fieles a los documentos.</span>
       </div>
 
     </div>

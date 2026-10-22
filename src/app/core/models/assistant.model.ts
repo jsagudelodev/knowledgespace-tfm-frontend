@@ -5,7 +5,6 @@ export interface Assistant {
   description?: string | null;
   system_prompt?: string | null;
   model: string;
-  temperature: number;
   avatar?: string | null;
   quick_prompts?: string[] | null;
   is_active: boolean;
@@ -20,7 +19,6 @@ export interface AssistantCreate {
   description?: string | null;
   system_prompt?: string | null;
   model?: string;
-  temperature?: number;
   avatar?: string | null;
   quick_prompts?: string[] | null;
 }
@@ -30,7 +28,6 @@ export interface AssistantUpdate {
   description?: string | null;
   system_prompt?: string | null;
   model?: string;
-  temperature?: number;
   avatar?: string | null;
   is_active?: boolean;
   quick_prompts?: string[] | null;

@@ -39,7 +39,9 @@ export class AssistantFormComponent implements OnInit {
   description  = '';
   systemPrompt = '';
   model        = 'gpt-4o-mini';
-  temperature  = 0.7;
+  // Solo se muestra: la temperatura no es configurable y el backend usa
+  // siempre `RAG_TEMPERATURA` (0), el valor que dio más fidelidad al medirlo.
+  readonly temperature = 0;
   avatar       = '🤖';
   quickPrompts: string[] = [];
   newPromptText = '';
@@ -69,7 +71,6 @@ export class AssistantFormComponent implements OnInit {
           this.description  = a.description ?? '';
           this.systemPrompt = a.system_prompt ?? '';
           this.model        = a.model;
-          this.temperature  = a.temperature;
           this.avatar       = a.avatar ?? '🤖';
           this.quickPrompts = a.quick_prompts ?? [];
           this.loading      = false;
@@ -86,11 +87,6 @@ export class AssistantFormComponent implements OnInit {
   selectAvatar(emoji: string): void { this.avatar = emoji; }
 
   modelHint(): string { return MODEL_HINTS[this.model] ?? ''; }
-
-  onTemperatureInput(event: Event): void {
-    const val = parseFloat((event.target as HTMLInputElement).value);
-    if (!isNaN(val)) this.temperature = Math.min(1, Math.max(0, Math.round(val * 10) / 10));
-  }
 
   addPrompt(): void {
     const text = this.newPromptText.trim();
@@ -115,7 +111,6 @@ export class AssistantFormComponent implements OnInit {
       description:   this.description.trim() || null,
       system_prompt: this.systemPrompt.trim() || null,
       model:         this.model,
-      temperature:   this.temperature,
       avatar:        this.avatar.trim() || null,
       quick_prompts: this.quickPrompts.length > 0 ? this.quickPrompts : null,
     };

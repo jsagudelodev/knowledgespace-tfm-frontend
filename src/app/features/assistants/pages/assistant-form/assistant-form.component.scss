@@ -189,7 +189,12 @@
   &:focus { outline: none; border-color: $field-border-focus; box-shadow: $field-focus-shadow; }
   &:disabled { opacity: 0.6; cursor: not-allowed; background: $bg-disabled; }
 
-  &--small { height: 32px; font-size: $size-xs; }
+  // Sin ancho explícito, el input toma el ancho por defecto del navegador y se
+  // sale de la columna del avatar (120px), encima del texto de la descripción.
+  &--small {
+    width: 100%; min-width: 0; box-sizing: border-box;
+    height: 32px; font-size: $size-xs; text-align: center;
+  }
 }
 
 .af-select {
@@ -311,23 +316,19 @@
   gap: $sp-6;
 }
 
-// ── Temperature ───────────────────────────────────────────────────────────────
+// ── Temperature (solo lectura) ────────────────────────────────────────────────
 
 .af-temp-badge {
   margin-left: auto;
   padding: 1px $sp-2;
   border-radius: $radius-pill;
   font-size: $size-xs; font-weight: $w-bold;
-
-  &--low  { background: $badge-info-bg;    color: $badge-info-text; }
-  &--mid  { background: $badge-pending-bg; color: $badge-pending-text; }
-  &--high { background: rgba($color-danger, 0.08); color: $color-danger; }
+  background: $badge-info-bg; color: $badge-info-text;
 }
 
 .af-range {
   width: 100%;
   accent-color: $color-primary;
-  cursor: pointer;
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
