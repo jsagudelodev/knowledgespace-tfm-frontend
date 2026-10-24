@@ -2,6 +2,8 @@ import {
   Component, DestroyRef, HostListener, inject, Input, signal
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
 import { DocumentChunks } from '../../../core/models/document.model';
 import { DocumentService } from '../../../features/documents/services/document.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -26,6 +28,15 @@ import { NotificationService } from '../../../core/services/notification.service
  *
  * Se usa desde las dos pantallas que listan documentos —el detalle del
  * asistente y la lista general—, de ahí que esté aquí y no en una de ellas.
+ *
+ * **Fragmentos de un `.md` se renderizan como Markdown real** (2026-10-24),
+ * en vez de texto plano con `#`/`**`/etc. literales. El texto sale de un
+ * documento subido por un usuario, así que pasa por dos capas de limpieza
+ * antes de insertarse en el DOM: `DOMPurify.sanitize` primero, y el propio
+ * saneamiento de Angular en el `[innerHTML]` después (no se usa
+ * `bypassSecurityTrustHtml`, que lo saltaría). Markdown permite HTML
+ * embebido por defecto — sin esto, un `.md` con un `<script>` se ejecutaría
+ * en el navegador de cualquiera que abra ese documento.
  */
 @Component({
   selector: 'app-chunks-drawer',
@@ -55,6 +66,22 @@ export class ChunksDrawerComponent {
   cerrar(): void {
     this.abierto.set(false);
     this.datos.set(null);
+  }
+
+  /** Solo los `.md` se interpretan como Markdown — el resto (PDF, DOCX, TXT)
+   * sigue mostrándose como texto plano, que es lo que de verdad son. */
+  esMarkdown(nombreDocumento: string | undefined): boolean {
+    return (nombreDocumento ?? '').toLowerCase().endsWith('.md');
+  }
+
+  /** Convierte un fragmento Markdown a HTML seguro para insertar con
+   * `[innerHTML]`. Ver el comentario de la clase sobre las dos capas de
+   * limpieza — esta función es, a propósito, la única puerta por la que pasa
+   * el HTML antes del DOM, para que sea el único sitio que hay que revisar
+   * si algún día se audita esto por seguridad. */
+  renderizarMarkdown(texto: string): string {
+    const html = marked.parse(texto, { async: false }) as string;
+    return DOMPurify.sanitize(html);
   }
 
   /** Se cierra con Escape, como cualquier capa superpuesta. */

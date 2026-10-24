@@ -71,8 +71,9 @@ export class DocumentUploadComponent implements OnInit {
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'text/plain',
+      'text/markdown', // .md — algunos sistemas operativos no lo registran y el navegador reporta '', que ya cae en el fallback de abajo
     ];
-    const validExtensions = ['pdf', 'docx', 'txt'];
+    const validExtensions = ['pdf', 'docx', 'txt', 'md'];
     const fileExtension = file.name.split('.').pop()?.toLowerCase() ?? '';
 
     const extValid = validExtensions.includes(fileExtension);
@@ -80,7 +81,7 @@ export class DocumentUploadComponent implements OnInit {
     const mimeValid = file.type ? validMimes.includes(file.type) : extValid;
 
     if (!extValid || !mimeValid) {
-      this.error = 'Solo se permiten archivos PDF, DOCX y TXT';
+      this.error = 'Solo se permiten archivos PDF, DOCX, TXT y MD';
       return false;
     }
 

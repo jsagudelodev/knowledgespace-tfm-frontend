@@ -120,3 +120,47 @@
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+// Fragmentos de un .md: aquí sí hay elementos HTML reales (h1, ul, strong...)
+// generados por marked, no texto plano — `pre-wrap` se desactiva porque ya
+// no hace falta conservar saltos de línea a mano, los da la propia etiqueta.
+.cd-chunk-texto--md {
+  white-space: normal;
+
+  :first-child { margin-top: 0; }
+  :last-child  { margin-bottom: 0; }
+
+  h1, h2, h3, h4 {
+    margin: $sp-3 0 $sp-2;
+    font-weight: $w-semibold;
+    color: $font-title;
+    line-height: $lh-tight;
+  }
+  h1 { font-size: $size-base; }
+  h2, h3, h4 { font-size: $size-xs; }
+
+  p { margin: 0 0 $sp-2; }
+
+  ul, ol {
+    margin: 0 0 $sp-2;
+    padding-left: $sp-4;
+  }
+
+  code {
+    background: $border-flat;
+    border-radius: $radius-xs;
+    padding: 0 4px;
+    font-size: 0.9em;
+  }
+
+  pre {
+    background: $border-flat;
+    border-radius: $radius-sm;
+    padding: $sp-2;
+    overflow-x: auto;
+
+    code { background: none; padding: 0; }
+  }
+
+  a { color: $color-primary; }
+}

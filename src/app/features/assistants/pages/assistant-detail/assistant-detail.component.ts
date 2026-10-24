@@ -164,7 +164,7 @@ export class AssistantDetailComponent implements OnInit, OnDestroy {
   }
 
   private uploadFiles(files: File[]): void {
-    const allowed = ['pdf', 'docx', 'txt'];
+    const allowed = ['pdf', 'docx', 'txt', 'md'];
     const a = this.assistant()!;
 
     for (const file of files) {

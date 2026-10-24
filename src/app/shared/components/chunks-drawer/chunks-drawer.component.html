@@ -44,7 +44,11 @@
                 <span class="cd-chunk-num">Fragmento {{ c.chunk_index }}</span>
                 <span class="cd-chunk-size">{{ c.caracteres }} caracteres</span>
               </div>
-              <p class="cd-chunk-texto">{{ c.text }}</p>
+              @if (esMarkdown(d.document_name)) {
+                <div class="cd-chunk-texto cd-chunk-texto--md" [innerHTML]="renderizarMarkdown(c.text)"></div>
+              } @else {
+                <p class="cd-chunk-texto">{{ c.text }}</p>
+              }
             </li>
           }
         </ol>
