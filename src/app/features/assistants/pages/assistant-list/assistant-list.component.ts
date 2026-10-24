@@ -9,11 +9,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AssistantService } from '../../services/assistant.service';
 import { Assistant } from '../../../../core/models/assistant.model';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { CardSkeletonComponent } from '../../../../shared/components/card-skeleton/card-skeleton.component';
 
 @Component({
   selector: 'app-assistant-list',
   standalone: true,
-  imports: [],
+  imports: [CardSkeletonComponent],
   templateUrl: './assistant-list.component.html',
   styleUrls: ['./assistant-list.component.scss']
 })

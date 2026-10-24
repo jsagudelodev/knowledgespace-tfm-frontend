@@ -68,10 +68,7 @@
 
   <!-- ── Loading ──────────────────────────────────────────────────────────── -->
   @if (loading) {
-    <div class="al-state">
-      <span class="al-spinner"></span>
-      <p class="al-state__title">Cargando asistentes...</p>
-    </div>
+    <app-card-skeleton [cards]="6" />
   }
 
   <!-- ── Error ────────────────────────────────────────────────────────────── -->
