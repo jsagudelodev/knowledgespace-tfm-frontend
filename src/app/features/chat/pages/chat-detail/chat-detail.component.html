@@ -291,6 +291,7 @@
 
                   <!-- Panel de comentario negativo -->
                   @if (feedbackPanelOpen() === message.id) {
+                    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
                     <div class="feedback-panel" (click)="$event.stopPropagation()">
                       <p class="feedback-panel__title">¿Qué estuvo mal?</p>
                       <div class="feedback-panel__chips">

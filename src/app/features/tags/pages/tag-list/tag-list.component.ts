@@ -17,11 +17,12 @@ import { Tag } from '../../../../core/models/tag.model';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { TagFormComponent } from '../tag-form/tag-form.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { TableSkeletonComponent } from '../../../../shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
   selector: 'app-tag-list',
   standalone: true,
-  imports: [TagFormComponent, EmptyStateComponent],
+  imports: [TagFormComponent, EmptyStateComponent, TableSkeletonComponent],
   templateUrl: './tag-list.component.html',
   styleUrls: ['./tag-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

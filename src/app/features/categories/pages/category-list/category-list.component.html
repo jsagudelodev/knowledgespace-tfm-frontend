@@ -60,10 +60,7 @@
 
   <!-- ── Cargando ─────────────────────────────────────────────────────────── -->
   @if (loading()) {
-    <div class="state-card">
-      <span class="material-symbols-outlined spin">progress_activity</span>
-      <p>Cargando categorías...</p>
-    </div>
+    <app-table-skeleton [columns]="6" />
   }
 
   <!-- ── Error ───────────────────────────────────────────────────────────── -->
@@ -187,6 +184,8 @@
 </div>
 
 <!-- ── Overlay ─────────────────────────────────────────────────────────────── -->
+<!-- Fondo de cierre al hacer clic fuera: no debe ser foco de teclado. -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
 <div
   class="modal-overlay"
   [class.open]="showCreateModal() || showEditModal()"
@@ -203,7 +202,7 @@
   </div>
   <div class="modal-body">
     @if (showCreateModal()) {
-      <app-category-form (categorySaved)="onCategorySaved()" (cancel)="closeModals()" />
+      <app-category-form (categorySaved)="onCategorySaved()" (cancelled)="closeModals()" />
     }
   </div>
 </div>
@@ -221,7 +220,7 @@
       <app-category-form
         [categoryId]="selectedCategoryId()"
         (categorySaved)="onCategorySaved()"
-        (cancel)="closeModals()"
+        (cancelled)="closeModals()"
       />
     }
   </div>

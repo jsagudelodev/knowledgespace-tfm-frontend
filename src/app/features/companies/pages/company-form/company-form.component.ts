@@ -29,7 +29,7 @@ export class CompanyFormComponent implements OnInit {
   @Input() isEmbedded = false;
 
   @Output() companySaved = new EventEmitter<void>();
-  @Output() cancel       = new EventEmitter<void>();
+  @Output() cancelled    = new EventEmitter<void>();
 
   // ── Servicios ─────────────────────────────────────────────────────────────
   private readonly destroyRef     = inject(DestroyRef);
@@ -146,7 +146,7 @@ export class CompanyFormComponent implements OnInit {
     }
   }
 
-  onCancel(): void { this.cancel.emit(); }
+  onCancel(): void { this.cancelled.emit(); }
 
   isFieldInvalid(field: string): boolean {
     const ctrl = this.companyForm.get(field);

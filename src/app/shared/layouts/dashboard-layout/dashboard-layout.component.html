@@ -169,6 +169,8 @@
 <!-- ══════════════════════════════════════════════════════════
      CHAT IA — Drawer CSS desde la derecha
 ══════════════════════════════════════════════════════════ -->
+<!-- Fondo de cierre al hacer clic fuera: no debe ser foco de teclado. -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
 <div class="drawer-overlay" [class.open]="chatDrawerVisible" (click)="chatDrawerVisible = false"></div>
 
 <aside class="chat-drawer" [class.open]="chatDrawerVisible" aria-label="Chat IA">

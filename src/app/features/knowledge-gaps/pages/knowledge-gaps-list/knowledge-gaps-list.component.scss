@@ -439,10 +439,7 @@ $shadow-seg:     0 1px 2px rgba(16, 24, 40, 0.08);
 }
 
 // ── Skeleton ──────────────────────────────────────────────────────────────────
-@keyframes sk-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.45; }
-}
+// `@keyframes sk-pulse` vive en styles.scss (global) desde el 2026-10-22.
 
 .gap-row--skeleton {
   pointer-events: none;
@@ -685,6 +682,7 @@ $shadow-seg:     0 1px 2px rgba(16, 24, 40, 0.08);
 
 // Candidatos radio (modo vincular)
 .candidate-radio {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -698,6 +696,27 @@ $shadow-seg:     0 1px 2px rgba(16, 24, 40, 0.08);
   &--selected {
     border-color: $c-primary;
     background: $c-row-sel;
+  }
+}
+
+// El radio real, accesible por teclado — invisible pero presente, para que
+// el círculo pintado a mano (`.radio-circle`) sea solo la representación
+// visual, no el único control. Antes el <label> capturaba el clic del
+// mouse y no respondía a nada desde el teclado.
+.candidate-radio__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+
+  &:focus-visible + .radio-circle {
+    outline: 2px solid $c-primary;
+    outline-offset: 2px;
   }
 }
 

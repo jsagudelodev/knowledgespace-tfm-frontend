@@ -54,6 +54,17 @@ button { font-family: inherit; }
   to { transform: rotate(360deg); }
 }
 
+// Pulso de los "skeletons" de carga. Estaba duplicado, con pequeñas variantes
+// de opacidad, en feedback-list, knowledge-gaps-list y notification-list —
+// centralizado aquí el 2026-10-22 por la misma razón que `spin`: dos
+// @keyframes con el mismo nombre en hojas de estilo distintas no quedan
+// aislados por componente, Angular no les aplica el mismo encapsulamiento
+// que a los selectores, así que uno acababa pisando al otro al compilar.
+@keyframes sk-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // MATERIAL SYMBOLS — Google Fonts Icons
 // ══════════════════════════════════════════════════════════════════════════

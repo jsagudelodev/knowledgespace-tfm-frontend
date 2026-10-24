@@ -12,11 +12,12 @@ import { User } from '../../../../core/models/user.model';
 import { UserFormComponent } from '../user-form/user-form.component';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { TableSkeletonComponent } from '../../../../shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [NgClass, UserFormComponent, EmptyStateComponent],
+  imports: [NgClass, UserFormComponent, EmptyStateComponent, TableSkeletonComponent],
   templateUrl: './user-list.component.html',
   styleUrls: ['./user-list.component.scss']
 })

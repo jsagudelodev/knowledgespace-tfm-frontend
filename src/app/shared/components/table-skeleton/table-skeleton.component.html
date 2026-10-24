@@ -1,0 +1,9 @@
+<div class="table-skeleton">
+  @for (fila of filas; track fila) {
+    <div class="table-skeleton__row">
+      @for (col of columnas; track col) {
+        <div class="table-skeleton__bar" [class.table-skeleton__bar--first]="col === 0"></div>
+      }
+    </div>
+  }
+</div>

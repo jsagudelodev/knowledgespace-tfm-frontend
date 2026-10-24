@@ -45,10 +45,12 @@
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
 
-        <div *ngIf="error" class="auth-alert auth-alert--error">
-          <span class="material-symbols-outlined icon-sm">error</span>
-          <span>{{ error }}</span>
-        </div>
+        @if (error) {
+          <div class="auth-alert auth-alert--error">
+            <span class="material-symbols-outlined icon-sm">error</span>
+            <span>{{ error }}</span>
+          </div>
+        }
 
         <!-- Email -->
         <div class="form-field">
@@ -65,14 +67,12 @@
               autocomplete="email"
             />
           </div>
-          <span *ngIf="loginForm.get('username')?.touched && loginForm.get('username')?.errors?.['required']"
-                class="form-field__error">
-            El correo es requerido
-          </span>
-          <span *ngIf="loginForm.get('username')?.touched && loginForm.get('username')?.errors?.['email']"
-                class="form-field__error">
-            Ingresa un correo válido
-          </span>
+          @if (loginForm.get('username')?.touched && loginForm.get('username')?.errors?.['required']) {
+            <span class="form-field__error">El correo es requerido</span>
+          }
+          @if (loginForm.get('username')?.touched && loginForm.get('username')?.errors?.['email']) {
+            <span class="form-field__error">Ingresa un correo válido</span>
+          }
         </div>
 
         <!-- Contraseña -->
@@ -90,10 +90,9 @@
               autocomplete="current-password"
             />
           </div>
-          <span *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
-                class="form-field__error">
-            La contraseña debe tener al menos 8 caracteres
-          </span>
+          @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+            <span class="form-field__error">La contraseña debe tener al menos 8 caracteres</span>
+          }
         </div>
 
         <button type="submit" class="btn-login" [disabled]="loading">

@@ -282,8 +282,14 @@
                       <label
                         class="candidate-radio"
                         [class.candidate-radio--selected]="linkSel() === i"
-                        (click)="linkSel.set(i)"
                       >
+                        <input
+                          type="radio"
+                          class="candidate-radio__input"
+                          name="candidate-{{ gap.id }}"
+                          [checked]="linkSel() === i"
+                          (change)="linkSel.set(i)"
+                        />
                         <span class="radio-circle" [class.radio-circle--on]="linkSel() === i"></span>
                         <span class="candidate-radio-name">{{ c.name }}</span>
                         <span class="candidate-score">{{ c.score.toFixed(2) }}</span>

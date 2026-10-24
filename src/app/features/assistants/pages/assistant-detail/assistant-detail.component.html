@@ -79,10 +79,14 @@
     <!-- Zona de carga -->
     <div class="ad-upload-zone"
       [class.ad-upload-zone--dragover]="isDragOver"
+      role="button"
+      tabindex="0"
       (dragover)="onDragOver($event)"
       (dragleave)="onDragLeave()"
       (drop)="onDrop($event)"
-      (click)="triggerFileInput()">
+      (click)="triggerFileInput()"
+      (keydown.enter)="triggerFileInput()"
+      (keydown.space)="triggerFileInput()">
       <input #fileInput type="file" multiple accept=".pdf,.docx,.txt"
         class="ad-file-input" (change)="onFileInputChange($event)">
       <span class="material-symbols-outlined icon-sm ad-upload-icon">cloud_upload</span>

@@ -278,11 +278,8 @@
   &:disabled             { opacity: 0.6; cursor: not-allowed; }
 }
 
-// ── Skeleton animation ────────────────────────────────────────────────────────
-@keyframes sk-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.45; }
-}
+// ── Skeleton animation ──────────────────────────────────────────────────────
+// `@keyframes sk-pulse` vive en styles.scss (global) desde el 2026-10-22.
 
 .sk-block {
   background: #eef1f6;

@@ -1,6 +1,13 @@
 import {
-  Component, OnInit, OnDestroy, DestroyRef, inject,
-  ChangeDetectorRef, signal, computed, HostListener
+  Component,
+  OnInit,
+  OnDestroy,
+  DestroyRef,
+  inject,
+  ChangeDetectorRef,
+  signal,
+  computed,
+  HostListener,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -14,51 +21,52 @@ import { Document } from '../../../../core/models/document.model';
 import { Category } from '../../../../core/models/category.model';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { ChunksDrawerComponent } from '../../../../shared/components/chunks-drawer/chunks-drawer.component';
+import { TableSkeletonComponent } from '../../../../shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
   selector: 'app-document-list',
   standalone: true,
-  imports: [DatePipe, RouterLink, Paginator, ChunksDrawerComponent],
+  imports: [DatePipe, RouterLink, Paginator, ChunksDrawerComponent, TableSkeletonComponent],
   templateUrl: './document-list.component.html',
-  styleUrls: ['./document-list.component.scss']
+  styleUrls: ['./document-list.component.scss'],
 })
 export class DocumentListComponent implements OnInit, OnDestroy {
+  private documentService = inject(DocumentService);
+  private categoryService = inject(CategoryService);
 
   // ── Data ──────────────────────────────────────────────────────────────
-  readonly originalData        = signal<Document[]>([]);
-  readonly searchTerm          = signal('');
-  readonly selectedStatus      = signal('');
-  readonly selectedCategory    = signal('');
+  readonly originalData = signal<Document[]>([]);
+  readonly searchTerm = signal('');
+  readonly selectedStatus = signal('');
+  readonly selectedCategory = signal('');
   readonly availableCategories = signal<Category[]>([]);
 
   readonly categoryMap = computed(() => {
     const map = new Map<number, Category>();
-    this.availableCategories().forEach(c => map.set(c.id, c));
+    this.availableCategories().forEach((c) => map.set(c.id, c));
     return map;
   });
 
-  readonly activeCategories = computed(() =>
-    this.availableCategories().filter(c => c.is_active)
-  );
+  readonly activeCategories = computed(() => this.availableCategories().filter((c) => c.is_active));
 
   readonly filteredData = computed(() => {
     let data = this.originalData();
-    const term       = this.searchTerm().toLowerCase().trim();
-    const status     = this.selectedStatus();
+    const term = this.searchTerm().toLowerCase().trim();
+    const status = this.selectedStatus();
     const categoryId = this.selectedCategory() ? Number(this.selectedCategory()) : null;
 
-    if (term)   data = data.filter(d => d.original_filename.toLowerCase().includes(term));
-    if (status) data = data.filter(d => d.status === status);
-    if (categoryId != null) data = data.filter(d => d.category_id === categoryId);
+    if (term) data = data.filter((d) => d.original_filename.toLowerCase().includes(term));
+    if (status) data = data.filter((d) => d.status === status);
+    if (categoryId != null) data = data.filter((d) => d.category_id === categoryId);
     return data;
   });
 
   // ── Pagination ────────────────────────────────────────────────────────
   readonly currentPage = signal(1);
-  readonly pageSize    = signal(10);
+  readonly pageSize = signal(10);
 
   readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredData().length / this.pageSize()))
+    Math.max(1, Math.ceil(this.filteredData().length / this.pageSize())),
   );
 
   readonly paginatedData = computed(() => {
@@ -67,15 +75,15 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   });
 
   readonly paginationStart = computed(() =>
-    this.filteredData().length === 0 ? 0 : (this.currentPage() - 1) * this.pageSize() + 1
+    this.filteredData().length === 0 ? 0 : (this.currentPage() - 1) * this.pageSize() + 1,
   );
 
   readonly paginationEnd = computed(() =>
-    Math.min(this.currentPage() * this.pageSize(), this.filteredData().length)
+    Math.min(this.currentPage() * this.pageSize(), this.filteredData().length),
   );
 
-  readonly hasActiveFilters = computed(() =>
-    !!this.selectedStatus() || !!this.selectedCategory() || !!this.searchTerm().trim()
+  readonly hasActiveFilters = computed(
+    () => !!this.selectedStatus() || !!this.selectedCategory() || !!this.searchTerm().trim(),
   );
 
   // ── UI state ──────────────────────────────────────────────────────────
@@ -83,31 +91,24 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   error: string | null = null;
 
   deleteConfirmId: number | null = null;
-  deletingIds     = new Set<number>();
-  downloadingIds  = new Set<number>();
+  deletingIds = new Set<number>();
+  downloadingIds = new Set<number>();
 
   categoryPickerDocId: number | null = null;
-  categoryActionIds   = new Set<number>();
+  categoryActionIds = new Set<number>();
 
-  private destroyRef     = inject(DestroyRef);
-  private cdr             = inject(ChangeDetectorRef);
-  private notifications   = inject(NotificationService);
-  private searchSubject   = new Subject<string>();
-
-  constructor(
-    private documentService: DocumentService,
-    private categoryService: CategoryService
-  ) {}
+  private destroyRef = inject(DestroyRef);
+  private cdr = inject(ChangeDetectorRef);
+  private notifications = inject(NotificationService);
+  private searchSubject = new Subject<string>();
 
   ngOnInit(): void {
-    this.searchSubject.pipe(
-      debounceTime(300),
-      distinctUntilChanged(),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(term => {
-      this.searchTerm.set(term);
-      this.currentPage.set(1);
-    });
+    this.searchSubject
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe((term) => {
+        this.searchTerm.set(term);
+        this.currentPage.set(1);
+      });
 
     this.loadDocuments();
     this.loadCategories();
@@ -131,8 +132,9 @@ export class DocumentListComponent implements OnInit, OnDestroy {
 
   loadDocuments(): void {
     this.loading = true;
-    this.error   = null;
-    this.documentService.getDocuments()
+    this.error = null;
+    this.documentService
+      .getDocuments()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
@@ -141,19 +143,21 @@ export class DocumentListComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges();
         },
         error: () => {
-          this.error   = 'No se pudieron cargar los documentos. Verifica tu conexión e intenta de nuevo.';
+          this.error =
+            'No se pudieron cargar los documentos. Verifica tu conexión e intenta de nuevo.';
           this.loading = false;
           this.cdr.detectChanges();
-        }
+        },
       });
   }
 
   private loadCategories(): void {
-    this.categoryService.getCategories()
+    this.categoryService
+      .getCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (categories) => this.availableCategories.set(categories),
-        error: () => {}
+        error: () => {},
       });
   }
 
@@ -181,8 +185,14 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     this.currentPage.set(1);
   }
 
-  clearStatusFilter(): void   { this.selectedStatus.set('');   this.currentPage.set(1); }
-  clearCategoryFilter(): void { this.selectedCategory.set(''); this.currentPage.set(1); }
+  clearStatusFilter(): void {
+    this.selectedStatus.set('');
+    this.currentPage.set(1);
+  }
+  clearCategoryFilter(): void {
+    this.selectedCategory.set('');
+    this.currentPage.set(1);
+  }
 
   clearAllFilters(): void {
     this.selectedStatus.set('');
@@ -211,37 +221,37 @@ export class DocumentListComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
-      completed:  'status-completed',
+      completed: 'status-completed',
       processing: 'status-processing',
-      failed:     'status-failed',
+      failed: 'status-failed',
     };
     return map[status] ?? 'status-pending';
   }
 
   getStatusLabel(status: string): string {
     const map: Record<string, string> = {
-      completed:  'Completado',
+      completed: 'Completado',
       processing: 'Procesando...',
-      failed:     'Fallido',
+      failed: 'Fallido',
     };
     return map[status] ?? 'Pendiente';
   }
 
   getStatusIcon(status: string): string {
     const map: Record<string, string> = {
-      completed:  'check_circle',
+      completed: 'check_circle',
       processing: 'autorenew',
-      failed:     'cancel',
+      failed: 'cancel',
     };
     return map[status] ?? 'schedule';
   }
 
   getStatusChipLabel(status: string): string {
     const map: Record<string, string> = {
-      pending:    'Pendiente',
+      pending: 'Pendiente',
       processing: 'Procesando',
-      completed:  'Completado',
-      failed:     'Fallido',
+      completed: 'Completado',
+      failed: 'Fallido',
     };
     return map[status] ?? status;
   }
@@ -268,7 +278,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     if (this.categoryActionIds.has(docId)) return;
 
-    const previous = this.originalData().find(d => d.id === docId)?.category_id ?? null;
+    const previous = this.originalData().find((d) => d.id === docId)?.category_id ?? null;
     if (previous === categoryId) {
       this.categoryPickerDocId = null;
       this.cdr.detectChanges();
@@ -279,12 +289,13 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     this.categoryPickerDocId = null;
 
     // Optimistic update
-    this.originalData.update(docs =>
-      docs.map(d => d.id === docId ? { ...d, category_id: categoryId } : d)
+    this.originalData.update((docs) =>
+      docs.map((d) => (d.id === docId ? { ...d, category_id: categoryId } : d)),
     );
     this.cdr.detectChanges();
 
-    this.documentService.updateDocument(docId, { category_id: categoryId })
+    this.documentService
+      .updateDocument(docId, { category_id: categoryId })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -293,14 +304,14 @@ export class DocumentListComponent implements OnInit, OnDestroy {
         },
         error: () => {
           // Revert optimistic update
-          this.originalData.update(docs =>
-            docs.map(d => d.id === docId ? { ...d, category_id: previous } : d)
+          this.originalData.update((docs) =>
+            docs.map((d) => (d.id === docId ? { ...d, category_id: previous } : d)),
           );
           this.categoryActionIds.delete(docId);
           this.categoryActionIds = new Set(this.categoryActionIds);
           this.notifications.error('No se pudo cambiar la categoría. Intenta de nuevo.');
           this.cdr.detectChanges();
-        }
+        },
       });
   }
 
@@ -311,7 +322,8 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     this.downloadingIds = new Set(this.downloadingIds).add(id);
     this.cdr.detectChanges();
 
-    this.documentService.getDownloadUrl(id)
+    this.documentService
+      .getDownloadUrl(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: ({ url, filename }) => {
@@ -329,7 +341,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
           this.downloadingIds = new Set(this.downloadingIds);
           this.notifications.error('Error al generar el enlace de descarga.');
           this.cdr.detectChanges();
-        }
+        },
       });
   }
 
@@ -348,8 +360,12 @@ export class DocumentListComponent implements OnInit, OnDestroy {
 
   // ── Delete ────────────────────────────────────────────────────────────
 
-  confirmDelete(id: number): void { this.deleteConfirmId = id; }
-  cancelDelete(): void            { this.deleteConfirmId = null; }
+  confirmDelete(id: number): void {
+    this.deleteConfirmId = id;
+  }
+  cancelDelete(): void {
+    this.deleteConfirmId = null;
+  }
 
   deleteDocument(id: number): void {
     if (this.deletingIds.has(id)) return;
@@ -357,7 +373,8 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     this.deletingIds = new Set(this.deletingIds).add(id);
     this.cdr.detectChanges();
 
-    this.documentService.deleteDocument(id)
+    this.documentService
+      .deleteDocument(id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -371,7 +388,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
           this.deletingIds = new Set(this.deletingIds);
           this.notifications.error('Error al eliminar el documento. Intenta de nuevo.');
           this.cdr.detectChanges();
-        }
+        },
       });
   }
 }

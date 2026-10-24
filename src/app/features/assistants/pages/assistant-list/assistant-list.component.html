@@ -114,7 +114,15 @@
   @if (!loading && !error && filteredData().length > 0) {
     <div class="al-grid">
       @for (assistant of paginatedData(); track assistant.id) {
-        <div class="al-card" [class.al-card--deleting]="deletingId === assistant.id" (click)="goToDetail(assistant.id)">
+        <div
+          class="al-card"
+          [class.al-card--deleting]="deletingId === assistant.id"
+          role="button"
+          tabindex="0"
+          (click)="goToDetail(assistant.id)"
+          (keydown.enter)="goToDetail(assistant.id)"
+          (keydown.space)="goToDetail(assistant.id)"
+        >
 
           <!-- Card header -->
           <div class="al-card-header">
@@ -147,6 +155,9 @@
           </div>
 
           <!-- Card actions -->
+          <!-- Solo evita que el clic llegue a la tarjeta (que navega); los
+               botones de dentro ya tienen su propio manejador. -->
+          <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
           <div class="al-card-actions" (click)="$event.stopPropagation()">
             @if (deleteConfirmId === assistant.id) {
               <span class="al-confirm-text">¿Eliminar?</span>

@@ -239,7 +239,7 @@ Resumen de lo no implementado aún:
 - **Presupuesto/Uso**: configuración de límite mensual de gasto y alertas al 80%/100% — no implementado (el tipo de notificación `budget_*` ya existe en el modelo, a la espera del módulo).
 - **Empresas**: `AuthService.selectedCompany` expone la empresa activa (mostrada en el header) pero no hay UI de selector para que `superadmin` cambie de contexto — sigue sin implementar.
 - **Widgets**: retirado de esta entrega — ver sección 9 y `ALCANCE_TFM.md`.
-- **404**: la ruta comodín (`**`) redirige a `/auth/login` en vez de mostrar una página "no encontrado".
+- ✅ **404** (2026-10-22): `shared/pages/not-found/`, reutiliza `EmptyStateComponent`. La ruta comodín (`**`) redirige a `/not-found` en vez de a `/auth/login` — antes era indistinguible de una sesión expirada.
 - ✅ `adminGuard` quedó enganchado en `app.routes.ts` a las rutas `/companies` y
   `/users`; antes estaba escrito pero sin usar, y el control de acceso admin
   dependía solo de comprobaciones dentro de cada componente.
@@ -247,7 +247,17 @@ Resumen de lo no implementado aún:
   WebSocket. Sigue siendo una mejora candidata para UX de streaming
   token-por-token. La variable `wsUrl` que los entornos declaraban para ese fin
   se retiró: apuntaba a un endpoint que el backend no expone.
-- El estado de `sidebarOpen` no persiste entre navegaciones de módulo ni en `localStorage`.
+- ✅ **Persistencia de `sidebarOpen` y los cuatro grupos colapsables** (2026-10-22): vía `StorageService` (`sessionStorage`), con un `effect()` por señal en `DashboardLayoutComponent`. Sobrevive a cambiar de módulo (cada uno instancia su propia layout); se reinicia al cerrar la pestaña, que es lo esperado para una preferencia de UI, no para datos.
 - ✅ **Interceptor global de errores HTTP** (2026-10-22): `core/interceptors/error.interceptor.ts`. 401 fuera del login fuerza `logout()` + redirección (antes solo pasaba si el usuario pulsaba "cerrar sesión"), 403 y errores de servidor (0 o ≥500) muestran un aviso genérico vía `NotificationService`. No toca los 4xx de negocio (404/409/422), que ya tienen su propio mensaje por componente — relanza el error en todos los casos para no romper ese manejo existente.
-- Deuda técnica adicional: sin loading skeletons en todas las listas/dashboard (Feedback ya tiene skeletons propios), sin tests unitarios ni e2e.
+- ✅ **Loading skeletons en las listas de tabla** (2026-10-22): `shared/components/table-skeleton/`, componente genérico (`[rows]`, `[columns]`) en vez de uno a medida por página. Conectado en etiquetas, categorías, empresas, usuarios y documentos. De paso, se centralizó `@keyframes sk-pulse` en `styles.scss` — estaba duplicado con ligeras variantes en feedback-list, knowledge-gaps-list y notification-list. **No cubre** `assistant-list` (tarjetas en cuadrícula, no tabla — necesitaría una forma de skeleton distinta) ni el dashboard (tarjetas de KPI).
+- ✅ **ESLint configurado** (2026-10-23): `@angular-eslint` oficial (`ng add @angular-eslint/schematics@21`), con `ng lint` en `package.json`. Primera pasada: 90 avisos. Se resolvieron todos, sin apagar reglas a ciegas:
+  - 21 por el *schematic* oficial de migración `ng generate @angular/core:inject` (inyección por constructor → `inject()`), automático y sin riesgo.
+  - 2 elementos con interacción real pero sin soporte de teclado, corregidos de verdad (no solo silenciados): la tarjeta de `assistant-list` que navega al hacer clic, y la zona de arrastrar-y-soltar de `assistant-detail` — ambas ganaron `tabindex`, `role="button"` y `(keydown.enter/space)`.
+  - El selector de documento candidato en `knowledge-gaps-list` pasó de un `<label>` sin control real (inaccesible de fondo) a un `<input type="radio">` oculto visualmente pero funcional, con foco visible.
+  - El toast de `toast-host` ahora también se puede cerrar con teclado.
+  - El resto (33 avisos) eran fondos de modal/drawer que cierran al clic-fuera y contenedores que solo detienen la propagación del clic — forzarlos a ser elementos de teclado habría sido peor accesibilidad, no mejor (un lector de pantalla no necesita tabular por un fondo invisible de pantalla completa). Se desactivó la regla línea por línea, con el motivo en un comentario, no un `rules: {}` global.
+  - 8 comparaciones `== null`/`!= null` (cubren `null` y `undefined` a la vez en campos opcionales) se dejaron así a propósito, con la opción `allowNullOrUndefined` de la regla — convertirlas a `===` habría cambiado el comportamiento, no solo el estilo.
+  - 14 manejadores `error: () => {}` de cargas de fondo no críticas (contador de notificaciones, filtros) se permitieron explícitamente, con la razón documentada en `eslint.config.js`.
+  - 4 `*ngIf` del login migrados a `@if`, y 4 `@Output() cancel` renombrados a `cancelled` (nombre de evento nativo del DOM, podía chocar si el componente se usara sobre un elemento nativo).
+- Deuda técnica adicional: sin tests unitarios ni e2e.
 - **Deploy**: el frontend se sirve desde Vercel (`https://knowledge-space-front-end.vercel.app/`, auto-deploy en cada push a `main`), desacoplado del backend en Cloud Run — CORS gestiona la conexión entre ambos (ver `doc/BITACORA.md`, 2026-08-14).

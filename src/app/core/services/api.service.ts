@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpEvent, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -7,12 +7,12 @@ export type QueryParamValue = string | number | boolean | undefined | null;
 export type QueryParams = Record<string, QueryParamValue>;
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = environment.apiUrl;
+  private http = inject(HttpClient);
 
-  constructor(private http: HttpClient) {}
+  private apiUrl = environment.apiUrl;
 
   private buildUrl(endpoint: string): string {
     return `${this.apiUrl}${endpoint}`.replace(/([^:])\/\//g, '$1/');
@@ -21,7 +21,7 @@ export class ApiService {
   get<T>(endpoint: string, params?: QueryParams): Observable<T> {
     let httpParams = new HttpParams();
     if (params) {
-      Object.keys(params).forEach(key => {
+      Object.keys(params).forEach((key) => {
         const value = params[key];
         if (value !== undefined && value !== null) {
           httpParams = httpParams.set(key, value);
@@ -42,7 +42,7 @@ export class ApiService {
   patch<T>(endpoint: string, body: unknown, params?: QueryParams): Observable<T> {
     let httpParams = new HttpParams();
     if (params) {
-      Object.keys(params).forEach(key => {
+      Object.keys(params).forEach((key) => {
         const value = params[key];
         if (value !== undefined && value !== null) {
           httpParams = httpParams.set(key, value);
@@ -63,7 +63,7 @@ export class ApiService {
   postFormDataWithProgress<T>(endpoint: string, formData: FormData): Observable<HttpEvent<T>> {
     return this.http.post<T>(this.buildUrl(endpoint), formData, {
       reportProgress: true,
-      observe: 'events'
+      observe: 'events',
     });
   }
 

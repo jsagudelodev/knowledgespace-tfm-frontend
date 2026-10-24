@@ -54,6 +54,7 @@
     </button>
 
     @if (notifOpen()) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
       <div class="notif-dropdown" role="menu" (click)="$event.stopPropagation()">
         <div class="notif-dropdown__header">
           <p class="notif-dropdown__title">Notificaciones</p>
@@ -126,6 +127,7 @@
 
     <!-- Dropdown de perfil -->
     @if (profileOpen()) {
+      <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
       <div class="profile-dropdown" role="menu" (click)="$event.stopPropagation()">
         <div class="dropdown-header">
           <p class="dropdown-name">{{ userName() }}</p>

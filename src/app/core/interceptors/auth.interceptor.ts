@@ -11,9 +11,9 @@
  * petición sale tal cual y es el backend quien responde 401: el interceptor no
  * decide qué rutas son públicas, eso lo hacen los guards.
  *
- * Pendiente conocido: no hay interceptor de respuesta. Un 401 por token
- * caducado lo gestiona hoy cada módulo por su cuenta, en vez de forzar el
- * logout de forma centralizada.
+ * El manejo de la respuesta —401 por token caducado, 403, errores de
+ * servidor— vive aparte, en `error.interceptor.ts`, registrado después de
+ * este en `app.config.ts`.
  */
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';

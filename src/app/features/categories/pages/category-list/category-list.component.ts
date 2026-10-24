@@ -17,13 +17,14 @@ import { Category } from '../../../../core/models/category.model';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { CategoryFormComponent } from '../category-form/category-form.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { TableSkeletonComponent } from '../../../../shared/components/table-skeleton/table-skeleton.component';
 
 type StatusFilter = 'all' | 'active' | 'inactive';
 
 @Component({
   selector: 'app-category-list',
   standalone: true,
-  imports: [CategoryFormComponent, EmptyStateComponent],
+  imports: [CategoryFormComponent, EmptyStateComponent, TableSkeletonComponent],
   templateUrl: './category-list.component.html',
   styleUrls: ['./category-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

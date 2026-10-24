@@ -85,10 +85,7 @@
 
   <!-- ── Loading ─────────────────────────────────────────────────────────── -->
   @if (loading) {
-    <div class="state-card">
-      <span class="material-symbols-outlined icon-sm" [class.pi-spin]="true">progress_activity</span>
-      <p>Cargando usuarios...</p>
-    </div>
+    <app-table-skeleton [columns]="5" />
   }
 
   <!-- ── Error ───────────────────────────────────────────────────────────── -->
@@ -205,6 +202,8 @@
 </div>
 
 <!-- ── Overlay ──────────────────────────────────────────────────────────── -->
+<!-- Fondo de cierre al hacer clic fuera: no debe ser foco de teclado. -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
 <div class="modal-overlay" [class.open]="showEditModal || showCreateModal || showResetModal" (click)="closeModals()"></div>
 
 <!-- ── Modal: Nuevo Usuario ─────────────────────────────────────────────── -->
@@ -217,7 +216,7 @@
     @if (showCreateModal) {
       <app-user-form
         (userSaved)="onUserSaved()"
-        (cancel)="closeModals()"
+        (cancelled)="closeModals()"
       />
     }
   </div>
@@ -234,7 +233,7 @@
       <app-user-form
         [userId]="selectedUserId"
         (userSaved)="onUserSaved()"
-        (cancel)="closeModals()"
+        (cancelled)="closeModals()"
       />
     }
   </div>

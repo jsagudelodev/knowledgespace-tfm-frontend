@@ -1,10 +1,8 @@
 @use 'styles/core/variables' as *;
 
 // ── Skeleton loading ──────────────────────────────────────────────────
-@keyframes sk-pulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.55; }
-}
+// `@keyframes sk-pulse` vive en styles.scss (global) desde el 2026-10-22,
+// para no duplicarlo en cada componente que tiene su propio skeleton.
 
 %sk-base {
   background: #eef1f6;

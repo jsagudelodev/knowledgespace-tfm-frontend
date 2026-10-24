@@ -13,9 +13,14 @@ import { Assistant } from '../../../../core/models/assistant.model';
   standalone: true,
   imports: [RouterLink],
   templateUrl: './document-upload.component.html',
-  styleUrls: ['./document-upload.component.scss']
+  styleUrls: ['./document-upload.component.scss'],
 })
 export class DocumentUploadComponent implements OnInit {
+  private documentService = inject(DocumentService);
+  private categoryService = inject(CategoryService);
+  private assistantService = inject(AssistantService);
+  private router = inject(Router);
+
   selectedFiles: File[] = [];
   uploading = false;
   error: string | null = null;
@@ -33,26 +38,21 @@ export class DocumentUploadComponent implements OnInit {
 
   private destroyRef = inject(DestroyRef);
 
-  constructor(
-    private documentService: DocumentService,
-    private categoryService: CategoryService,
-    private assistantService: AssistantService,
-    private router: Router
-  ) {}
-
   ngOnInit(): void {
-    this.categoryService.getCategories()
+    this.categoryService
+      .getCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (categories) => this.availableCategories = categories.filter(c => c.is_active),
-        error: () => {}
+        next: (categories) => (this.availableCategories = categories.filter((c) => c.is_active)),
+        error: () => {},
       });
 
-    this.assistantService.getAssistants()
+    this.assistantService
+      .getAssistants()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (assistants) => this.availableAssistants = assistants.filter(a => a.is_active),
-        error: () => {}
+        next: (assistants) => (this.availableAssistants = assistants.filter((a) => a.is_active)),
+        error: () => {},
       });
   }
 
@@ -70,12 +70,12 @@ export class DocumentUploadComponent implements OnInit {
     const validMimes = [
       'application/pdf',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'text/plain'
+      'text/plain',
     ];
     const validExtensions = ['pdf', 'docx', 'txt'];
     const fileExtension = file.name.split('.').pop()?.toLowerCase() ?? '';
 
-    const extValid  = validExtensions.includes(fileExtension);
+    const extValid = validExtensions.includes(fileExtension);
     // Si el navegador detecta MIME type, debe coincidir; si no lo detecta (cadena vacía) se acepta solo la extensión
     const mimeValid = file.type ? validMimes.includes(file.type) : extValid;
 
@@ -127,7 +127,7 @@ export class DocumentUploadComponent implements OnInit {
     for (const file of files) {
       if (this.validateFile(file)) {
         // Evitar duplicados
-        if (!this.selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+        if (!this.selectedFiles.some((f) => f.name === file.name && f.size === file.size)) {
           validFiles.push(file);
         }
       }
@@ -156,12 +156,13 @@ export class DocumentUploadComponent implements OnInit {
     this.selectedFiles.forEach((file) => {
       this.uploadProgressMap.set(file.name, 0);
 
-      this.documentService.uploadDocument(file, this.selectedCategoryId, this.selectedAssistantId)
+      this.documentService
+        .uploadDocument(file, this.selectedCategoryId, this.selectedAssistantId)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (event) => {
             if (event.type === HttpEventType.UploadProgress && event.total) {
-              const progress = Math.round(100 * event.loaded / event.total);
+              const progress = Math.round((100 * event.loaded) / event.total);
               this.uploadProgressMap.set(file.name, progress);
               this.updateOverallProgress();
             } else if (event.type === HttpEventType.Response) {
@@ -188,13 +189,16 @@ export class DocumentUploadComponent implements OnInit {
             if (this.uploadedCount === this.totalFiles) {
               this.uploading = false;
             }
-          }
+          },
         });
     });
   }
 
   private updateOverallProgress(): void {
-    const totalProgress = Array.from(this.uploadProgressMap.values()).reduce((sum, progress) => sum + (progress >= 0 ? progress : 0), 0);
+    const totalProgress = Array.from(this.uploadProgressMap.values()).reduce(
+      (sum, progress) => sum + (progress >= 0 ? progress : 0),
+      0,
+    );
     this.uploadProgress = Math.round(totalProgress / this.totalFiles);
   }
 
@@ -213,7 +217,7 @@ export class DocumentUploadComponent implements OnInit {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   }
 
   getFileIcon(fileName: string): string {

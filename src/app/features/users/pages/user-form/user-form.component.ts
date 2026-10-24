@@ -18,7 +18,7 @@ import { User, UserCreate, UserUpdate } from '../../../../core/models/user.model
 export class UserFormComponent implements OnInit {
   @Input() userId: number | null = null;
   @Output() userSaved = new EventEmitter<void>();
-  @Output() cancel    = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
 
   isEditMode = false;
   loading    = false;
@@ -126,7 +126,7 @@ export class UserFormComponent implements OnInit {
     }
   }
 
-  onCancel(): void { this.cancel.emit(); }
+  onCancel(): void { this.cancelled.emit(); }
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.userForm.get(fieldName);

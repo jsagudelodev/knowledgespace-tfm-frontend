@@ -65,5 +65,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadChildren: () => import('./features/knowledge-gaps/knowledge-gaps.routes').then(m => m.KNOWLEDGE_GAPS_ROUTES)
   },
-  { path: '**', redirectTo: '/auth/login' }
+  {
+    path: 'not-found',
+    loadComponent: () => import('./shared/pages/not-found/not-found.component').then(m => m.NotFoundComponent)
+  },
+  { path: '**', redirectTo: '/not-found' }
 ];

@@ -1,3 +1,6 @@
+<!-- Fondo de cierre al hacer clic fuera: no debe ser foco de teclado, ya
+     captura el Escape el propio drawer. -->
+<!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
 <div class="cd-overlay" [class.open]="abierto()" (click)="cerrar()"></div>
 
 <aside class="cd-drawer" [class.open]="abierto()" aria-label="Fragmentos del documento">

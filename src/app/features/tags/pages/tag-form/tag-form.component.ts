@@ -27,7 +27,7 @@ const DEFAULT_TAG_COLOR = '#6366f1';
 export class TagFormComponent implements OnInit {
   @Input() tagId: number | null = null;
   @Output() tagSaved = new EventEmitter<void>();
-  @Output() cancel   = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
 
   // ── Servicios ─────────────────────────────────────────────────────────────
   private readonly destroyRef = inject(DestroyRef);
@@ -115,7 +115,7 @@ export class TagFormComponent implements OnInit {
     }
   }
 
-  onCancel(): void { this.cancel.emit(); }
+  onCancel(): void { this.cancelled.emit(); }
 
   isFieldInvalid(field: string): boolean {
     const ctrl = this.tagForm.get(field);

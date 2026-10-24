@@ -6,7 +6,9 @@
       [class.toast--error]="item.type === 'error'"
       [class.toast--info]="item.type === 'info'"
       role="status"
+      tabindex="0"
       (click)="notifications.dismiss(item.id)"
+      (keydown.enter)="notifications.dismiss(item.id)"
     >
       <span class="material-symbols-outlined">{{ icon(item.type) }}</span>
       <span class="toast__message">{{ item.message }}</span>

@@ -102,10 +102,7 @@
 
   <!-- ── Loading ─────────────────────────────────────────────────────────── -->
   @if (loading) {
-    <div class="state-container">
-      <span class="state-spinner"></span>
-      <p class="state-text">Cargando documentos...</p>
-    </div>
+    <app-table-skeleton [columns]="7" />
   }
 
   <!-- ── Error ───────────────────────────────────────────────────────────── -->
@@ -180,6 +177,9 @@
               }
             </div>
 
+            <!-- Solo evita que el clic llegue a la fila; los controles de
+                 dentro ya tienen su propio manejador de teclado. -->
+            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
             <div class="doc-col-category" (click)="$event.stopPropagation()">
               <div class="doc-category-wrap">
                 @if (getCategory(doc); as cat) {
@@ -212,6 +212,7 @@
                 </button>
 
                 @if (categoryPickerDocId === doc.id) {
+                  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
                   <div class="doc-category-picker" (click)="$event.stopPropagation()">
                     <button
                       class="doc-category-option doc-category-option--none"

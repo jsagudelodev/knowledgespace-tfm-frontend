@@ -19,11 +19,12 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { CompanyFormComponent } from '../company-form/company-form.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { TableSkeletonComponent } from '../../../../shared/components/table-skeleton/table-skeleton.component';
 
 @Component({
   selector: 'app-company-list',
   standalone: true,
-  imports: [NgClass, DecimalPipe, CompanyFormComponent, EmptyStateComponent],
+  imports: [NgClass, DecimalPipe, CompanyFormComponent, EmptyStateComponent, TableSkeletonComponent],
   templateUrl: './company-list.component.html',
   styleUrls: ['./company-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

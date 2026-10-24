@@ -1,6 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { StorageService } from './storage.service';
 import { User } from '../models/user.model';
@@ -17,15 +16,18 @@ export interface TokenResponse {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
+  private apiService = inject(ApiService);
+  private storage = inject(StorageService);
+
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
   readonly selectedCompany = signal<Company | null>(null);
 
-  constructor(private apiService: ApiService, private storage: StorageService) {
+  constructor() {
     this.loadUserFromStorage();
   }
 

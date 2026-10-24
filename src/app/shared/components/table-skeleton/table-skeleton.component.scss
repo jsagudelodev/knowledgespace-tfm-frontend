@@ -1,0 +1,31 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+
+:host {
+  display: block;
+}
+
+.table-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-3;
+  padding: $sp-4 0;
+}
+
+.table-skeleton__row {
+  display: flex;
+  gap: $sp-4;
+  align-items: center;
+}
+
+.table-skeleton__bar {
+  height: 14px;
+  flex: 1;
+  border-radius: $radius-sm;
+  background: $border-flat;
+  animation: sk-pulse 1.4s ease-in-out infinite;
+
+  &--first {
+    flex: 1.6; // la primera columna suele ser un nombre, más ancha que el resto
+  }
+}
