@@ -125,10 +125,13 @@ asistente.
 
 ### Paso 4. Calificar la respuesta
 
-Debajo de cada respuesta hay un pulgar arriba y uno abajo. Al marcar una
-respuesta como mala se puede explicar **qué estuvo mal**. Esa calificación
+Debajo de cada respuesta hay un pulgar arriba y uno abajo. El pulgar arriba se
+guarda al momento. El pulgar abajo abre el cuadro **«¿Qué estuvo mal?»**: la
+calificación negativa solo se guarda al pulsar **Enviar**. Esa calificación
 alimenta **Feedback IA** y **Sin respuesta**: es como la empresa descubre qué le
 falta a su documentación.
+
+![Una respuesta calificada como mala, vista desde Feedback IA](capturas/18-feedback-respuesta-calificada.jpg)
 
 ---
 

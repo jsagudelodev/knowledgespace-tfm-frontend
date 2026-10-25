@@ -1,5 +1,6 @@
 /**
- * Añade el JWT a cada petición saliente.
+ * Añade el JWT a cada petición saliente, y el contexto de empresa cuando un
+ * `superadmin` está viendo los datos de otra (2026-10-25).
  *
  * Es el único punto del frontend que toca la cabecera `Authorization`: ningún
  * servicio la construye por su cuenta. Eso importa para el multi-tenant —
@@ -11,6 +12,13 @@
  * petición sale tal cual y es el backend quien responde 401: el interceptor no
  * decide qué rutas son públicas, eso lo hacen los guards.
  *
+ * `X-Company-Context` solo se añade si el usuario es `superadmin` Y eligió
+ * una empresa distinta de la suya (`AuthService.selectedCompany`) — para
+ * cualquier otro rol el backend la ignora de todos modos
+ * (`get_company_context`), pero no tiene sentido mandarla. Hoy solo la
+ * respetan los endpoints de Documentos y Asistentes; el resto sigue
+ * mostrando los datos del propio superadmin aunque la cabecera viaje.
+ *
  * El manejo de la respuesta —401 por token caducado, 403, errores de
  * servidor— vive aparte, en `error.interceptor.ts`, registrado después de
  * este en `app.config.ts`.
@@ -18,17 +26,22 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { StorageService } from '../services/storage.service';
+import { AuthService } from '../services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const storage = inject(StorageService);
+  const authService = inject(AuthService);
   const token = storage.getItem<string>('access_token');
 
-  if (token) {
-    const cloned = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
-    return next(cloned);
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const user = authService.getCurrentUserValue();
+  const selected = authService.selectedCompany();
+  if (user?.role === 'superadmin' && selected && selected.id !== user.company_id) {
+    headers['X-Company-Context'] = String(selected.id);
   }
 
-  return next(req);
+  if (Object.keys(headers).length === 0) return next(req);
+  return next(req.clone({ setHeaders: headers }));
 };

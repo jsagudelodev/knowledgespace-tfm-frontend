@@ -11,6 +11,13 @@ export class CompanyService extends CrudService<Company, CompanyCreate, CompanyU
     return this.list({ skip, limit });
   }
 
+  /** La empresa del usuario autenticado (`GET /v1/companies/me`), para que el
+   * selector de empresa arranque mostrando la propia antes de cambiar de
+   * contexto. Cualquier usuario puede pedirla, no solo `superadmin`. */
+  getMyCompany(): Observable<Company> {
+    return this.api.get<Company>(`${this.basePath}/me`);
+  }
+
   getCompany(id: number): Observable<Company> {
     return this.getById(id);
   }

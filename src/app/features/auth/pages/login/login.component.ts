@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 import { tap, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../../core/services/auth.service';
+import { CompanyService } from '../../../companies/services/company.service';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +22,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
+  private companyService = inject(CompanyService);
   private router = inject(Router);
 
   loginForm: FormGroup;
@@ -55,6 +57,19 @@ export class LoginComponent {
       .subscribe({
         next: (user) => {
           this.authService.setCurrentUser(user);
+          // La propia empresa como punto de partida del selector — sin esto,
+          // `selectedCompany` queda vacío hasta que un superadmin cambie de
+          // contexto, y el header muestra "KnowledgeSpace" en vez del nombre
+          // real. Si falla (red, 404), no bloquea el login: el header vuelve
+          // a caer en ese mismo texto genérico, que es peor cosmética, no un
+          // error funcional.
+          this.companyService
+            .getMyCompany()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (company) => this.authService.setSelectedCompany(company),
+              error: () => {},
+            });
           this.router.navigate(['/dashboard']);
         },
         error: () => {

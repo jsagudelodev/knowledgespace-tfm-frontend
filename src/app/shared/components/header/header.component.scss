@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'styles/core/variables' as *;
 @use 'styles/core/colors'    as *;
 @use 'styles/core/mixins'    as *;
@@ -78,6 +79,122 @@
   color: $font-title;
   @include text-ellipsis;
   max-width: 180px;
+}
+
+// ── Selector de empresa (superadmin) ────────────────────────────────────────
+.context-badge--clickable {
+  cursor: pointer;
+  @include transition-fast(background-color, border-color);
+  &:hover { background: $bg-hover; }
+}
+
+// Empresa distinta de la propia: el indicador pasa de verde a ámbar para que
+// sea imposible no notar que se está viendo "como" otra empresa.
+.context-badge--override {
+  border-color: $color-warning;
+  .context-indicator { background-color: $color-warning; }
+}
+
+.company-dropdown {
+  position: absolute;
+  top: calc(100% + #{$sp-2});
+  left: 0;
+  width: 320px;
+  max-width: 90vw;
+  background: $bg-card;
+  border: 1px solid $border-flat;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-lg;
+  overflow: hidden;
+  animation: dropdown-in $motion-fast both;
+  z-index: $z-dropdown;
+  display: flex;
+  flex-direction: column;
+}
+
+.company-dropdown__header {
+  padding: $sp-4;
+  border-bottom: 1px solid $border-flat;
+}
+
+.company-dropdown__title {
+  margin: 0 0 2px;
+  font-size: $size-sm;
+  font-weight: $w-bold;
+  color: $font-title;
+}
+
+.company-dropdown__hint {
+  margin: 0;
+  font-size: $size-2xs;
+  color: $font-muted;
+  line-height: 1.4;
+}
+
+.company-dropdown__own {
+  @include flex-start-center;
+  gap: $sp-2;
+  width: 100%;
+  padding: $sp-3 $sp-4;
+  background: $bg-selected;
+  border: none;
+  border-bottom: 1px solid $border-flat;
+  color: $color-primary;
+  font-size: $size-xs;
+  font-weight: $w-semibold;
+  cursor: pointer;
+  text-align: left;
+  @include transition-fast(background-color);
+  &:hover { background: color.adjust($bg-selected, $lightness: -2%); }
+}
+
+.company-dropdown__list {
+  max-height: 320px;
+  overflow-y: auto;
+  @include scrollbar-slim;
+}
+
+.company-dropdown__loading,
+.company-dropdown__empty {
+  padding: $sp-6 $sp-4;
+  text-align: center;
+  color: $font-muted;
+  font-size: $size-xs;
+}
+
+.company-item {
+  @include flex-between-center;
+  gap: $sp-2;
+  width: 100%;
+  padding: $sp-3 $sp-4;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid $border-flat;
+  color: $font-body;
+  font-size: $size-xs;
+  text-align: left;
+  cursor: pointer;
+  @include transition-fast(background-color);
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: $bg-hover; }
+  &--active { color: $color-primary; font-weight: $w-semibold; }
+}
+
+.company-item__name {
+  @include text-ellipsis;
+}
+
+.company-item__badge {
+  margin-left: auto;
+  margin-right: $sp-2;
+  padding: 1px 6px;
+  border-radius: $radius-pill;
+  background: $bg-selected;
+  color: $color-primary;
+  font-size: 10px;
+  font-weight: $w-semibold;
+  text-transform: uppercase;
 }
 
 // ── Botón Chat IA ─────────────────────────────────────────────────────────

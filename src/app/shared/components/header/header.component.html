@@ -12,10 +12,68 @@
       <span class="material-symbols-outlined icon-sm">{{ sidebarOpen ? 'menu_open' : 'menu' }}</span>
     </button>
 
-    <div class="context-badge">
-      <span class="context-indicator"></span>
-      <span class="context-text">{{ companyName() }}</span>
-    </div>
+    @if (isSuperadmin()) {
+      <button
+        class="context-badge context-badge--clickable"
+        type="button"
+        [class.context-badge--override]="selectedCompanyId() !== ownCompanyId()"
+        (click)="toggleCompanyMenu($event)"
+        title="Cambiar de empresa (solo afecta a Documentos y Asistentes)"
+      >
+        <span class="context-indicator"></span>
+        <span class="context-text">{{ companyName() }}</span>
+        <span class="material-symbols-outlined icon-xs">expand_more</span>
+      </button>
+
+      @if (companyMenuOpen()) {
+        <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
+        <div class="company-dropdown" role="menu" (click)="$event.stopPropagation()">
+          <div class="company-dropdown__header">
+            <p class="company-dropdown__title">Ver como otra empresa</p>
+            <p class="company-dropdown__hint">
+              Solo cambia Documentos y Asistentes; el resto sigue mostrando tus propios datos.
+            </p>
+          </div>
+
+          @if (selectedCompanyId() !== ownCompanyId()) {
+            <button class="company-dropdown__own" type="button" (click)="clearCompanyContext()">
+              <span class="material-symbols-outlined icon-sm">undo</span>
+              Volver a mi empresa
+            </button>
+          }
+
+          <div class="company-dropdown__list">
+            @if (companiesLoading()) {
+              <div class="company-dropdown__loading"><span class="mini-spinner"></span></div>
+            } @else if (companiesError()) {
+              <p class="company-dropdown__empty">No se pudieron cargar las empresas.</p>
+            } @else {
+              @for (c of companies(); track c.id) {
+                <button
+                  class="company-item"
+                  [class.company-item--active]="c.id === selectedCompanyId()"
+                  type="button"
+                  (click)="selectCompany(c)"
+                >
+                  <span class="company-item__name">{{ c.name }}</span>
+                  @if (c.id === ownCompanyId()) {
+                    <span class="company-item__badge">tuya</span>
+                  }
+                  @if (c.id === selectedCompanyId()) {
+                    <span class="material-symbols-outlined icon-sm">check</span>
+                  }
+                </button>
+              }
+            }
+          </div>
+        </div>
+      }
+    } @else {
+      <div class="context-badge">
+        <span class="context-indicator"></span>
+        <span class="context-text">{{ companyName() }}</span>
+      </div>
+    }
   </div>
 
   <!-- ── Derecha: perfil ───────────────────────────────────────────────────── -->

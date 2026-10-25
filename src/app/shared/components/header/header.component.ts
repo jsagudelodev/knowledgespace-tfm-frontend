@@ -8,6 +8,8 @@ import { UiStatusService } from '../../../core/services/ui-status.service';
 import { NotificationsService } from '../../../features/notifications/services/notifications.service';
 import { AppNotification } from '../../../core/models/notification.model';
 import { notificationIcon, relativeTime } from '../../../features/notifications/notification-display.util';
+import { CompanyService } from '../../../features/companies/services/company.service';
+import { Company } from '../../../core/models/company.model';
 
 const UNREAD_POLL_MS = 45_000;
 const PREVIEW_LIMIT = 6;
@@ -24,6 +26,7 @@ export class HeaderComponent implements OnInit {
   private readonly router              = inject(Router);
   private readonly uiStatus            = inject(UiStatusService);
   private readonly notificationsService = inject(NotificationsService);
+  private readonly companyService      = inject(CompanyService);
   private readonly destroyRef          = inject(DestroyRef);
 
   @Input() sidebarOpen = true;
@@ -59,6 +62,23 @@ export class HeaderComponent implements OnInit {
     this.authService.selectedCompany()?.name ?? 'KnowledgeSpace'
   );
 
+  /**
+   * Selector de empresa activa — solo para `superadmin` (2026-10-25).
+   *
+   * Hoy solo cambia de contexto para Documentos y Asistentes (ver
+   * `get_company_context` en el backend); el resto de módulos sigue
+   * mostrando los datos del propio superadmin aunque se elija otra empresa.
+   * Por eso el desplegable avisa de esa limitación en vez de dar a entender
+   * que cambia la vista entera.
+   */
+  readonly isSuperadmin     = computed(() => this.user()?.role === 'superadmin');
+  readonly ownCompanyId     = computed(() => this.user()?.company_id ?? null);
+  readonly companyMenuOpen  = signal(false);
+  readonly companies        = signal<Company[]>([]);
+  readonly companiesLoading = signal(false);
+  readonly companiesError   = signal(false);
+  readonly selectedCompanyId = computed(() => this.authService.selectedCompany()?.id ?? null);
+
   ngOnInit(): void {
     // Refresca el contador de no leídas periódicamente para que la campanita
     // se mantenga al día sin que el usuario tenga que refrescar la página.
@@ -71,6 +91,48 @@ export class HeaderComponent implements OnInit {
   onDocumentClick(): void {
     this.profileOpen.set(false);
     this.notifOpen.set(false);
+    this.companyMenuOpen.set(false);
+  }
+
+  toggleCompanyMenu(event: Event): void {
+    if (!this.isSuperadmin()) return;
+    event.stopPropagation();
+    this.profileOpen.set(false);
+    this.notifOpen.set(false);
+    const opening = !this.companyMenuOpen();
+    this.companyMenuOpen.set(opening);
+    if (opening && this.companies().length === 0) this.loadCompanies();
+  }
+
+  private loadCompanies(): void {
+    this.companiesLoading.set(true);
+    this.companiesError.set(false);
+    this.companyService.getCompanies()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (list) => { this.companies.set(list); this.companiesLoading.set(false); },
+        error: () => { this.companiesLoading.set(false); this.companiesError.set(true); },
+      });
+  }
+
+  /** Cambia la empresa activa y recarga: es la forma más simple de que TODOS
+   * los servicios ya cargados —dashboard, listas con datos en memoria—
+   * vuelvan a pedir con la cabecera nueva, en vez de dejar pantallas a medio
+   * refrescar. */
+  selectCompany(company: Company): void {
+    this.companyMenuOpen.set(false);
+    if (company.id === this.selectedCompanyId()) return;
+    this.authService.setSelectedCompany(company);
+    window.location.reload();
+  }
+
+  /** Vuelve a la empresa propia del superadmin — sale del modo "viendo como".
+   * Pide `/companies/me` en vez de buscarla en `companies()`: esa lista solo
+   * existe si el desplegable ya se abrió al menos una vez. */
+  clearCompanyContext(): void {
+    this.companyService.getMyCompany()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: (own) => this.selectCompany(own), error: () => {} });
   }
 
   toggleProfile(event: Event): void {
