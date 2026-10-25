@@ -3,7 +3,7 @@
 Cómo usar KnowledgeSpace para convertir la documentación de una empresa en
 asistentes que responden preguntas sobre ella. Es la segunda mitad del anexo
 10.1 de la memoria; la primera, cómo desplegar la aplicación, está en
-`knowledgespace-tfm-backend/docs/DEPLOYMENT.md`.
+`knowledgespace-tfm-backend/docs/TFM/DEPLOYMENT.md`.
 
 Aplicación de demostración: https://knowledgespace-tfm-frontend.vercel.app
 
@@ -69,6 +69,11 @@ documentos que se le asignan.
    puede añadir un avatar y hasta seis **preguntas sugeridas**, que aparecerán
    en el chat.
 3. Guardar.
+
+El prompt de sistema define **cómo habla** el asistente, pero no puede desactivar
+las reglas que le impiden inventar: responder solo con los documentos y decir
+«No encontré información…» cuando no los tiene se aplica siempre, se escriba lo
+que se escriba en ese campo.
 
 La **temperatura** aparece bloqueada en 0: no se puede cambiar, porque es el
 valor que dio las respuestas más fieles a los documentos al medirlo.

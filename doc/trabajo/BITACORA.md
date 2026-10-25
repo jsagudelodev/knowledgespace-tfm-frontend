@@ -103,7 +103,7 @@ Formato de cada entrada:
 **Hecho (documentación):**
 - `ALCANCE_TFM.md` de ambos repos: el widget pasa de "fuera de alcance" a
   "código retirado", con la justificación de por qué el modelo permanece.
-- `doc/FEATURES.md`: sección 9 reescrita; widget fuera del flujo de valor y de
+- `doc/trabajo/FEATURES.md`: sección 9 reescrita; widget fuera del flujo de valor y de
   las transversales; corregida la afirmación de que `/knowledge-gaps` no estaba
   registrada (lo está); eliminada la remisión a `BACKLOG_FRONTEND.md`, que no
   existe en este repositorio; corregido "Vitest como test runner" — la
@@ -186,7 +186,7 @@ Formato de cada entrada:
   - `shared/layouts/dashboard-layout/dashboard-layout.component.ts`: inyectado `NotificationsService`; signal `notifUnreadCount` cargado con `getUnreadCount()` en el constructor.
   - `shared/layouts/dashboard-layout/dashboard-layout.component.html`: Notificaciones movida del grupo **Plataforma** al grupo **Analytics**; badge numérico en modo expandido / punto azul en modo colapsado.
   - `shared/layouts/dashboard-layout/dashboard-layout.component.scss`: añadido `.sidebar-badge` y `.sidebar-badge--dot`.
-- **Documentación**: `doc/FEATURES.md` sección 12 reescrita con tabla de eventos de backend, descripción completa de la página y lista de endpoints. Sección "Pendientes" actualizada.
+- **Documentación**: `doc/trabajo/FEATURES.md` sección 12 reescrita con tabla de eventos de backend, descripción completa de la página y lista de endpoints. Sección "Pendientes" actualizada.
 
 **Decisiones / notas:**
 - El tipo `document_uploaded` existe en el seed de `notification_types` pero el router de documentos nunca lo emite — notificar que inició el procesamiento y luego que terminó sería redundante con el polling de estado que ya tiene `assistant-detail`.
@@ -255,7 +255,7 @@ Formato de cada entrada:
   - `core/models/feedback.model.ts`: modelos `FeedbackResponse`, `FeedbackStats`, `WeekStats`, `ThemeCount`, tipo `FeedbackStatus`.
   - `features/chat/services/feedback.service.ts`: `getAll`, `getStats`, `updateStatus`, `convertToGap`, `exportCsv` (vía `api.getBlob()`).
   - `feedback-list.component`: layout dos columnas — header con selector segmentado de asistente + exportar CSV; 4 KPI cards (satisfacción + delta, % calificadas, negativas, con brecha); izquierda: distribución filtrable, chips de temas, gráfico semanal; derecha: tarjetas de comentario con avatar, rating, respuesta calificada, acciones (ver conversación, convertir en brecha, pill de estado). Modal "convertir en brecha" con textarea editable.
-- **Documentación automatizada**: creado `.github/workflows/bitacora.yml` — en cada push a `main` inserta automáticamente una entrada en `doc/BITACORA.md` con hash, autor, mensaje y archivos modificados.
+- **Documentación automatizada**: creado `.github/workflows/bitacora.yml` — en cada push a `main` inserta automáticamente una entrada en `doc/trabajo/BITACORA.md` con hash, autor, mensaje y archivos modificados.
 
 **Decisiones / notas:**
 - `dateutil` no está en `requirements.txt`; se usó `datetime` stdlib para calcular el mes anterior y las semanas de corte.
@@ -281,7 +281,7 @@ Formato de cada entrada:
 - **Chat flotante**: botón "Chat IA" en el header (visible en todos los módulos) que abre el mismo `ChatDetailComponent` como drawer lateral, vía `UiStatusService` (ya existía el servicio, solo faltaba conectarlo). Se corrigió un bug heredado de TrainIQ: el botón de cerrar (X) dentro del chat en modo drawer no hacía nada; ahora cierra el drawer correctamente.
 - **Toggle de sidebar**: el signal `sidebarOpen`/`toggleSidebar()` de `DashboardLayoutComponent` existía pero no estaba conectado a ningún botón. Se agregó el botón ☰ en el header (`HeaderComponent`, `@Output() sidebarToggle`) para expandir/colapsar el sidebar.
 - Verificación end-to-end en navegador con datos reales: creación de conversación, respuesta RAG grounded en Pinecone con fuentes citadas y score de relevancia, apertura/cierre del drawer desde distintas páginas, colapso del sidebar.
-- Documentación: actualizado `doc/FEATURES.md` (sección 10 — Chat IA, transversales, pendientes) y `BACKLOG_FRONTEND.md` (Módulo 5 marcado completo). Creado este archivo (`BITACORA.md`).
+- Documentación: actualizado `doc/trabajo/FEATURES.md` (sección 10 — Chat IA, transversales, pendientes) y `BACKLOG_FRONTEND.md` (Módulo 5 marcado completo). Creado este archivo (`BITACORA.md`).
 - **Limpieza de código / centralización en el sistema de diseño**, a raíz de una revisión general del frontend:
   - Eliminados colores hex hardcodeados que duplicaban tokens ya existentes: `#fff` → `$font-on-primary` (paginador activo en `document-list` y `assistant-detail`) o `$bg-card` (thumb del toggle en `category-form`); `#eff6ff`/`#2563eb`/`#93c5fd` → `$color-primary-light`/`$color-primary`/`$navy-250` (hover del botón de descarga en `document-list`).
   - Reemplazados dos `box-shadow: rgba(0,0,0,...)` sueltos en `chat-detail.component.scss` por `$shadow-xs`/`$shadow-md` (todo el resto del código ya usaba los tokens `$shadow-*`, solo el chat portado de TrainIQ tenía valores sueltos).

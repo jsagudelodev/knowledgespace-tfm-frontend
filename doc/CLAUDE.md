@@ -95,7 +95,7 @@ Prettier — `printWidth: 100`, `singleQuote: true`, Angular parser for HTML fil
 
 Al terminar cualquier sesión de trabajo en este repositorio, Claude **siempre** debe actualizar estos tres archivos:
 
-### 1. `doc/BITACORA.md`
+### 1. `doc/trabajo/BITACORA.md`
 
 Añadir una entrada nueva al inicio (orden descendente — lo más reciente arriba) con la fecha de hoy. Seguir el formato establecido:
 
@@ -114,7 +114,7 @@ Añadir una entrada nueva al inicio (orden descendente — lo más reciente arri
 ---
 ```
 
-### 2. `doc/FEATURES.md`
+### 2. `doc/trabajo/FEATURES.md`
 
 - Si se implementó un módulo nuevo: añadir sección numerada con descripción completa de las funcionalidades.
 - Si se completó algo que estaba en "Pendientes": mover de la lista de pendientes a la sección correspondiente o actualizar el texto.
