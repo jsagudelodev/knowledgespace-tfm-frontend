@@ -120,9 +120,14 @@ export class DashboardLayoutComponent {
     const name = this.user()?.full_name ?? '';
     return name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase() || 'U';
   });
-  readonly userRole = computed(() =>
-    this.user()?.role === 'admin' ? 'Administrador' : 'Usuario'
-  );
+  // Mismas etiquetas que la cabecera (`HeaderComponent.userRole`). Antes no
+  // contemplaba `superadmin` y lo mostraba como "Usuario".
+  readonly userRole = computed(() => {
+    const role = this.user()?.role;
+    if (role === 'superadmin') return 'Super Admin';
+    if (role === 'admin')      return 'Administrador';
+    return 'Usuario';
+  });
   readonly isAdmin = computed(() => {
     const role = this.user()?.role;
     return role === 'admin' || role === 'superadmin';

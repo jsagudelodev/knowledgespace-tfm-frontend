@@ -210,6 +210,12 @@ usuarios y mensajes. Una empresa sin documentos ve una guía de primeros pasos.
 - **Empresas:** alta y edición de las empresas, con su plan y sus límites de
   usuarios, documentos y mensajes al mes.
 
+![Dashboard de un administrador, con la sección Administración](capturas/15-dashboard-administrador.jpg)
+
+![Gestión de usuarios](capturas/16-usuarios.jpg)
+
+![Gestión de empresas](capturas/17-empresas.jpg)
+
 ---
 
 ## 7. Lo que la aplicación no hace
