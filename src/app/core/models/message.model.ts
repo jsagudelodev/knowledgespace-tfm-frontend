@@ -23,6 +23,11 @@ export interface Message {
   token_count?: number;
   cost_usd?: number;
   created_at: string;
+  /** true mientras un mensaje del asistente se está escribiendo por streaming
+   * (`ChatService.sendMessageStream`). No existe en mensajes ya guardados —
+   * el backend no lo conoce, es puramente de presentación: oculta copiar,
+   * feedback y costo hasta que la respuesta está completa. */
+  streaming?: boolean;
 }
 
 export interface ChatRequest {
@@ -41,3 +46,28 @@ export interface ChatResponse {
   assistant_id?: number;
   cost_usd?: number;
 }
+
+/** Eventos del streaming de `POST /v1/chat/message/stream`. Misma forma que
+ * emite el backend — ver `_generar_eventos_sse` en `api/app/routers/v1/chat.py`. */
+export interface ChatStreamDelta {
+  type: 'delta';
+  content: string;
+}
+
+export interface ChatStreamDone {
+  type: 'done';
+  message_id: number;
+  conversation_id: number;
+  sources: Source[];
+  assistant_id?: number | null;
+  cost_usd?: number | null;
+}
+
+export interface ChatStreamError {
+  type: 'error';
+  /** La etapa del pipeline que falló (p.ej. "generación de la respuesta",
+   * "búsqueda vectorial") — la misma que trae `RAGUnavailableError` en el backend. */
+  etapa: string;
+}
+
+export type ChatStreamEvent = ChatStreamDelta | ChatStreamDone | ChatStreamError;

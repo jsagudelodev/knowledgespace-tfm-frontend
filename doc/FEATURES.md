@@ -23,9 +23,9 @@ Es una plataforma **multi-tenant** (multiempresa) con roles jerárquicos (`super
 - **PrimeNG 21** — componentes UI, sin tema preestablecido (estilos sobreescritos globalmente).
 - **Material Symbols** + tipografía **Inter** (Google Fonts).
 - **RxJS 7.8**, **TypeScript 5.9** en modo estricto.
-- **Prettier** para formateo. `vitest` figura como dependencia de desarrollo,
-  pero **no hay ningún archivo `.spec.ts` en el repositorio**: no existe
-  cobertura de tests. Ver `ALCANCE_TFM.md`.
+- **Prettier** para formateo y **ESLint** (`@angular-eslint`). Tests unitarios
+  con Vitest: 20 desde el 2026-10-24, sobre los *guards*, los interceptores y la
+  expiración del JWT (ver «Pendientes»). Sin tests de componentes ni e2e.
 - Sistema de diseño propio "Deep Blue Premium" (`#2563EB` primario, sidebar oscuro `#0F172A`), arquitectura SCSS en 3 capas.
 - Multi-entorno: local, development, qa, production (cada uno con su propio `apiUrl`).
 
@@ -133,19 +133,18 @@ Interfaz conversacional interna: el equipo de la empresa consulta su propia
 documentación indexada en lenguaje natural, con respuestas generadas por RAG y
 trazabilidad de fuentes.
 
-- **Chat Shell** (`/chat`): layout de dos columnas (lista de conversaciones + panel principal). Pantalla de bienvenida con accesos rápidos cuando no hay una conversación activa.
-- **Chat List**: historial de conversaciones del usuario, resaltando la conversación activa, con acceso directo al dashboard y creación de nuevas conversaciones.
-- **Chat Detail** (`/chat/:id`): burbujas de mensaje usuario/asistente con formato markdown básico (negrita, cursiva, código), indicador de "escribiendo…", selector de **Asistente** activo cuando la empresa tiene más de uno configurado, sugerencias de inicio rápido en el estado vacío.
+- **Dónde vive:** en un panel lateral (*drawer*) que abre el botón **Chat IA** de la cabecera, desde cualquier módulo. La página completa con lista de conversaciones (`ChatShellComponent`, `ChatListComponent`) se retiró por redundante. La ruta `/chat/:id` se conserva para los enlaces a una conversación concreta (por ejemplo, «Ver conversación» desde Feedback), y `/chat` a secas redirige al dashboard (2026-10-24; antes mostraba el layout en blanco).
+- **Chat Detail** (panel y `/chat/:id`): burbujas de mensaje usuario/asistente con formato markdown básico (negrita, cursiva, código), indicador de "escribiendo…", selector de **Asistente** activo cuando la empresa tiene más de uno configurado, sugerencias de inicio rápido en el estado vacío.
   - **Fuentes citadas**: cada respuesta lista los documentos consultados con su score de relevancia, permite previsualizar el fragmento exacto usado por el modelo y descargar el documento original (vía URL firmada de S3).
   - **Feedback**: pulgar arriba/abajo por respuesta, con panel de comentario opcional al marcar una respuesta como mejorable (`POST /v1/feedback/`); el estado de feedback ya emitido se restaura al recargar la conversación.
   - **Búsqueda** dentro de los mensajes de la conversación (con resaltado de coincidencias) y **paginación** de mensajes largos.
-  - Sin streaming: la respuesta llega completa en una sola petición a `POST /v1/chat/message` (no hay SSE/WebSocket token-por-token).
-- **Chat flotante**: además de la página completa, un botón "Chat IA" en el header (visible en cualquier módulo) abre el mismo `ChatDetailComponent` como **drawer lateral** superpuesto (`UiStatusService` centraliza el estado abierto/cerrado), para consultar el asistente sin abandonar la pantalla actual.
-- **Backend consumido**: `POST /v1/chat/message`, `GET/POST /v1/conversations`, `GET /v1/messages`, `GET /v1/assistants` (filtrado a activos en cliente), `GET /v1/documents/:id/download`, `POST /v1/feedback/`, `GET /v1/feedback/me`.
+  - **Streaming** (2026-10-24): la respuesta llega token a token por *Server-Sent Events* (`POST /v1/chat/message/stream`), con un cursor parpadeante al final del texto mientras se sigue escribiendo. `ChatService.sendMessageStream` lee el progreso de descarga de `HttpClient` (no `EventSource`, que solo hace GET) y parsea las líneas SSE a mano, reconstruyendo eventos que puedan llegar partidos entre dos trozos de red. No reduce el tiempo total de la consulta —el RAG hace el mismo trabajo—, reduce la espera hasta el primer token. Copiar, feedback y costo quedan ocultos en la burbuja hasta que la respuesta termina. La ruta síncrona (`sendMessage` / `POST /v1/chat/message`) se conserva sin usarse desde la UI.
+- **Estado del panel**: `UiStatusService` centraliza si el drawer está abierto o cerrado. Cada respuesta muestra además su costo en USD.
+- **Backend consumido**: `POST /v1/chat/message`, `POST /v1/chat/message/stream`, `GET/POST /v1/conversations`, `GET /v1/messages`, `GET /v1/assistants` (filtrado a activos en cliente), `GET /v1/documents/:id/download`, `POST /v1/feedback/`, `GET /v1/feedback/me`.
 
 ### 11. Feedback IA — Analytics (`/feedback`)
 
-Panel de análisis de la calidad de las respuestas del asistente: cómo califican los usuarios las respuestas, distribución, agrupación semántica en temas y gestión de quejas convertidas en preguntas sin respuesta. Solo visible para roles `admin` / `superadmin`. Rediseñado (handoff v2) el 2026-08-15 — reemplaza por completo la versión inicial del 2026-08-14.
+Panel de análisis de la calidad de las respuestas del asistente: cómo califican los usuarios las respuestas, distribución, agrupación semántica en temas y gestión de quejas convertidas en preguntas sin respuesta. Visible para cualquier usuario de la empresa: ni la ruta ni la API exigen un rol (solo `/companies`, `/users` y los costos lo exigen). Ver `MANUAL_USUARIO.md`, sección 1. Rediseñado (handoff v2) el 2026-08-15 — reemplaza por completo la versión inicial del 2026-08-14.
 
 - **Header**: selector de **período** (Este mes / 90 días / 12 meses), dropdown de asistente (Todos / por asistente, con cierre al clic exterior y `Escape`) y botón "Exportar comentarios" (CSV).
 - **KPI cards** (3, antes 4 — se eliminó "Respuestas calificadas"):
@@ -243,10 +242,10 @@ Resumen de lo no implementado aún:
 - ✅ `adminGuard` quedó enganchado en `app.routes.ts` a las rutas `/companies` y
   `/users`; antes estaba escrito pero sin usar, y el control de acceso admin
   dependía solo de comprobaciones dentro de cada componente.
-- **Streaming del Chat IA**: el chat quedó implementado sobre HTTP síncrono, no
-  WebSocket. Sigue siendo una mejora candidata para UX de streaming
-  token-por-token. La variable `wsUrl` que los entornos declaraban para ese fin
-  se retiró: apuntaba a un endpoint que el backend no expone.
+- ✅ **Streaming del Chat IA** (2026-10-24): resuelto, ver sección 10. La
+  variable `wsUrl` que los entornos declaraban para un WebSocket que nunca se
+  usó se había retirado antes; el streaming final se hizo con Server-Sent
+  Events sobre HTTP, no WebSocket.
 - ✅ **Persistencia de `sidebarOpen` y los cuatro grupos colapsables** (2026-10-22): vía `StorageService` (`sessionStorage`), con un `effect()` por señal en `DashboardLayoutComponent`. Sobrevive a cambiar de módulo (cada uno instancia su propia layout); se reinicia al cerrar la pestaña, que es lo esperado para una preferencia de UI, no para datos.
 - ✅ **Interceptor global de errores HTTP** (2026-10-22): `core/interceptors/error.interceptor.ts`. 401 fuera del login fuerza `logout()` + redirección (antes solo pasaba si el usuario pulsaba "cerrar sesión"), 403 y errores de servidor (0 o ≥500) muestran un aviso genérico vía `NotificationService`. No toca los 4xx de negocio (404/409/422), que ya tienen su propio mensaje por componente — relanza el error en todos los casos para no romper ese manejo existente.
 - ✅ **Loading skeletons en las listas de tabla** (2026-10-22): `shared/components/table-skeleton/`, componente genérico (`[rows]`, `[columns]`) en vez de uno a medida por página. Conectado en etiquetas, categorías, empresas, usuarios y documentos. De paso, se centralizó `@keyframes sk-pulse` en `styles.scss` — estaba duplicado con ligeras variantes en feedback-list, knowledge-gaps-list y notification-list.
@@ -263,4 +262,4 @@ Resumen de lo no implementado aún:
 - ✅ **Primeros tests unitarios** (2026-10-24): de 0 a 20, con Vitest (`@angular/build:unit-test`, ya configurado en `angular.json` pero sin ningún `.spec.ts` hasta ahora). Empezado por lo más crítico, igual que en el backend (umbral y abstención primero): los tres *guards* de ruta (`auth`, `admin`, `guest`), los dos interceptores (`auth`, `error` — el que se construyó el 2026-10-22) y `AuthService.isAuthenticated()` (la lógica de expiración del JWT que usan los *guards*). Verificado con sabotaje deliberado en dos casos: el *guard* de autenticación y la exclusión del login en el interceptor de errores — ambos detectaron la regresión introducida a propósito. **Sigue pendiente:** tests de componentes (servicios de features, formularios) y e2e; esto cubre solo el núcleo de seguridad/acceso, no la aplicación completa.
 - ✅ **Soporte de archivos `.md`** (2026-10-24): se podía subir PDF, DOCX y TXT, pero no Markdown — el backend ya tenía un extractor de texto plano (`_extraer_txt`) listo para reutilizar, solo faltaba declarar el tipo como soportado. Se indexa con la sintaxis de marcado incluida (sin parsear Markdown). Actualizado en los tres puntos donde el frontend valida o menciona el tipo: `document-upload` (input + validación de extensión/MIME + mensaje de error), `assistant-detail` (zona de arrastrar-y-soltar) y el texto de onboarding del dashboard.
 - ✅ **Vista previa de `.md` en el panel de fragmentos** (2026-10-24): como se indexa el `.md` tal cual, sin parsear, el panel de fragmentos (`ChunksDrawerComponent`, usado tanto en el detalle de un asistente como en el listado de documentos) lo mostraba como texto plano con `#`/`**`/etc. literales. Ahora, si el documento del fragmento termina en `.md`, su texto se convierte a HTML con `marked` y se inserta con `[innerHTML]`. El texto viene de un archivo subido por un usuario, así que antes de insertarse pasa por `DOMPurify.sanitize` y, después, por el propio saneamiento de Angular en `[innerHTML]` (no se usa `bypassSecurityTrustHtml`, que saltaría esa segunda capa) — Markdown admite HTML embebido por defecto, así que sin esto un `.md` con un `<script>` se ejecutaría en el navegador de quien abra el panel. El resto de tipos (PDF/DOCX/TXT) sigue mostrándose como texto plano. Verificado con sabotaje: se quitó temporalmente la llamada a `DOMPurify.sanitize` y los dos tests que comprueban que se elimina un `<script>` y un atributo `onerror` fallaron como se esperaba; restaurado después.
-- **Deploy**: el frontend se sirve desde Vercel (`https://knowledge-space-front-end.vercel.app/`, auto-deploy en cada push a `main`), desacoplado del backend en Cloud Run — CORS gestiona la conexión entre ambos (ver `doc/BITACORA.md`, 2026-08-14).
+- **Deploy**: el frontend del TFM se sirve desde Vercel (`https://knowledgespace-tfm-frontend.vercel.app`, auto-deploy en cada push a `main` de este repositorio), contra el backend del TFM en Cloud Run (`europe-west1`); CORS gestiona la conexión entre ambos. Guía completa en `knowledgespace-tfm-backend/docs/DEPLOYMENT.md`. El proyecto de Vercel anterior (`knowledge-space-front-end.vercel.app`, 2026-08-14) pertenece al repositorio comercial.

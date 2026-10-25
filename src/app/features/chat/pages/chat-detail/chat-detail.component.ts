@@ -391,33 +391,87 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
     if (!this.searchTerm()) this.currentPage.set(this.totalPages());
     this.scrollToBottom();
 
+    // Id provisional de la burbuja del asistente mientras llega por streaming
+    // -se crea recién con el PRIMER trozo, no antes: si la recuperación tarda
+    // unos segundos en encontrar contexto, una burbuja vacía desde ya se vería
+    // como un mensaje en blanco en vez de como "escribiendo…"-. Al llegar el
+    // evento `done` se sustituye por el id real que asignó el backend.
+    const streamingId = Date.now() + 1;
+    let streamingStarted = false;
+
     this.chatService
-      .sendMessage({ conversation_id: conv.id, message: text, assistant_id: this.assistantId() })
+      .sendMessageStream({ conversation_id: conv.id, message: text, assistant_id: this.assistantId() })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (r) => {
-          this.sendError.set(null);
-          this.messages.update((m) => [
-            ...m,
-            {
-              id: r.message_id,
-              conversation_id: conv.id,
-              role: 'assistant',
-              content: r.content,
-              sources: r.sources,
-              cost_usd: r.cost_usd,
-              created_at: r.created_at,
-            },
-          ]);
-          if (!this.searchTerm()) this.currentPage.set(this.totalPages());
+        next: (evento) => {
+          if (evento.type === 'delta') {
+            this.isTyping.set(false);
+            if (!streamingStarted) {
+              streamingStarted = true;
+              this.messages.update((m) => [
+                ...m,
+                {
+                  id: streamingId,
+                  conversation_id: conv.id,
+                  role: 'assistant',
+                  content: evento.content,
+                  created_at: new Date().toISOString(),
+                  streaming: true,
+                },
+              ]);
+              if (!this.searchTerm()) this.currentPage.set(this.totalPages());
+            } else {
+              this.messages.update((m) =>
+                m.map((msg) =>
+                  msg.id === streamingId ? { ...msg, content: msg.content + evento.content } : msg,
+                ),
+              );
+            }
+            this.scrollToBottom();
+            return;
+          }
+
+          if (evento.type === 'done') {
+            this.sendError.set(null);
+            this.messages.update((m) =>
+              m.map((msg) =>
+                msg.id === streamingId
+                  ? { ...msg, id: evento.message_id, sources: evento.sources, cost_usd: evento.cost_usd ?? undefined, streaming: false }
+                  : msg,
+              ),
+            );
+            this.sending.set(false);
+            this.isTyping.set(false);
+            this.scrollToBottom();
+            return;
+          }
+
+          // evento.type === 'error': el RAG falló, antes o después de empezar a escribir.
           this.sending.set(false);
           this.isTyping.set(false);
-          this.scrollToBottom();
+          if (streamingStarted) {
+            // Ya había texto visible: se conserva tal como llegó, solo se
+            // quita la marca de "escribiendo" -borrarlo descartaría una
+            // respuesta parcial legítima que el usuario ya vio aparecer-.
+            this.messages.update((m) =>
+              m.map((msg) => (msg.id === streamingId ? { ...msg, streaming: false } : msg)),
+            );
+          } else {
+            // No llegó a generarse nada: se revierte, igual que en la ruta síncrona.
+            this.messages.update((m) => m.slice(0, -1));
+          }
+          this.showStreamError(evento.etapa);
         },
         error: (e) => {
-          this.messages.update((m) => m.slice(0, -1));
           this.sending.set(false);
           this.isTyping.set(false);
+          if (streamingStarted) {
+            this.messages.update((m) =>
+              m.map((msg) => (msg.id === streamingId ? { ...msg, streaming: false } : msg)),
+            );
+          } else {
+            this.messages.update((m) => m.slice(0, -1));
+          }
           this.showSendError(e);
         },
       });
@@ -766,6 +820,17 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
           this.loadError.set(this.mensajeDeCarga(e));
         },
       });
+  }
+
+  /** Error del RAG durante el streaming (`evento.type === 'error'`). Mismo
+   * texto que el backend usa para el 503 de la ruta síncrona, para que el
+   * mensaje sea consistente entre las dos formas de enviar. */
+  private showStreamError(etapa: string): void {
+    clearTimeout(this.errorTimer);
+    this.sendError.set(
+      `El asistente no está disponible en este momento (falló la etapa: ${etapa}). Vuelve a intentarlo en unos segundos.`,
+    );
+    this.errorTimer = setTimeout(() => this.sendError.set(null), 5000);
   }
 
   private showSendError(e: unknown): void {

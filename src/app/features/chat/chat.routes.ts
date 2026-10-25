@@ -12,6 +12,10 @@ export const CHAT_ROUTES: Routes = [
     path: '',
     component: DashboardLayoutComponent,
     children: [
+      // `/chat` a secas no tiene página propia y mostraba el layout en blanco.
+      // El chat se abre desde el botón "Chat IA" de la cabecera, presente en
+      // el dashboard.
+      { path: '', pathMatch: 'full', redirectTo: '/dashboard' },
       {
         path: ':id',
         loadComponent: () => import('./pages/chat-detail/chat-detail.component').then(m => m.ChatDetailComponent)

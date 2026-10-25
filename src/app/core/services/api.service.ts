@@ -70,4 +70,23 @@ export class ApiService {
   getBlob(endpoint: string): Observable<Blob> {
     return this.http.get(this.buildUrl(endpoint), { responseType: 'blob' });
   }
+
+  /**
+   * POST cuya respuesta se lee a medida que llega, no de un solo golpe al
+   * final — para un backend que responde con Server-Sent Events.
+   *
+   * `reportProgress: true` + `observe: 'events'` hace que el backend XHR de
+   * Angular emita un `HttpDownloadProgressEvent` por cada trozo recibido, con
+   * `partialText`: el texto acumulado hasta ese momento (no solo lo nuevo).
+   * Es un detalle del backend XHR, no del backend `fetch` —este proyecto no
+   * usa `provideHttpClient(withFetch())`, así que esto funciona tal cual—.
+   * Quien llama se encarga de quedarse solo con lo nuevo en cada evento.
+   */
+  postStream(endpoint: string, body: unknown): Observable<HttpEvent<string>> {
+    return this.http.post(this.buildUrl(endpoint), body, {
+      responseType: 'text',
+      reportProgress: true,
+      observe: 'events',
+    });
+  }
 }

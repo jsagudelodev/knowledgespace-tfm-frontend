@@ -185,7 +185,7 @@
               @switch (doc.status) {
                 @case ('completed') {
                   <span class="ad-status ad-status--ok">
-                    <span class="material-symbols-outlined icon-sm">check_circle</span> Listo
+                    <span class="material-symbols-outlined icon-sm">check_circle</span> Completado
                   </span>
                 }
                 @case ('processing') {
@@ -200,7 +200,7 @@
                 }
                 @case ('failed') {
                   <span class="ad-status ad-status--failed" [title]="doc.error_message ?? ''">
-                    <span class="material-symbols-outlined icon-sm">cancel</span> Error
+                    <span class="material-symbols-outlined icon-sm">cancel</span> Fallido
                   </span>
                 }
               }

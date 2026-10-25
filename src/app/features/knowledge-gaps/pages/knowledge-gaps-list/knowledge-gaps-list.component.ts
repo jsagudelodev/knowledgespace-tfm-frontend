@@ -7,6 +7,7 @@ import { debounceTime } from 'rxjs/operators';
 
 import { KnowledgeGapsService } from '../../services/knowledge-gaps.service';
 import { UserService } from '../../../users/services/user.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { User } from '../../../../core/models/user.model';
 import {
   KnowledgeGap,
@@ -27,6 +28,7 @@ import {
 export class KnowledgeGapsListComponent implements OnInit {
   private readonly svc        = inject(KnowledgeGapsService);
   private readonly userSvc    = inject(UserService);
+  private readonly auth       = inject(AuthService);
   private readonly route      = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly search$    = new Subject<string>();
@@ -111,6 +113,15 @@ export class KnowledgeGapsListComponent implements OnInit {
   }
 
   private loadAssignees(): void {
+    // `GET /users` es solo para administradores. Pedirla con un usuario normal
+    // devolvía 403 y el interceptor mostraba "No tienes permiso" al abrir la
+    // página. Un usuario normal puede pedir un documento, pero solo asignándoselo
+    // a sí mismo: no puede ver al resto de usuarios de la empresa.
+    const yo = this.auth.getCurrentUserValue();
+    if (yo && yo.role !== 'admin' && yo.role !== 'superadmin') {
+      this.assignees.set([yo]);
+      return;
+    }
     this.userSvc.getUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: list => this.assignees.set(list),
     });

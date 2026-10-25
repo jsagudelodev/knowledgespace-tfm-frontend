@@ -513,6 +513,23 @@
   p      { margin: 0 0 8px; &:last-child { margin-bottom: 0; } }
   ul, ol { margin: 4px 0 8px; padding-left: 20px; }
   li     { margin-bottom: 4px; }
+
+  // Mientras llega por streaming: un cursor parpadeante al final del texto,
+  // la señal visual habitual de "esto se sigue escribiendo".
+  &--streaming::after {
+    content: '';
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    background: currentColor;
+    animation: cursor-parpadeo 1s step-start infinite;
+  }
+}
+
+@keyframes cursor-parpadeo {
+  50% { opacity: 0; }
 }
 
 // ── Sources ───────────────────────────────────────────────
