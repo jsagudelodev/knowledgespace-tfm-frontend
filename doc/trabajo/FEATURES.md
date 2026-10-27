@@ -42,11 +42,20 @@ La mayoría de los módulos de negocio siguen la misma receta:
 
 ### 1. Autenticación (`/auth`)
 
-Login de usuarios con JWT. No existe registro público (el botón "crear cuenta" navega a una ruta `/auth/register` aún no implementada).
+Login de usuarios con JWT. No existe registro público en el frontend — el backend sí lo tiene completo (`POST /v1/auth/register`, con validación de cupo de usuarios de la empresa), pero nunca se conectó a ninguna pantalla ni botón.
 
 - **Login**: formulario reactivo (email + contraseña mín. 8 caracteres). Al enviar, obtiene el `access_token`, luego consulta los datos del usuario autenticado y navega al dashboard.
 - Manejo de estados de carga y error ("Email o contraseña incorrectos").
 - **Backend consumido**: `POST /v1/auth/login` (OAuth2 form-data), `GET /v1/auth/me`.
+
+### 1b. Mi perfil (`/profile`)
+
+Editar el propio nombre y cambiar la propia contraseña — el email, el rol y la empresa los asigna un admin, no el propio usuario. Igual que el registro, **el backend ya tenía esto completo y sin usar** (`PUT /v1/auth/me`, `PUT /v1/auth/change-password`) desde antes de conectarlo (2026-10-25).
+
+- Acceso desde "Mi perfil" en el dropdown del header.
+- Formulario de nombre, independiente del de contraseña (actual + nueva + confirmación, con validación cruzada de que las dos últimas coincidan).
+- El backend da el motivo exacto de un fallo ("la contraseña actual es incorrecta", "debe ser diferente a la actual") y se muestra tal cual, no un mensaje genérico.
+- **Backend consumido**: `GET /v1/auth/me`, `PUT /v1/auth/me`, `PUT /v1/auth/change-password`.
 
 ### 2. Dashboard (`/dashboard`)
 
@@ -223,10 +232,11 @@ Diseño high-fidelity conforme al handoff: `max-width: 1000px`, `padding: 28px 2
 
 Resumen de lo no implementado aún:
 
-- **Auth**: registro (`/auth/register`) y edición de perfil/cambio de contraseña
-  propio (`/profile-settings`) no existen como ruta ni como página. El login
-  conservaba un método `goToRegister()` que apuntaba a esa ruta inexistente,
-  sin que ninguna plantilla lo invocara; se retiró.
+- ✅ **Auth — edición de perfil propio** (2026-10-25): resuelto, ver sección 1b.
+- **Auth — registro público**: sigue sin existir como ruta ni como página. El
+  backend lo tiene completo (`POST /v1/auth/register`); falta solo la pantalla.
+  El login conservaba un método `goToRegister()` que apuntaba a una ruta
+  inexistente, sin que ninguna plantilla lo invocara; se retiró.
 - **Conversaciones (vista admin)**: listado/detalle administrativo de conversaciones (distinto del Chat IA de la sección 10) — no implementado.
 - **Notificaciones**: ✅ completado (sección 12, 2026-08-16) — generación automática de eventos en el pipeline de documentos (processed / failed / deleted), listado paginado con 5 chips de filtro, badge en sidebar (grupo Analytics), tiempo relativo preciso, skeleton y estados de error/vacío dentro de la tarjeta.
 - **Feedback IA (vista admin)**: implementado, con redición v2 (sección 11). Ruta `/feedback` activa con analytics completo. Pendiente: verificación end-to-end con datos reales en producción; backend de conversión de tema en bloque (`POST /feedback/theme-convert`); `samples`/`trend` en `/stats` para `ThemeCount` cuando el backend no los provee.

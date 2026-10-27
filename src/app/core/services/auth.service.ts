@@ -1,8 +1,8 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { ApiService } from './api.service';
 import { StorageService } from './storage.service';
-import { User } from '../models/user.model';
+import { User, ProfileUpdate, ChangePasswordRequest } from '../models/user.model';
 import { Company } from '../models/company.model';
 
 export interface LoginRequest {
@@ -56,6 +56,20 @@ export class AuthService {
 
   getCurrentUser(): Observable<User> {
     return this.apiService.get<User>('/v1/auth/me');
+  }
+
+  /** Actualiza el nombre del usuario autenticado y refresca la copia local
+   * (`currentUser$`/localStorage) con la respuesta del servidor, para que el
+   * header y cualquier otra pantalla que lea `getCurrentUserValue()` vean el
+   * cambio sin tener que recargar la página. */
+  updateProfile(data: ProfileUpdate): Observable<User> {
+    return this.apiService.put<User>('/v1/auth/me', data).pipe(
+      tap((user) => this.setCurrentUser(user)),
+    );
+  }
+
+  changePassword(data: ChangePasswordRequest): Observable<{ message: string }> {
+    return this.apiService.put<{ message: string }>('/v1/auth/change-password', data);
   }
 
   setCurrentUser(user: User): void {

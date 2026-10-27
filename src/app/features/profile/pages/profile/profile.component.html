@@ -1,0 +1,116 @@
+<div class="profile-page">
+  <header class="page-header">
+    <h1>Mi perfil</h1>
+    <p class="page-subtitle">Tu nombre y tu contraseña — el resto lo administra tu empresa.</p>
+  </header>
+
+  @if (loadingUser()) {
+    <div class="profile-loading">
+      <span class="material-symbols-outlined spin">progress_activity</span>
+      <span>Cargando perfil...</span>
+    </div>
+  } @else if (user(); as u) {
+
+    <div class="profile-card profile-summary">
+      <div class="profile-avatar">{{ initials(u.full_name) }}</div>
+      <div class="profile-summary__info">
+        <p class="profile-summary__name">{{ u.full_name }}</p>
+        <p class="profile-summary__email">{{ u.email }}</p>
+        <span class="profile-summary__role">{{ roleLabel(u.role) }}</span>
+      </div>
+    </div>
+
+    <!-- ── Editar nombre ─────────────────────────────────────────────── -->
+    <div class="profile-card">
+      <h2>Datos personales</h2>
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <div class="form-group">
+          <label for="full_name">Nombre completo <span class="required">*</span></label>
+          <input
+            id="full_name"
+            type="text"
+            formControlName="full_name"
+            [class.is-invalid]="isProfileFieldInvalid('full_name')"
+            autocomplete="name"
+          />
+          @if (isProfileFieldInvalid('full_name')) {
+            <span class="field-error">El nombre debe tener entre 2 y 255 caracteres.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="email">Correo</label>
+          <input id="email" type="email" [value]="u.email" disabled />
+          <span class="field-hint">El correo no se puede cambiar desde aquí.</span>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="savingProfile()">
+            @if (savingProfile()) {
+              <span class="material-symbols-outlined icon-sm spin">progress_activity</span>
+            } @else {
+              <span class="material-symbols-outlined icon-sm">save</span>
+            }
+            Guardar cambios
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ── Cambiar contraseña ────────────────────────────────────────── -->
+    <div class="profile-card">
+      <h2>Contraseña</h2>
+      <form [formGroup]="passwordForm" (ngSubmit)="savePassword()">
+        <div class="form-group">
+          <label for="current_password">Contraseña actual <span class="required">*</span></label>
+          <input
+            id="current_password"
+            type="password"
+            formControlName="current_password"
+            [class.is-invalid]="isPasswordFieldInvalid('current_password')"
+            autocomplete="current-password"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="new_password">Contraseña nueva <span class="required">*</span></label>
+          <input
+            id="new_password"
+            type="password"
+            formControlName="new_password"
+            [class.is-invalid]="isPasswordFieldInvalid('new_password')"
+            autocomplete="new-password"
+          />
+          @if (isPasswordFieldInvalid('new_password')) {
+            <span class="field-error">Mínimo 8 caracteres.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="confirm_password">Confirmar contraseña nueva <span class="required">*</span></label>
+          <input
+            id="confirm_password"
+            type="password"
+            formControlName="confirm_password"
+            [class.is-invalid]="isPasswordFieldInvalid('confirm_password') || passwordsNoCoinciden()"
+            autocomplete="new-password"
+          />
+          @if (passwordsNoCoinciden()) {
+            <span class="field-error">Las contraseñas no coinciden.</span>
+          }
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="savingPassword()">
+            @if (savingPassword()) {
+              <span class="material-symbols-outlined icon-sm spin">progress_activity</span>
+            } @else {
+              <span class="material-symbols-outlined icon-sm">lock_reset</span>
+            }
+            Cambiar contraseña
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

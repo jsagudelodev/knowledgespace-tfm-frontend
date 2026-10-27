@@ -1,0 +1,216 @@
+@use 'styles/core/variables' as *;
+@use 'styles/core/colors'    as *;
+@use 'styles/core/mixins'    as *;
+
+// ==========================================================================
+// CONTENEDOR
+// ==========================================================================
+
+.profile-page {
+  padding: $sp-8;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: $sp-8;
+
+  h1 {
+    font-size: $size-4xl;
+    color: $font-title;
+    margin: 0 0 $sp-2;
+    font-weight: $w-semibold;
+  }
+}
+
+.page-subtitle {
+  margin: 0;
+  color: $font-muted;
+  font-size: $size-sm;
+}
+
+.profile-loading {
+  @include flex-center;
+  gap: $sp-3;
+  padding: $sp-8;
+  color: $font-muted;
+  font-size: $size-sm;
+}
+
+.spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-size: $size-xl;
+  color: $color-primary;
+}
+
+// ==========================================================================
+// TARJETAS
+// ==========================================================================
+
+.profile-card {
+  background: $bg-card;
+  border: 1px solid $border-flat;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-xs;
+  padding: $sp-6;
+  margin-bottom: $sp-6;
+
+  h2 {
+    margin: 0 0 $sp-5;
+    font-size: $size-lg;
+    font-weight: $w-semibold;
+    color: $font-title;
+  }
+}
+
+.profile-summary {
+  @include flex-start-center;
+  gap: $sp-4;
+}
+
+.profile-avatar {
+  @include flex-center;
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: $radius-circle;
+  background: $bg-selected;
+  color: $color-primary;
+  font-weight: $w-bold;
+  font-size: $size-lg;
+}
+
+.profile-summary__info { min-width: 0; }
+
+.profile-summary__name {
+  margin: 0;
+  font-size: $size-base;
+  font-weight: $w-semibold;
+  color: $font-title;
+  @include text-ellipsis;
+}
+
+.profile-summary__email {
+  margin: 2px 0 $sp-2;
+  font-size: $size-sm;
+  color: $font-muted;
+  @include text-ellipsis;
+}
+
+.profile-summary__role {
+  display: inline-block;
+  padding: 2px $sp-3;
+  border-radius: $radius-pill;
+  background: $bg-selected;
+  color: $color-primary;
+  font-size: $size-2xs;
+  font-weight: $w-semibold;
+  text-transform: uppercase;
+}
+
+// ==========================================================================
+// CAMPOS
+// ==========================================================================
+
+.form-group {
+  margin-bottom: $sp-5;
+  &:last-of-type { margin-bottom: 0; }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: $sp-1;
+    font-size: $size-sm;
+    font-weight: $w-medium;
+    color: $font-body;
+    margin-bottom: $sp-2;
+  }
+
+  .required { color: $red-text; margin-left: 2px; }
+}
+
+.field-hint {
+  display: block;
+  margin-top: $sp-1;
+  font-size: $size-xs;
+  color: $font-muted;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'] {
+  width: 100%;
+  padding: $sp-3 $sp-4;
+  border: 1px solid $field-border;
+  border-radius: $radius-md;
+  font-size: $size-base;
+  color: $field-text;
+  background: $field-bg;
+  box-sizing: border-box;
+  @include transition-fast(border-color, box-shadow);
+
+  &:hover:not(:disabled) { border-color: $field-border-hover; }
+
+  &:focus {
+    outline: none;
+    border-color: $field-border-focus;
+    box-shadow: $field-focus-shadow;
+  }
+
+  &.is-invalid {
+    border-color: $field-border-error;
+    &:focus { box-shadow: 0 0 0 3px rgba($red-500, 0.12); }
+  }
+
+  &:disabled {
+    background: $bg-disabled;
+    color: $font-muted;
+    cursor: not-allowed;
+  }
+
+  &::placeholder { color: $font-muted; }
+}
+
+.field-error {
+  color: $red-text;
+  font-size: $size-xs;
+  margin-top: $sp-1;
+  display: block;
+}
+
+// ==========================================================================
+// BOTONES
+// ==========================================================================
+
+.form-actions {
+  @include flex-start-center;
+  justify-content: flex-end;
+  gap: $sp-4;
+  margin-top: $sp-6;
+  padding-top: $sp-6;
+  border-top: 1px solid $border-flat;
+}
+
+.btn-primary {
+  @include flex-start-center;
+  gap: $sp-2;
+  padding: $sp-3 $sp-6;
+  border-radius: $radius-md;
+  font-size: $size-base;
+  font-weight: $w-medium;
+  cursor: pointer;
+  border: 1px solid transparent;
+  line-height: 1;
+  background: $btn-primary-bg;
+  color: $btn-primary-text;
+  @include transition-fast(background, opacity);
+
+  &:hover:not(:disabled)  { background: $btn-primary-hover; }
+  &:active:not(:disabled) { background: $btn-primary-active; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+@media (max-width: 480px) {
+  .form-actions .btn-primary { width: 100%; justify-content: center; }
+}

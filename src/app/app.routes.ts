@@ -66,6 +66,11 @@ export const routes: Routes = [
     loadChildren: () => import('./features/knowledge-gaps/knowledge-gaps.routes').then(m => m.KNOWLEDGE_GAPS_ROUTES)
   },
   {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadChildren: () => import('./features/profile/profile.routes').then(m => m.PROFILE_ROUTES)
+  },
+  {
     path: 'not-found',
     loadComponent: () => import('./shared/pages/not-found/not-found.component').then(m => m.NotFoundComponent)
   },
