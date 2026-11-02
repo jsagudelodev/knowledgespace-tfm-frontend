@@ -71,10 +71,13 @@
           }
           <div class="menu-group-items" [class.collapsed]="sidebarOpen() && !groupAdministracion()">
             <div class="menu-group-items-inner">
-              <a class="menu-item" routerLink="/companies" routerLinkActive="active" title="Empresas">
-                <span class="material-symbols-outlined icon-sm">business</span>
-                @if (sidebarOpen()) { <span>Empresas</span> }
-              </a>
+              <!-- Empresas es de plataforma: solo superadmin (el backend también lo exige). -->
+              @if (isSuperadmin()) {
+                <a class="menu-item" routerLink="/companies" routerLinkActive="active" title="Empresas">
+                  <span class="material-symbols-outlined icon-sm">business</span>
+                  @if (sidebarOpen()) { <span>Empresas</span> }
+                </a>
+              }
               <a class="menu-item" routerLink="/users" routerLinkActive="active" title="Usuarios">
                 <span class="material-symbols-outlined icon-sm">person</span>
                 @if (sidebarOpen()) { <span>Usuarios</span> }

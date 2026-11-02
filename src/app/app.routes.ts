@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from './core/guards/admin.guard';
+import { superadminGuard } from './core/guards/superadmin.guard';
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
 
@@ -17,7 +18,7 @@ export const routes: Routes = [
   },
   {
     path: 'companies',
-    canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, superadminGuard],
     loadChildren: () => import('./features/companies/companies.routes').then(m => m.COMPANIES_ROUTES)
   },
   {
