@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -37,13 +37,21 @@ export class DocumentUploadComponent implements OnInit {
   selectedAssistantId: number | null = null;
 
   private destroyRef = inject(DestroyRef);
+  // La app no usa zone.js: lo que se asigna dentro de un callback HTTP no se
+  // pinta solo. Sin esto los selectores de asistente y categoría salían vacíos
+  // -todo lo subido desde aquí quedaba "sin asistente" y ningún chat lo veía-
+  // y tampoco se movían el progreso ni los mensajes de éxito o error.
+  private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
     this.categoryService
       .getCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (categories) => (this.availableCategories = categories.filter((c) => c.is_active)),
+        next: (categories) => {
+          this.availableCategories = categories.filter((c) => c.is_active);
+          this.cdr.markForCheck();
+        },
         error: () => {},
       });
 
@@ -51,7 +59,10 @@ export class DocumentUploadComponent implements OnInit {
       .getAssistants()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (assistants) => (this.availableAssistants = assistants.filter((a) => a.is_active)),
+        next: (assistants) => {
+          this.availableAssistants = assistants.filter((a) => a.is_active);
+          this.cdr.markForCheck();
+        },
         error: () => {},
       });
   }
@@ -180,6 +191,7 @@ export class DocumentUploadComponent implements OnInit {
                 }, 2000);
               }
             }
+            this.cdr.markForCheck();
           },
           error: () => {
             this.error = `Error al subir ${file.name}`;
@@ -190,6 +202,7 @@ export class DocumentUploadComponent implements OnInit {
             if (this.uploadedCount === this.totalFiles) {
               this.uploading = false;
             }
+            this.cdr.markForCheck();
           },
         });
     });

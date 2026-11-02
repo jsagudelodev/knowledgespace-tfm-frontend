@@ -1,13 +1,13 @@
 import { Component, DestroyRef, OnInit, inject, signal, computed, HostListener, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { interval, startWith, switchMap } from 'rxjs';
+import { interval, startWith } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
 import { UiStatusService } from '../../../core/services/ui-status.service';
 import { NotificationsService } from '../../../features/notifications/services/notifications.service';
 import { AppNotification } from '../../../core/models/notification.model';
-import { notificationIcon, relativeTime } from '../../../features/notifications/notification-display.util';
+import { notificationAction, notificationIcon, relativeTime } from '../../../features/notifications/notification-display.util';
 import { CompanyService } from '../../../features/companies/services/company.service';
 import { Company } from '../../../core/models/company.model';
 
@@ -36,7 +36,7 @@ export class HeaderComponent implements OnInit {
   readonly chatOpen     = this.uiStatus.chatOpen;
 
   readonly notifOpen         = signal(false);
-  readonly unreadCount       = signal(0);
+  readonly unreadCount       = this.notificationsService.unreadCount;
   readonly recentNotifications = signal<AppNotification[]>([]);
   readonly notifLoading      = signal(false);
   readonly notifBadge        = computed(() => this.unreadCount() > 9 ? '9+' : String(this.unreadCount()));
@@ -83,8 +83,8 @@ export class HeaderComponent implements OnInit {
     // Refresca el contador de no leídas periódicamente para que la campanita
     // se mantenga al día sin que el usuario tenga que refrescar la página.
     interval(UNREAD_POLL_MS)
-      .pipe(startWith(0), switchMap(() => this.notificationsService.getUnreadCount()), takeUntilDestroyed(this.destroyRef))
-      .subscribe({ next: ({ count }) => this.unreadCount.set(count), error: () => {} });
+      .pipe(startWith(0), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.notificationsService.refreshUnreadCount());
   }
 
   @HostListener('document:click')
@@ -161,14 +161,20 @@ export class HeaderComponent implements OnInit {
 
   markAsRead(notification: AppNotification, event: Event): void {
     event.stopPropagation();
-    if (notification.read) return;
-    this.recentNotifications.update(list =>
-      list.map(n => n.id === notification.id ? { ...n, read: true } : n)
-    );
-    this.unreadCount.update(c => Math.max(0, c - 1));
-    this.notificationsService.markAsRead(notification.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({ error: () => {} });
+    if (!notification.read) {
+      this.recentNotifications.update(list =>
+        list.map(n => n.id === notification.id ? { ...n, read: true } : n)
+      );
+      this.notificationsService.markAsRead(notification.id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({ error: () => {} });
+    }
+    // Mismo destino que en la página de Notificaciones.
+    const action = notificationAction(notification);
+    if (action) {
+      this.notifOpen.set(false);
+      this.router.navigate(action.commands);
+    }
   }
 
   markAllAsRead(event: Event): void {
@@ -179,7 +185,6 @@ export class HeaderComponent implements OnInit {
       .subscribe({
         next: () => {
           this.recentNotifications.update(list => list.map(n => ({ ...n, read: true })));
-          this.unreadCount.set(0);
         },
         error: () => {}
       });

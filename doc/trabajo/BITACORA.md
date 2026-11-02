@@ -19,6 +19,203 @@ Formato de cada entrada:
 
 ---
 
+## 2026-11-02 — Prueba de cada botón con datos "[PRUEBA TFM]" (crear, editar, borrar)
+
+**Bugs reales encontrados y corregidos:**
+- **Crear categorías y empresas daba 500 desde siempre** en este repo:
+  `categories.is_active` y `companies.is_active` son INTEGER en la BD y los
+  modelos los declaraban `Boolean`. Nuevo tipo `app/db/types.py::IntBoolean`
+  (booleano en Python, 0/1 en BD); no se tocó el esquema. Revisadas todas las
+  columnas modelo↔BD: solo esas dos. `test_int_boolean.py`.
+- **Restablecer contraseña (Usuarios) nunca funcionó y filtraba la contraseña
+  a los logs**: el frontend la mandaba como `?new_password=` en la URL y el
+  backend la espera en el cuerpo (422). Ahora va en el body.
+- **Subir documento (pantalla principal): los selectores de asistente y
+  categoría salían vacíos.** La app no usa zone.js y el componente asignaba
+  campos planos en callbacks HTTP. Todo lo subido desde ahí quedaba "sin
+  asistente", invisible para el chat. Mismo fallo en el **login**: con
+  contraseña incorrecta no salía el mensaje. Corregidos con `markForCheck`.
+- **Buscador del chat**: rellenaba el mensaje de `<mark>` entre cada letra
+  (los marcadores eran caracteres invisibles que se perdieron → `''`). Ahora
+  son escapes `/`; `chat-detail.highlight.spec.ts`. El icono del
+  botón de buscar no se veía (iba en `[ngClass]`) y abrir la búsqueda no daba
+  foco al campo.
+- **Chat**: la cabecera "Chat IA" desapareció con el cambio de ayer
+  (conversación perezosa) → repuesta. Los asistentes nuevos no aparecían en el
+  drawer hasta recargar → se recargan al abrirlo. La fuente "Respuesta
+  directa" mostraba un botón de descargar que no hacía nada → oculto.
+- **Notificaciones**: la campana y el menú lateral tenían cada uno su
+  contador; "Marcar todas como leídas" no movía ninguno. Ahora es un signal
+  compartido en `NotificationsService`; `notifications.service.spec.ts`.
+- **Preguntas sin respuesta**: al resolver, la lista pasaba a la siguiente sin
+  enseñar la verificación y los errores eran silenciosos → avisos con
+  "verificada 0.57 → 1.00" y mensaje de error. El enlace directo mostraba
+  "Nada pendiente" mientras cargaba. Motivo vacío en ignoradas antiguas.
+- **Feedback · Exportar CSV**: sin BOM (Excel rompía tildes) y fecha en UTC sin
+  decirlo → BOM + columna `fecha_utc`; `test_feedback_export_csv.py`.
+- **Empresas**: un 422 salía como "Error al crear" genérico → ahora dice qué
+  campo revisar.
+
+**Verificado de punta a punta:** asistente nuevo con sugerencia rápida → subir
+documento → procesado → chat lo responde y lo cita → pulgar arriba/abajo →
+feedback → pregunta sin respuesta → vincular documento (verificada 0.57 → 1.00)
+/ pedir documento / escribir respuesta (0.89 → 0.90) / ignorar con motivo →
+notificaciones → exportar CSV. CRUD completo de categoría, empresa y usuario
+(con restablecer contraseña), filtros y buscadores de todas las listas.
+
+**Decisiones / notas para la defensa:**
+- La verificación tras **vincular** da ~1.00 por construcción: se indexa la
+  pregunta como alias y se verifica con esa misma pregunta. No prueba que el
+  documento responda.
+- La #2 "resuelta" en junio da 0.00 al reverificar: su vector ya no está.
+- Los mensajes no guardan su asistente: calificar en una conversación
+  reabierta atribuye el feedback al asistente seleccionado, no al que respondió.
+- El texto indexado de un .txt mostró "12. 500 pesos" (espacio dentro de la
+  cifra) — pendiente de investigar en la extracción.
+- Los avisos de herramienta de edición escribieron `` y `﻿` como
+  caracteres invisibles literales; se reescribieron como escapes.
+
+**Cierre de la prueba:** borrados los documentos 46/47 (Pinecone limpio, también
+el alias de la #36) y el asistente de prueba 5 —el chat lo quitó sin recargar—.
+Editar asistente, guardar perfil, abrir notificación desde la campana (los dos
+contadores bajan a la vez), cerrar sesión y login con credenciales falsas
+("Email o contraseña incorrectos" ya se muestra): verificados.
+
+- ✅ Cabecera tras el login verificada por el autor: con su cuenta (empresa 3)
+  muestra "Logit" con punto verde (su propia empresa).
+- **Datos de prueba que se conservan a propósito** (decisión del autor), todos
+  marcados "[PRUEBA TFM]" o creados en esta prueba: notificaciones 25–31,
+  feedbacks 14–17, preguntas sin respuesta #35–#37, conversaciones 2187–2197 y
+  el vector `gap-35-answer` en el namespace de Demo.
+
+---
+
+## 2026-11-01 — Pulido de Feedback y Preguntas sin respuesta: lo que la UI prometía y nadie llenaba
+
+**Hecho (backend `api/`):**
+- **Reincidencia real.** `KnowledgeGap.recurrence_count` y `reopened_at` no
+  los escribía ningún sitio, así que la píldora "reincidente" nunca salía.
+  Nuevo `FeedbackRepository._contar_resueltos_iguales`: si una pregunta ya
+  **resuelta** (mismo texto normalizado, mismo asistente) vuelve a llegar como
+  fallo, el gap nuevo nace con `recurrence_count` = resoluciones previas y
+  `reopened_at`. Las ignoradas no cuentan. 5 tests nuevos en
+  `test_feedback_convert_to_gap.py`.
+- **Textos vacíos rechazados en la API.** `KnowledgeGapAnswerRequest.answer_text`
+  y `FeedbackConvertGap.question` ahora recortan espacios y exigen
+  `min_length=1`; antes solo lo impedía el frontend y una llamada directa
+  habría indexado un vector vacío en Pinecone. Nuevo
+  `tests/test_schemas_texto_no_vacio.py` (7 casos).
+- Suite: 198 → 210 tests, ruff limpio. Verificado por sabotaje: quitar la
+  reincidencia o el recorte hace caer 5 tests; restaurado, pasan todos.
+- `ALCANCE_TFM.md`: cifra de tests corregida (decía 26 archivos/176 tests → 31/210).
+
+**Hecho (frontend):**
+- `knowledge-gaps-list`: el pie decía "Agrupadas por similitud semántica" y
+  agrupa por texto exacto → corregido. Quitado de cada fila el "N variantes",
+  que mostraba siempre "0 variantes".
+- `FEATURES.md`: registro público marcado como decisión de alcance (sin
+  control de cuota, abrirlo dispararía gasto real en OpenAI), y sección de
+  Knowledge Gaps con lo resuelto y lo que queda fuera.
+- 43 tests de Vitest y `ng lint` en verde.
+
+**Prueba de punta a punta en el navegador (Claude in Chrome, local contra la BD real):**
+- Recorridas todas las pantallas (Dashboard, Documentos, Etiquetas,
+  Categorías, Asistentes, Empresas, Usuarios, Notificaciones, Mi perfil,
+  Feedback, Preguntas sin respuesta, Chat IA en drawer y en `/chat/:id`,
+  selector de empresa): sin errores de consola ni respuestas 4xx/5xx.
+- **Objetivo 4 verificado de punta a punta:** la pregunta del horario de
+  soporte (#34, resuelta a mano) ya la responde el chat citando "Respuesta
+  directa" al 89 %; calificada con 1 estrella y enviada desde Feedback, nace
+  la #35 marcada **reincidente**, con su notificación y enlace profundo.
+- **Bug grave corregido — conversaciones vacías:** el drawer del chat está
+  montado en el layout aunque esté cerrado, y su `ngOnInit` creaba una
+  conversación en cada carga de página. En la BD: **1.985 de 2.181
+  conversaciones vacías (91 %)**. Ahora se crea con el primer mensaje
+  (`chat-detail.component.ts`, `sendMessage`). Verificado: navegar ya no hace
+  ningún `POST /conversations`, y dos mensajes seguidos usan una sola.
+- **Selector de empresa tras el login:** `getMyCompany()` llevaba
+  `takeUntilDestroyed` y la navegación inmediata al dashboard destruía el
+  login y cancelaba la petición; la cabecera quedaba en "KnowledgeSpace" con
+  el punto naranja de "viendo otra empresa". Quitado (pendiente de
+  verificar con un login real).
+- **Textos que prometían lo que no existe**, corregidos: subtítulo "agrupado
+  por intención"; "Las variantes ya citan esta fuente"; "Se reejecuta cada
+  lunes… se reabre sola" (no hay ningún proceso programado); recomendación
+  "el contenido ya existe en X… se reindexa con estas variantes" (un 0,35
+  sobre un documento no relacionado); Temas de Feedback decía "No hay temas
+  identificados" cuando la agrupación no existe.
+- Quitado el botón **"Informe mensual"**, que no tenía ninguna acción.
+- **Calificar en el chat ahora es definitivo:** volver a pulsar el pulgar lo
+  "desmarcaba" solo en pantalla —la fila seguía en BD— y al recalificar se
+  creaba otra fila. No existe endpoint para borrar feedback.
+- Feedback: el botón "Enviar a preguntas sin respuesta" se oculta si ya se
+  envió (antes un segundo clic daba 409).
+- Chat: al abrir "¿Qué estuvo mal?" la hora y el costo quedaban flotando a
+  media altura y los botones se desplazaban; corregida la maquetación.
+- `ng build --configuration production` pasa; el aviso de presupuesto de
+  `chat-detail.component.scss` (18,8 kB / 16 kB) ya existía.
+
+**Auditoría de todo el menú, opción por opción (formularios abiertos y cancelados, sin guardar):**
+- Notificaciones: "Ver documento →" llevaba a `/documents/:id`, ruta que no
+  existe (404) → ahora a la lista. La campana solo marcaba como leída sin
+  navegar → ahora lleva al mismo destino que la página (`notificationAction`
+  en `notification-display.util.ts`, compartida).
+- Documentos: el menú de categoría quedaba recortado por `overflow: hidden`
+  de la tabla y no se podía usar con pocas filas → corregido.
+- Subir documento: aviso cuando no se elige asistente. El chat siempre
+  consulta el espacio de un asistente y no hay forma de asignar después un
+  documento ya subido: sin asistente, ningún chat lo vería.
+- Preguntas sin respuesta: más textos sobre "variantes" e "informe mensual"
+  que no existen, corregidos.
+- Empresas: las columnas "Usuarios"/"Documentos" mostraban los máximos del
+  plan, no los totales → renombradas. Ningún límite se aplica
+  (`monthly_message_limit` nunca se lee; `max_users` solo en el registro
+  público, deshabilitado; `max_documents` nunca) → aviso en el formulario.
+- Verificado sin incidencias: Dashboard, filtros de Feedback (periodo,
+  asistente, estrellas), Etiquetas y Categorías (validación, crear/editar),
+  Asistentes (gestionar, configuración, editar), Usuarios (restablecer
+  contraseña, nuevo usuario), Mi perfil (validaciones), selector de empresa,
+  menú de perfil, menú lateral plegable.
+
+**Decisiones / notas:**
+- Una auditoría completa de ambos módulos encontró campos "fantasma" (modelo
+  y UI construidos, nada que los llene): `variants` y `trend` de
+  `KnowledgeGap`, y el estado `stale` de `Feedback`. Solo se arregló lo que
+  el usuario veía mal o lo que da valor a la defensa (reincidencia = prueba
+  de que el ciclo del Objetivo 4 detecta una resolución que no funcionó); lo
+  invisible se documenta como fuera de alcance.
+- No existe `BACKLOG_FRONTEND.md` en el repo, aunque `doc/CLAUDE.md` lo pide.
+
+**Pendiente para después (decisiones del autor):**
+- ✅ **Etiquetas retiradas** (2026-11-02, decisión del autor): eran un CRUD que
+  nunca se vinculó a documentos y la categoría ya cubre la organización.
+  Frontend: fuera la ruta `/tags`, la entrada del menú, `features/tags/` y
+  `tag.model.ts`. Backend: fuera router, repositorio y esquemas; se conserva el
+  modelo `Tag` (la tabla tiene 3 filas). Test nuevo
+  `test_etiquetas_retiradas.py`, verificado por sabotaje. Backend 209 tests,
+  frontend 43, lint y build en verde.
+- Notificación antigua "Advertencia de presupuesto" (20-06, era comercial) y
+  chip "Presupuesto" visibles, con el módulo fuera de alcance.
+- Usuario "Auth Test User" (auth-test@example.com, Admin) visible en la demo.
+- Las conversaciones no guardan su asistente: al reabrir una de EBIS sale
+  seleccionado Demo. Arreglarlo exige cambio de esquema.
+- ✅ Hecho (con confirmación): borradas **1.980 conversaciones vacías** (869 de
+  la empresa 3, 1.111 de la 8; del 16-05 al 30-10). Solo las sin mensajes, sin
+  referencias en `cost_tracking` ni `knowledge_gaps`, y de más de 1 hora; en
+  una transacción que se revertía si el número no coincidía con la simulación.
+  Quedan 203 conversaciones, 5 vacías (las de la prueba de hoy) y 0 mensajes
+  huérfanos.
+- Datos de prueba creados hoy: conversación #2188 con feedback "[PRUEBA TFM]",
+  pregunta sin respuesta #35 (reincidente) y su notificación.
+- El backend local tarda varios segundos por petición (BD remota); el primer
+  mensaje del chat tardó ~15 s.
+- CI (tests + lint como compuerta) — propuesto un workflow de GitHub Actions
+  por repo, sin tocar el despliegue de Vercel/Cloud Run; pendiente de decisión.
+- Fallback silencioso `chunk_id = 0` en `find_candidates` cuando falta
+  `chunk_index` en Pinecone (cosmético).
+
+---
+
 ## 2026-09-30 — El Dashboard estaba roto: endpoint inexistente
 
 **Hecho (backend `api/`):**

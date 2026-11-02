@@ -4,9 +4,8 @@
   <div class="gaps-header">
     <div class="gaps-title-block">
       <h1 class="gaps-h1">Preguntas sin respuesta</h1>
-      <p class="gaps-subtitle">Lo que tus usuarios preguntaron y la documentación no pudo responder, agrupado por intención.</p>
+      <p class="gaps-subtitle">Lo que tus usuarios preguntaron y la documentación no pudo responder. Las repeticiones exactas cuentan como una sola.</p>
     </div>
-    <button class="btn-report" type="button">Informe mensual</button>
   </div>
 
   <!-- ══ Línea de resumen ════════════════════════════════════════════════════ -->
@@ -132,8 +131,7 @@
                   </div>
                   <!-- Contexto -->
                   <div class="gap-row-ctx">
-                    {{ (gap.variants?.length ?? 0) + ' variantes' }}
-                    &nbsp;·&nbsp;{{ channelLabel(gap) }}
+                    {{ channelLabel(gap) }}
                     @if (gap.assistant_name) { &nbsp;·&nbsp;{{ gap.assistant_name }} }
                     @if (trendLabel(gap)) { &nbsp;·&nbsp;{{ trendLabel(gap) }} }
                     &nbsp;·&nbsp;{{ relativeTime(gap.created_at) }}
@@ -172,7 +170,7 @@
         <!-- Pie de lista -->
         <div class="gaps-list-footer">
           <span>{{ footerLabel() }}</span>
-          <span>Agrupadas por similitud semántica</span>
+          <span>Agrupadas por texto exacto</span>
         </div>
       </div>
     </div>
@@ -301,7 +299,7 @@
                       </button>
                       <button class="btn-secondary" (click)="ignoring.set(true)" type="button">Ignorar</button>
                     </div>
-                    <p class="res-note">Al reindexar se reejecutan las variantes y se registra el score resultante.</p>
+                    <p class="res-note">Al vincular se indexa esta pregunta apuntando a ese documento, se reejecuta contra el índice y se registra el score resultante.</p>
                   </div>
                 } @else {
                   <p class="no-candidates-text">No hay documentos candidatos disponibles.</p>
@@ -361,7 +359,7 @@
               @if (ignoring()) {
                 <div class="ignore-block">
                   <p class="ignore-question">
-                    &#191;Por qu&#233; se ignora? El motivo decide si cuenta como vac&#237;o de conocimiento en el informe.
+                    &#191;Por qu&#233; se ignora? El motivo queda registrado junto a la pregunta.
                   </p>
                   <div class="ignore-chips">
                     <button class="ignore-chip" [class.ignore-chip--active]="ignoreReason() === 'out_of_scope'"
@@ -392,7 +390,7 @@
                 <div class="resolved-block">
                   @if (gap.resolved_document_name) {
                     <p class="resolved-title">Vinculado a &#8220;{{ gap.resolved_document_name }}&#8221;</p>
-                    <p class="resolved-note">El contenido exist&#237;a. Se reindex&#243; con las variantes de esta pregunta.</p>
+                    <p class="resolved-note">El contenido exist&#237;a. Esta pregunta se index&#243; apuntando a ese documento.</p>
                   } @else if (gap.answer_text) {
                     <p class="resolved-title">Resuelto con respuesta directa</p>
                     <p class="resolved-note">{{ gap.answer_text }}</p>
@@ -404,7 +402,7 @@
               @if (gap.status === 'ignored') {
                 <div class="ignored-block">
                   <p class="ignored-reason">Motivo: {{ ignoreReasonLabel(gap.ignore_reason) }}</p>
-                  <p class="ignored-note">No cuenta como vac&#237;o de conocimiento en el informe mensual: la plataforma no deb&#237;a responderla.</p>
+                  <p class="ignored-note">Se ignor&#243; a prop&#243;sito: no se intent&#243; responderla.</p>
                 </div>
               }
             </div>
@@ -431,7 +429,7 @@
                   </div>
                   <p class="verify-note">
                     @if (gap.verify_passed) {
-                      Las variantes ya citan esta fuente correctamente.
+                      La pregunta ya recupera esta fuente por encima del umbral.
                     } @else {
                       La respuesta se public&#243; pero el &#237;ndice a&#250;n no la recupera bien.
                     }
@@ -439,7 +437,7 @@
                   @if (gap.verified_at) {
                     <p class="verify-footer">reejecutada {{ relativeTime(gap.verified_at) }}</p>
                   }
-                  <p class="verify-footer">Se reejecuta cada lunes. Si vuelve a caer bajo el umbral, la pregunta se reabre sola.</p>
+                  <p class="verify-footer">Si la misma pregunta vuelve a fallar, se abre de nuevo marcada como reincidente.</p>
                 } @else {
                   <div class="verify-pending">
                     <p class="verify-pending-text">Sin verificar todav&#237;a.</p>

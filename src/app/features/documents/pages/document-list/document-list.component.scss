@@ -425,7 +425,8 @@
   background: $bg-card;
   border-radius: $radius-md;
   border: 1px solid $border-flat;
-  overflow: hidden;
+  // Sin overflow: hidden: recortaba el selector de categoría de las últimas
+  // filas. Las esquinas redondeadas se mantienen en la cabecera.
 }
 
 .documents-table {
@@ -439,6 +440,7 @@
   gap: $sp-4;
   padding: $sp-4 $sp-5;
   background: $bg-app;
+  border-radius: $radius-md $radius-md 0 0;
   border-bottom: 1px solid $border-flat;
   font-size: $size-xs;
   font-weight: $w-semibold;

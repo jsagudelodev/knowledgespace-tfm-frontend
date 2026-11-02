@@ -34,6 +34,13 @@
       </div>
     </div>
     <p class="upload-category__hint">Se asignará a todos los archivos de esta carga.</p>
+    @if (selectedAssistantId === null) {
+      <!-- El chat siempre consulta el espacio de un asistente y no hay forma de
+           asignar después un documento ya subido: sin asistente, no lo verá ningún chat. -->
+      <p class="upload-category__hint upload-category__hint--warn">
+        Sin asistente, el documento no lo consultará ningún chat: elige uno para poder preguntarle.
+      </p>
+    }
 
     <div
       class="drop-zone"

@@ -14,9 +14,9 @@
  *   servicio de ese módulo. Lo correcto sería centralizar el conteo en
  *   `core/`; se dejó así por ser suficiente para el alcance del trabajo.
  *
- * Consecuencia conocida: el badge no se refresca al marcar notificaciones como
- * leídas desde `/notifications`, porque esa página y esta layout usan
- * instancias distintas del servicio. Se actualiza en la siguiente navegación.
+ * El contador vive en `NotificationsService` (un signal compartido con la
+ * campana), así que marcar como leídas desde cualquier sitio actualiza los dos
+ * badges a la vez (2026-11-02; antes cada uno tenía su propia copia).
  *
  * El estado del sidebar (`sidebarOpen`) y el de sus grupos colapsables ya
  * persisten entre navegaciones (2026-10-22), vía `StorageService`
@@ -75,7 +75,8 @@ export class DashboardLayoutComponent {
   // Se leen una vez al construir el layout; qué valor tenían antes de la
   // navegación que acaba de ocurrir, no el valor por defecto de la clase.
   readonly sidebarOpen         = signal(this.leerBooleano(UI_STATE_KEYS.sidebarOpen, true));
-  readonly notifUnreadCount    = signal(0);
+  // Mismo contador que la campana (lo sondea el header); ver NotificationsService.
+  readonly notifUnreadCount    = this.notificationsSvc.unreadCount;
 
   readonly groupConocimiento   = signal(this.leerBooleano(UI_STATE_KEYS.groupConocimiento, true));
   readonly groupPlataforma     = signal(this.leerBooleano(UI_STATE_KEYS.groupPlataforma, false));
@@ -98,10 +99,6 @@ export class DashboardLayoutComponent {
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
       takeUntilDestroyed()
     ).subscribe(e => this.currentUrl.set(e.urlAfterRedirects));
-
-    this.notificationsSvc.getUnreadCount()
-      .pipe(takeUntilDestroyed())
-      .subscribe({ next: ({ count }) => this.notifUnreadCount.set(count), error: () => {} });
 
     // Un efecto por señal en vez de uno combinado: cada una se guarda bajo
     // su propia clave, y mezclarlas en un solo efecto obligaría a escribir

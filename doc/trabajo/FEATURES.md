@@ -1,6 +1,6 @@
 # FEATURES.md
 
-Documento de funcionalidades implementadas en KnowledgeSpace Frontend, a la fecha del 2026-08-16.
+Documento de funcionalidades implementadas en KnowledgeSpace Frontend, a la fecha del 2026-11-01.
 
 ## Descripción general del producto
 
@@ -95,9 +95,9 @@ Administración de los usuarios dentro de una empresa.
 - **Reseteo de contraseña** desde un modal dedicado.
 - Al crear un usuario, se asocia automáticamente a la empresa del usuario logueado.
 
-### 5. Etiquetas — Tags (`/tags`)
+### 5. Etiquetas — retiradas (2026-11-02)
 
-Catálogo simple de etiquetas (nombre + color) usadas para clasificar contenido. CRUD completo vía modal.
+Había un CRUD de etiquetas (nombre + color) en `/tags`, pero nunca se vincularon a los documentos: crear una no tenía efecto en ninguna parte. Se retiró la pantalla, la ruta y la entrada del menú, simétrico con el backend (router `/api/v1/tags` eliminado; ver `ALCANCE_TFM.md`). La organización de documentos la cubre la categoría (sección 6).
 
 ### 6. Categorías (`/categories`)
 
@@ -143,6 +143,12 @@ Interfaz conversacional interna: el equipo de la empresa consulta su propia
 documentación indexada en lenguaje natural, con respuestas generadas por RAG y
 trazabilidad de fuentes.
 
+- **Cuándo se crea la conversación** (2026-11-01): con el primer mensaje, no al
+  abrir el drawer. Antes se creaba en cada carga de página, porque el drawer
+  está montado en el layout aunque esté cerrado: el 91 % de las conversaciones
+  de la BD (1.985 de 2.181) estaban vacías.
+- **Calificar es definitivo**: volver a pulsar el mismo pulgar no hace nada (no
+  hay endpoint para borrar un feedback).
 - **Dónde vive:** en un panel lateral (*drawer*) que abre el botón **Chat IA** de la cabecera, desde cualquier módulo. La página completa con lista de conversaciones (`ChatShellComponent`, `ChatListComponent`) se retiró por redundante. La ruta `/chat/:id` se conserva para los enlaces a una conversación concreta (por ejemplo, «Ver conversación» desde Feedback), y `/chat` a secas redirige al dashboard (2026-10-24; antes mostraba el layout en blanco).
 - **Chat Detail** (panel y `/chat/:id`): burbujas de mensaje usuario/asistente con formato markdown básico (negrita, cursiva, código), indicador de "escribiendo…", selector de **Asistente** activo cuando la empresa tiene más de uno configurado, sugerencias de inicio rápido en el estado vacío.
   - **Fuentes citadas**: cada respuesta lista los documentos consultados con su score de relevancia, permite previsualizar el fragmento exacto usado por el modelo y descargar el documento original (vía URL firmada de S3).
@@ -234,7 +240,11 @@ Resumen de lo no implementado aún:
 
 - ✅ **Auth — edición de perfil propio** (2026-10-25): resuelto, ver sección 1b.
 - **Auth — registro público**: sigue sin existir como ruta ni como página. El
-  backend lo tiene completo (`POST /v1/auth/register`); falta solo la pantalla.
+  backend lo tiene completo (`POST /v1/auth/register`), pero no se conecta a
+  propósito: sin un módulo de presupuesto/límites de gasto (ver `ALCANCE_TFM.md`,
+  declarado fuera de alcance), abrir el registro a cualquiera dispararía
+  llamadas reales a OpenAI sin control de cuota. No es trabajo pendiente, es
+  una decisión de alcance ligada a esa misma limitación.
   El login conservaba un método `goToRegister()` que apuntaba a una ruta
   inexistente, sin que ninguna plantilla lo invocara; se retiró.
 - **Conversaciones (vista admin)**: listado/detalle administrativo de conversaciones (distinto del Chat IA de la sección 10) — no implementado.
@@ -246,7 +256,21 @@ Resumen de lo no implementado aún:
   respuesta") como las notificaciones (sección 12, tipos
   `knowledge_gap_found` / `knowledge_gap_resolved`) generan y enlazan
   `KnowledgeGap` correctamente.
+  - ✅ **Reincidencia real** (2026-11-01): la píldora "reincidente" nunca
+    aparecía porque `recurrence_count` no se escribía en ningún sitio. Ahora,
+    si una pregunta ya **resuelta** vuelve a llegar como fallo, el gap nuevo
+    nace con `recurrence_count` = veces que se resolvió antes y `reopened_at`.
+    Las ignoradas no cuentan. Tests en `test_feedback_convert_to_gap.py`.
+  - ✅ Se quitó de cada fila el texto "N variantes", que siempre mostraba
+    "0 variantes": `variants` no lo llena nada.
+  - **Fuera de alcance, invisibles en la UI**: `variants` y `trend` de
+    `KnowledgeGap` (pensados para un job en segundo plano que no existe; la
+    tendencia nunca se pinta y su peso en la prioridad vale siempre 1,0), y el
+    estado `stale` ("Obsoleto") de `Feedback`, que nada asigna. El código que
+    los pinta se conserva pero no se muestra porque los datos nunca llegan.
 - **Presupuesto/Uso**: configuración de límite mensual de gasto y alertas al 80%/100% — no implementado (el tipo de notificación `budget_*` ya existe en el modelo, a la espera del módulo).
+- **Límites de empresa** (`max_users`, `max_documents`, `monthly_message_limit`): se guardan pero no se hacen cumplir; el formulario de Empresas lo dice (2026-11-01).
+- **Conversaciones sin asistente guardado**: el asistente se elige mensaje a mensaje y no se persiste; al reabrir una conversación se selecciona el primero activo.
 - ✅ **Empresas — selector de contexto** (2026-10-25): resuelto, ver sección 3. Queda pendiente extender `X-Company-Context` a más módulos que Documentos y Asistentes, si hace falta.
 - **Widgets**: retirado de esta entrega — ver sección 9 y `ALCANCE_TFM.md`.
 - ✅ **404** (2026-10-22): `shared/pages/not-found/`, reutiliza `EmptyStateComponent`. La ruta comodín (`**`) redirige a `/not-found` en vez de a `/auth/login` — antes era indistinguible de una sesión expirada.
@@ -259,7 +283,7 @@ Resumen de lo no implementado aún:
   Events sobre HTTP, no WebSocket.
 - ✅ **Persistencia de `sidebarOpen` y los cuatro grupos colapsables** (2026-10-22): vía `StorageService` (`sessionStorage`), con un `effect()` por señal en `DashboardLayoutComponent`. Sobrevive a cambiar de módulo (cada uno instancia su propia layout); se reinicia al cerrar la pestaña, que es lo esperado para una preferencia de UI, no para datos.
 - ✅ **Interceptor global de errores HTTP** (2026-10-22): `core/interceptors/error.interceptor.ts`. 401 fuera del login fuerza `logout()` + redirección (antes solo pasaba si el usuario pulsaba "cerrar sesión"), 403 y errores de servidor (0 o ≥500) muestran un aviso genérico vía `NotificationService`. No toca los 4xx de negocio (404/409/422), que ya tienen su propio mensaje por componente — relanza el error en todos los casos para no romper ese manejo existente.
-- ✅ **Loading skeletons en las listas de tabla** (2026-10-22): `shared/components/table-skeleton/`, componente genérico (`[rows]`, `[columns]`) en vez de uno a medida por página. Conectado en etiquetas, categorías, empresas, usuarios y documentos. De paso, se centralizó `@keyframes sk-pulse` en `styles.scss` — estaba duplicado con ligeras variantes en feedback-list, knowledge-gaps-list y notification-list.
+- ✅ **Loading skeletons en las listas de tabla** (2026-10-22): `shared/components/table-skeleton/`, componente genérico (`[rows]`, `[columns]`) en vez de uno a medida por página. Conectado en categorías, empresas, usuarios y documentos. De paso, se centralizó `@keyframes sk-pulse` en `styles.scss` — estaba duplicado con ligeras variantes en feedback-list, knowledge-gaps-list y notification-list.
 - ✅ **Loading skeleton para `assistant-list`** (2026-10-24): `shared/components/card-skeleton/`, con la forma de `.al-card` (avatar circular, dos líneas de texto, insignias) y las mismas medidas que `.al-grid`/`.al-card` para que la cuadrícula no salte de tamaño al pasar del skeleton al contenido real. **No cubre** el dashboard (tarjetas de KPI, otra forma distinta).
 - ✅ **ESLint configurado** (2026-10-23): `@angular-eslint` oficial (`ng add @angular-eslint/schematics@21`), con `ng lint` en `package.json`. Primera pasada: 90 avisos. Se resolvieron todos, sin apagar reglas a ciegas:
   - 21 por el *schematic* oficial de migración `ng generate @angular/core:inject` (inyección por constructor → `inject()`), automático y sin riesgo.

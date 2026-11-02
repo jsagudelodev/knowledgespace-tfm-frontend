@@ -118,8 +118,8 @@ export class CompanyFormComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next:  () => { this.loading.set(false); this.companySaved.emit(); },
-          error: () => {
-            this.error.set('Error al actualizar la empresa. Intenta de nuevo.');
+          error: (e: unknown) => {
+            this.error.set(this.motivoDelError(e, 'Error al actualizar la empresa. Intenta de nuevo.'));
             this.loading.set(false);
           }
         });
@@ -138,12 +138,29 @@ export class CompanyFormComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next:  () => { this.loading.set(false); this.companySaved.emit(); },
-          error: () => {
-            this.error.set('Error al crear la empresa. Intenta de nuevo.');
+          error: (e: unknown) => {
+            this.error.set(this.motivoDelError(e, 'Error al crear la empresa. Intenta de nuevo.'));
             this.loading.set(false);
           }
         });
     }
+  }
+
+  // El backend explica qué falló (`detail`): un 422 por un email con dominio
+  // reservado se mostraba como el mismo "Error al crear" genérico de un fallo de red.
+  private motivoDelError(e: unknown, porDefecto: string): string {
+    const detail = (e as { error?: { detail?: unknown } })?.error?.detail;
+    if (typeof detail === 'string') return detail;
+    if (Array.isArray(detail) && detail.length) {
+      const campo = String(detail[0]?.loc?.at(-1) ?? '');
+      const nombres: Record<string, string> = {
+        email: 'el email', name: 'el nombre', phone: 'el teléfono',
+        max_users: 'el máximo de usuarios', max_documents: 'el máximo de documentos',
+        monthly_message_limit: 'el límite mensual de mensajes',
+      };
+      return `Revisa ${nombres[campo] ?? 'los datos'}: no es un valor válido.`;
+    }
+    return porDefecto;
   }
 
   onCancel(): void { this.cancelled.emit(); }

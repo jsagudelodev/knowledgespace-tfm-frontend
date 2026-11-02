@@ -691,7 +691,9 @@
 // ── Message footer ────────────────────────────────────────
 .message-footer {
   display: flex;
-  align-items: center;
+  // flex-start y no center: con el panel de feedback abierto el bloque de
+  // acciones crece en alto y la hora quedaba flotando a media altura.
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
   margin-top: 2px;
@@ -869,6 +871,7 @@
 .message-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 6px;
   flex-wrap: wrap;
 }
@@ -962,6 +965,7 @@
 
 // ── Panel de comentario negativo ──────────────────────────
 .feedback-panel {
+  flex-basis: 100%;
   margin-top: 10px;
   padding: 14px 16px;
   background: $bg-card;

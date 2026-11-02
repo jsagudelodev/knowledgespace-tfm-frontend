@@ -92,6 +92,10 @@
       <!-- ── Sección: Plan y límites ──────────────────────────────────── -->
       <div class="form-section">
         <h2>Plan y Límites</h2>
+        <span class="field-hint">
+          <span class="material-symbols-outlined icon-xs">info</span>
+          Los límites se guardan como referencia del plan; esta versión no los hace cumplir.
+        </span>
 
         <div class="form-group">
           <label for="plan">Plan <span class="required">*</span></label>
@@ -151,7 +155,7 @@
           />
           <span class="field-hint">
             <span class="material-symbols-outlined icon-xs">info</span>
-            Máximo de mensajes de IA por mes. Vacío = sin restricción.
+            Mensajes de IA por mes previstos en el plan. Vacío = sin tope.
           </span>
           @if (isFieldInvalid('monthly_message_limit')) {
             <span class="field-error">{{ getErrorMessage('monthly_message_limit') }}</span>

@@ -7,7 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { NotificationsService } from '../../services/notifications.service';
 import { AppNotification, NotificationCounts } from '../../../../core/models/notification.model';
-import { notificationIcon, relativeTime } from '../../notification-display.util';
+import { notificationAction, notificationIcon, relativeTime } from '../../notification-display.util';
 
 export type FilterMode = 'all' | 'unread' | 'documents' | 'budget' | 'knowledge_gap';
 
@@ -162,36 +162,7 @@ export class NotificationListComponent implements OnInit {
       });
   }
 
-  entityAction(n: AppNotification): { text: string; commands: string[] } | null {
-    const type = n.notification_type.name;
-    const id   = n.entity_id;
-
-    if (type === 'document_processed' || type === 'document_failed' || type === 'document_uploaded') {
-      return { text: 'Ver documento', commands: id ? ['/documents', String(id)] : ['/documents'] };
-    }
-    // Las notificaciones de presupuesto no ofrecen acción: el módulo de
-    // Presupuesto/Uso no está implementado y el dashboard no muestra costos
-    // (el costo por respuesta se ve en el propio chat). Antes enlazaban a
-    // /dashboard con el texto "Ver costos", que prometía algo que esa página
-    // no tiene.
-    if (type.startsWith('budget')) {
-      return null;
-    }
-    if (type === 'knowledge_gap_found') {
-      return id
-        ? { text: 'Resolver',    commands: ['/knowledge-gaps', String(id)] }
-        : { text: 'Ver la lista', commands: ['/knowledge-gaps'] };
-    }
-    if (type === 'knowledge_gap_resolved') {
-      return id
-        ? { text: 'Revisar',     commands: ['/knowledge-gaps', String(id)] }
-        : { text: 'Ver la lista', commands: ['/knowledge-gaps'] };
-    }
-    if (type === 'user_invited' || type === 'user_joined') {
-      return { text: 'Ver usuarios', commands: ['/users'] };
-    }
-    return null;
-  }
+  readonly entityAction = notificationAction;
 
   typeColor(n: AppNotification): string {
     return n.notification_type.color ?? '#6B7280';

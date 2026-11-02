@@ -37,6 +37,8 @@ import {
   inject,
   signal,
   computed,
+  effect,
+  untracked,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -83,6 +85,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   @ViewChild('messageInput') messageInput?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
   private readonly defaultSuggestions = [
     { icon: 'summarize', text: 'Dame un resumen de la documentación disponible' },
@@ -190,6 +193,13 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
 
   constructor() {
     this.currentUser.set(this.authService.getCurrentUserValue());
+    // El drawer vive montado en el layout: sin recargar al abrirlo, un asistente
+    // creado o desactivado después no aparecía (o seguía apareciendo) en el chat.
+    effect(() => {
+      if (this.uiStatus.chatOpen() && this.isDrawerMode() && this.currentUser()?.company_id) {
+        untracked(() => this.loadAssistants());
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -203,9 +213,11 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
     const initialId = this.route.snapshot.paramMap.get('id');
 
     if (!initialId) {
-      // Modo drawer: no hay :id en la ruta
+      // Modo drawer: no hay :id en la ruta. La conversación se crea con el
+      // primer mensaje (`sendMessage`): el drawer está montado en el layout aunque
+      // esté cerrado, y crearla aquí dejaba una vacía por cada carga de página
+      // -1.985 de 2.181 en la base de datos el 2026-11-01-.
       this.isDrawerMode.set(true);
-      this.createNewConversation();
     } else {
       // Modo ruta: reacciona a cambios de :id con switchMap para cancelar
       // requests anteriores en caso de navegación rápida entre conversaciones
@@ -262,6 +274,8 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
     const next = !this.searchActive();
     this.searchActive.set(next);
     if (!next) this.clearSearch();
+    // Sin esto lo que se escribía tras abrir la búsqueda caía en el campo de mensaje.
+    else setTimeout(() => this.searchInput?.nativeElement.focus());
   }
 
   onSearchInput(event: Event): void {
@@ -298,10 +312,12 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
         next: (all) => {
           const active = all.filter((a) => a.is_active);
           this.assistants.set(active);
-          const first = active[0];
-          if (first) {
-            this.selectedAssistant.set(first);
-            this.assistantId.set(first.id);
+          // Al recargar se conserva el asistente elegido si sigue activo.
+          const keep = active.find((a) => a.id === this.selectedAssistant()?.id);
+          const chosen = keep ?? active[0];
+          if (chosen) {
+            this.selectedAssistant.set(chosen);
+            this.assistantId.set(chosen.id);
           }
         },
         error: () => {},
@@ -311,22 +327,6 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
   selectAssistant(assistant: Assistant): void {
     this.selectedAssistant.set(assistant);
     this.assistantId.set(assistant.id);
-  }
-
-  createNewConversation(): void {
-    this.loadError.set(null);
-    this.chatService
-      .createConversation({ title: 'Chat IA' })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (c) => {
-          this.conversation.set(c);
-          this.loadMessages(c.id);
-        },
-        // Es el caso del drawer: si no hay conversación, no hay dónde escribir.
-        // Dejarlo en console.error dejaba el chat en blanco sin explicación.
-        error: (e) => this.loadError.set(this.mensajeDeCarga(e)),
-      });
   }
 
   loadMessages(conversationId: number): void {
@@ -368,8 +368,27 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
 
   sendMessage(): void {
     const text = this.newMessage.trim();
+    if (!text) return;
     const conv = this.conversation();
-    if (!text || !conv) return;
+    if (!conv) {
+      if (this.sending()) return;
+      this.sending.set(true);
+      this.chatService
+        .createConversation({ title: 'Chat IA' })
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (c) => {
+            this.conversation.set(c);
+            this.sending.set(false);
+            this.sendMessage();
+          },
+          error: (e) => {
+            this.sending.set(false);
+            this.sendError.set(this.mensajeDeCarga(e));
+          },
+        });
+      return;
+    }
 
     this.newMessage = '';
     if (this.messageInput) this.messageInput.nativeElement.style.height = 'auto';
@@ -535,9 +554,12 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
     const term = this.searchTerm().trim();
     if (!term) return this.formatMessage(content);
 
-    // Placeholders que sobreviven al HTML-escape y al procesado markdown
-    const OPEN = '';
-    const CLOSE = '';
+    // Placeholders que sobreviven al HTML-escape y al procesado markdown.
+    // Escritos como escapes a propósito: eran caracteres invisibles literales y
+    // se perdieron, y con cadenas vacías `replaceAll('', …)` metía un <mark>
+    // entre cada par de letras del mensaje.
+    const OPEN = '\uE000';
+    const CLOSE = '\uE001';
     const safe = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
     const marked = content.replace(new RegExp(safe, 'gi'), (match) => `${OPEN}${match}${CLOSE}`);
@@ -716,15 +738,11 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
   }
 
   submitFeedback(messageId: number, type: 'up' | 'down', comment?: string): void {
+    // Calificar es definitivo: no hay endpoint para borrar un feedback, y
+    // "desmarcarlo" solo en pantalla dejaba la fila en la base de datos y
+    // duplicaba la calificación al volver a pulsar.
     const current = this.messageFeedback()[messageId];
-    if (current === type && !comment) {
-      this.messageFeedback.update((m) => {
-        const n = { ...m };
-        delete n[messageId];
-        return n;
-      });
-      return;
-    }
+    if (current === type && !comment) return;
 
     const rating = type === 'up' ? 5 : 1;
     this.feedbackService
@@ -746,14 +764,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
   }
 
   openFeedbackPanel(messageId: number): void {
-    if (this.messageFeedback()[messageId] === 'down') {
-      this.messageFeedback.update((m) => {
-        const n = { ...m };
-        delete n[messageId];
-        return n;
-      });
-      return;
-    }
+    if (this.messageFeedback()[messageId] === 'down') return;
     this.feedbackPanelOpen.set(messageId);
     this.feedbackComment.set('');
   }

@@ -94,6 +94,8 @@
     margin: $sp-2 0 0;
     font-size: $size-xs;
     color: $font-muted;
+
+    &--warn { color: $badge-pending-text; }
   }
 }
 

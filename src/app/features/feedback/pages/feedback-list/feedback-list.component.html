@@ -283,7 +283,7 @@
                   >Ver conversación</a>
                 }
 
-                @if (isNegative(fb.rating)) {
+                @if (isNegative(fb.rating) && !fb.knowledge_gap_id) {
                   <button
                     class="action-btn action-btn--gap"
                     (click)="openConvertDialog(fb)"
@@ -337,7 +337,7 @@
             </div>
           }
         } @else if (!stats()?.themes?.length) {
-          <div class="fb-empty"><p>No hay temas identificados en este período.</p></div>
+          <div class="fb-empty"><p>La agrupación de comentarios por tema no está disponible en esta versión.</p></div>
         } @else {
           @for (theme of stats()!.themes; track theme.label) {
             @if (!themeSearch() || theme.label.toLowerCase().includes(themeSearch().toLowerCase())) {

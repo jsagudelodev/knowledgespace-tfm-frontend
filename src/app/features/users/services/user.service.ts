@@ -28,9 +28,11 @@ export class UserService extends CrudService<User, UserCreate, UserUpdate> {
   }
 
   resetPassword(id: number, newPassword: string): Observable<{ message: string }> {
+    // En el cuerpo, nunca en la URL: los query params quedan en los logs del
+    // servidor y de los proxies. Antes iba como `?new_password=` y además el
+    // backend (que lo espera en el body) respondía 422.
     return this.api.patch<{ message: string }>(
       `${this.basePath}/${id}/reset-password`,
-      null,
       { new_password: newPassword }
     );
   }

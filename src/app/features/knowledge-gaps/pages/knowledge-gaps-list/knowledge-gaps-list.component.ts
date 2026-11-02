@@ -8,6 +8,7 @@ import { debounceTime } from 'rxjs/operators';
 import { KnowledgeGapsService } from '../../services/knowledge-gaps.service';
 import { UserService } from '../../../users/services/user.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { NotificationService } from '../../../../core/services/notification.service';
 import { User } from '../../../../core/models/user.model';
 import {
   KnowledgeGap,
@@ -31,6 +32,7 @@ export class KnowledgeGapsListComponent implements OnInit {
   private readonly auth       = inject(AuthService);
   private readonly route      = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly toast      = inject(NotificationService);
   private readonly search$    = new Subject<string>();
 
   // ── UI state ──────────────────────────────────────────────────────────────
@@ -86,6 +88,9 @@ export class KnowledgeGapsListComponent implements OnInit {
     const deepLinkId = idParam ? Number(idParam) : null;
 
     if (deepLinkId) {
+      // Mientras llega la pregunta del enlace, la lista aún no se pidió: sin esto
+      // se veía "Nada pendiente en este estado" hasta que respondía el backend.
+      this.loading.set(true);
       this.svc.getById(deepLinkId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: gap => {
           this.gapTab.set(gap.status === 'resolved' ? 'resolved' : gap.status === 'ignored' ? 'ignored' : 'open');
@@ -283,7 +288,8 @@ export class KnowledgeGapsListComponent implements OnInit {
   }
 
   ignoreReasonLabel(r: string | null): string {
-    if (!r) return '';
+    // Las ignoradas antes de que el motivo fuera obligatorio no tienen ninguno.
+    if (!r) return 'sin motivo registrado';
     const map: Record<string, string> = {
       out_of_scope: 'Fuera de alcance',
       one_off:      'Puntual, no se repite',
@@ -345,7 +351,7 @@ export class KnowledgeGapsListComponent implements OnInit {
   recommendationText(gap: KnowledgeGap): string {
     if (this.hasCandidates(gap)) {
       const name = gap.candidates![0].name;
-      return `Recomendado: el contenido ya existe en "${name}". Vincúlalo y se reindexa con estas variantes.`;
+      return `Recomendado: "${name}" pasa el umbral de relevancia. Si responde la pregunta, vincúlalo y se indexará con ella.`;
     }
     return 'Recomendado: ningún documento pasa el umbral. Pide el documento a quien lo tenga.';
   }
@@ -367,9 +373,10 @@ export class KnowledgeGapsListComponent implements OnInit {
         next: updated => {
           this.patchInList(updated);
           this.submitting.set(false);
+          this.avisarResolucion(updated);
           this.advanceToNext(gap.id);
         },
-        error: () => this.submitting.set(false),
+        error: () => this.fallo('No se pudo vincular el documento.'),
       });
   }
 
@@ -393,10 +400,30 @@ export class KnowledgeGapsListComponent implements OnInit {
         next: updated => {
           this.patchInList(updated);
           this.submitting.set(false);
+          this.avisarResolucion(updated);
           this.advanceToNext(gap.id);
         },
-        error: () => this.submitting.set(false),
+        error: () => this.fallo('No se pudo vincular el documento.'),
       });
+  }
+
+  // La lista avanza sola a la siguiente pregunta: sin este aviso, el resultado
+  // de la verificación —lo que demuestra que ya se responde— no se llegaba a ver.
+  private avisarResolucion(gap: KnowledgeGap): void {
+    const antes = gap.verify_score_before;
+    const despues = gap.verify_score_after;
+    if (antes == null || despues == null) {
+      this.toast.success(`#${gap.id} resuelta.`);
+    } else if (gap.verify_passed) {
+      this.toast.success(`#${gap.id} resuelta y verificada: ${antes.toFixed(2)} → ${despues.toFixed(2)}.`);
+    } else {
+      this.toast.info(`#${gap.id} resuelta, pero el índice aún no la recupera bien (${despues.toFixed(2)}).`);
+    }
+  }
+
+  private fallo(mensaje: string): void {
+    this.submitting.set(false);
+    this.toast.error(`${mensaje} Inténtalo de nuevo.`);
   }
 
   doAnswer(): void {
@@ -410,9 +437,10 @@ export class KnowledgeGapsListComponent implements OnInit {
           this.patchInList(updated);
           this.submitting.set(false);
           this.answerText = '';
+          this.avisarResolucion(updated);
           this.advanceToNext(gap.id);
         },
-        error: () => this.submitting.set(false),
+        error: () => this.fallo('No se pudo guardar la respuesta.'),
       });
   }
 
@@ -428,9 +456,10 @@ export class KnowledgeGapsListComponent implements OnInit {
           this.patchInList(updated);
           this.submitting.set(false);
           this.requestNote = '';
+          this.toast.success(`Documento solicitado para la #${updated.id}.`);
           this.selectGap(updated);
         },
-        error: () => this.submitting.set(false),
+        error: () => this.fallo('No se pudo solicitar el documento.'),
       });
   }
 
@@ -445,9 +474,10 @@ export class KnowledgeGapsListComponent implements OnInit {
           this.patchInList(updated);
           this.submitting.set(false);
           this.ignoring.set(false);
+          this.toast.info(`#${updated.id} ignorada.`);
           this.advanceToNext(gap.id);
         },
-        error: () => this.submitting.set(false),
+        error: () => this.fallo('No se pudo ignorar la pregunta.'),
       });
   }
 
@@ -462,7 +492,7 @@ export class KnowledgeGapsListComponent implements OnInit {
           this.patchInList(updated);
           this.submitting.set(false);
         },
-        error: () => this.submitting.set(false),
+        error: () => this.fallo('No se pudo reverificar contra el índice.'),
       });
   }
 }

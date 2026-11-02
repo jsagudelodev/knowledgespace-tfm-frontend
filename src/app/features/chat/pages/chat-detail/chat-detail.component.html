@@ -14,10 +14,10 @@
         </button>
       }
 
-      @if (conversation()) {
+      @if (conversation() || isDrawerMode()) {
         <div class="header-title-group">
           <h1>
-            {{ conversation()!.title }}
+            {{ conversation()?.title ?? 'Chat IA' }}
             <span class="beta-badge">BETA</span>
           </h1>
           <p class="header-subtitle">{{ companyLabel() }}</p>
@@ -34,7 +34,7 @@
         [title]="searchActive() ? 'Cerrar búsqueda' : 'Buscar en mensajes'"
         aria-label="Buscar mensajes"
       >
-        <span class="material-symbols-outlined icon-sm" [ngClass]="!searchActive() ? 'search' : 'close'"></span>
+        <span class="material-symbols-outlined icon-sm">{{ searchActive() ? 'close' : 'search' }}</span>
       </button>
     </div>
   </header>
@@ -44,6 +44,7 @@
     <div class="search-bar">
       <span class="material-symbols-outlined icon-sm search-bar__icon">search</span>
       <input
+        #searchInput
         type="text"
         class="search-bar__input"
         placeholder="Buscar en mensajes..."
@@ -198,7 +199,7 @@
                   @for (grupo of agruparFuentes(message.sources); track grupo.nombre) {
                     <div class="source-row">
                       <div class="source-info">
-                        <span class="material-symbols-outlined icon-sm source-pdf-icon">picture_as_pdf</span>
+                        <span class="material-symbols-outlined icon-sm source-pdf-icon">{{ grupo.nombre.toLowerCase().endsWith('.pdf') ? 'picture_as_pdf' : 'description' }}</span>
                         <div class="source-meta">
                           <span class="source-name">{{ grupo.nombre }}</span>
                           <div class="source-badges">
@@ -221,11 +222,14 @@
                           </div>
                         </div>
                       </div>
-                      <div class="source-actions">
-                        <button class="action-btn" title="Descargar documento" aria-label="Descargar documento original" (click)="downloadSource(grupo.fragmentos[0])">
-                          <span class="material-symbols-outlined icon-sm">download</span>
-                        </button>
-                      </div>
+                      <!-- Una respuesta escrita a mano no tiene documento que descargar. -->
+                      @if (grupo.fragmentos[0].document_id) {
+                        <div class="source-actions">
+                          <button class="action-btn" title="Descargar documento" aria-label="Descargar documento original" (click)="downloadSource(grupo.fragmentos[0])">
+                            <span class="material-symbols-outlined icon-sm">download</span>
+                          </button>
+                        </div>
+                      }
                     </div>
                     @for (f of grupo.fragmentos; track f.chunk_id || f.chunk_index) {
                       @if (expandedSource() === f) {

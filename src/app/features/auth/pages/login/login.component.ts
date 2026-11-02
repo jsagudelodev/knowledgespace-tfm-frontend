@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, inject } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -30,6 +30,9 @@ export class LoginComponent {
   error: string | null = null;
 
   private destroyRef = inject(DestroyRef);
+  // Sin zone.js, el error que llega en el callback HTTP no se pintaba: con una
+  // contraseña incorrecta el botón se quedaba cargando y sin mensaje.
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     this.loginForm = this.fb.group({
@@ -63,9 +66,11 @@ export class LoginComponent {
           // real. Si falla (red, 404), no bloquea el login: el header vuelve
           // a caer en ese mismo texto genérico, que es peor cosmética, no un
           // error funcional.
+          // Sin `takeUntilDestroyed` a propósito: la navegación de abajo destruye
+          // este componente al instante y cancelaba la petición antes de que
+          // respondiera. Una petición HTTP termina sola, no hay fuga.
           this.companyService
             .getMyCompany()
-            .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: (company) => this.authService.setSelectedCompany(company),
               error: () => {},
@@ -75,6 +80,7 @@ export class LoginComponent {
         error: () => {
           this.error = 'Email o contraseña incorrectos';
           this.loading = false;
+          this.cdr.markForCheck();
         },
       });
   }
