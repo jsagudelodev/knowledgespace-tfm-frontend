@@ -3,10 +3,13 @@
   <!-- ── Header ────────────────────────────────────────────────────────────── -->
   <div class="category-list-header">
     <h1>Categorías</h1>
-    <button class="btn-primary" (click)="openCreateModal()">
-      <span class="material-symbols-outlined icon-sm">add</span>
-      Nueva Categoría
-    </button>
+    <!-- Crear, editar y borrar categorías: solo admin (el backend responde 403 si no). -->
+    @if (isAdmin) {
+      <button class="btn-primary" (click)="openCreateModal()">
+        <span class="material-symbols-outlined icon-sm">add</span>
+        Nueva Categoría
+      </button>
+    }
   </div>
 
   <!-- ── Filtros ────────────────────────────────────────────────────────────── -->
@@ -84,7 +87,7 @@
         <div class="col-icon">Ícono</div>
         <div class="col-order">Orden</div>
         <div class="col-status">Estado</div>
-        <div class="col-actions">Acciones</div>
+        <div class="col-actions">{{ isAdmin ? 'Acciones' : '' }}</div>
       </div>
 
       @for (cat of paginatedData(); track cat.id) {
@@ -133,7 +136,7 @@
               <button class="action-btn cancel-btn" (click)="cancelDelete()" title="Cancelar">
                 <span class="material-symbols-outlined icon-sm">close</span>
               </button>
-            } @else {
+            } @else if (isAdmin) {
               <button class="action-btn edit-btn" (click)="openEditModal(cat.id)" title="Editar categoría">
                 <span class="material-symbols-outlined icon-sm">edit</span>
               </button>

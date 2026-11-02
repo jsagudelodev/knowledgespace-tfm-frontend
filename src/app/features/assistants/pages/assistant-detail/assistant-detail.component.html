@@ -42,9 +42,11 @@
     </div>
 
     <div class="ad-header-actions">
-      <button class="ad-btn-secondary" (click)="goToEdit()">
-        <span class="material-symbols-outlined icon-sm">edit</span> Editar
-      </button>
+      @if (isAdmin) {
+        <button class="ad-btn-secondary" (click)="goToEdit()">
+          <span class="material-symbols-outlined icon-sm">edit</span> Editar
+        </button>
+      }
     </div>
   </div>
 
@@ -209,7 +211,7 @@
             <!-- Acciones -->
             @if (deleteConfirmId !== doc.id) {
               <div class="ad-doc-actions">
-                @if (doc.status === 'failed' || doc.status === 'processing') {
+                @if ((doc.status === 'failed' || doc.status === 'processing') && canManage(doc)) {
                   <button class="ad-doc-btn ad-doc-btn--retry"
                     [disabled]="retryingId === doc.id"
                     (click)="retryDocument(doc.id)"
@@ -225,12 +227,15 @@
                     <span class="material-symbols-outlined icon-sm">download</span>
                   </button>
                 }
-                <button class="ad-doc-btn ad-doc-btn--delete"
-                  [disabled]="!!deletingId"
-                  (click)="confirmDelete(doc.id)"
-                  title="Eliminar">
-                  <span class="material-symbols-outlined icon-sm">delete</span>
-                </button>
+                <!-- Borrar: quien lo subió o un admin (el backend responde 403 si no). -->
+                @if (canManage(doc)) {
+                  <button class="ad-doc-btn ad-doc-btn--delete"
+                    [disabled]="!!deletingId"
+                    (click)="confirmDelete(doc.id)"
+                    title="Eliminar">
+                    <span class="material-symbols-outlined icon-sm">delete</span>
+                  </button>
+                }
               </div>
             } @else {
               <div class="ad-doc-confirm">

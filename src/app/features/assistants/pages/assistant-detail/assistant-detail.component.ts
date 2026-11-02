@@ -13,6 +13,7 @@ import { Document } from '../../../../core/models/document.model';
 import { Category } from '../../../../core/models/category.model';
 import { Paginator, PaginatorState } from 'primeng/paginator';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ChunksDrawerComponent } from '../../../../shared/components/chunks-drawer/chunks-drawer.component';
 
 type Tab = 'documents' | 'info';
@@ -82,6 +83,13 @@ export class AssistantDetailComponent implements OnInit, OnDestroy {
   private readonly assistantService = inject(AssistantService);
   private readonly documentService  = inject(DocumentService);
   private readonly categoryService  = inject(CategoryService);
+  private readonly auth             = inject(AuthService);
+  /** Editar el asistente: solo admin. Subir documentos: cualquiera. */
+  readonly isAdmin = this.auth.isAdmin();
+
+  canManage(doc: { uploaded_by: number }): boolean {
+    return this.auth.canManageDocument(doc);
+  }
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));

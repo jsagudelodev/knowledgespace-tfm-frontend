@@ -98,10 +98,14 @@
               <span class="material-symbols-outlined icon-sm">bar_chart</span>
               @if (sidebarOpen()) { <span>Dashboard</span> }
             </a>
-            <a class="menu-item" routerLink="/feedback" routerLinkActive="active" title="Feedback IA">
-              <span class="material-symbols-outlined icon-sm">rate_review</span>
-              @if (sidebarOpen()) { <span>Feedback IA</span> }
-            </a>
+            <!-- Feedback IA y Preguntas sin respuesta: datos de todos los usuarios y
+                 escritura en la base de conocimiento -> solo admin (el backend también lo exige). -->
+            @if (isAdmin()) {
+              <a class="menu-item" routerLink="/feedback" routerLinkActive="active" title="Feedback IA">
+                <span class="material-symbols-outlined icon-sm">rate_review</span>
+                @if (sidebarOpen()) { <span>Feedback IA</span> }
+              </a>
+            }
             <a class="menu-item" routerLink="/notifications" routerLinkActive="active" title="Notificaciones">
               <span class="material-symbols-outlined icon-sm">notifications</span>
               @if (sidebarOpen()) {
@@ -113,10 +117,12 @@
                 <span class="sidebar-badge sidebar-badge--dot"></span>
               }
             </a>
-            <a class="menu-item" routerLink="/knowledge-gaps" routerLinkActive="active" title="Preguntas sin respuesta">
-              <span class="material-symbols-outlined icon-sm">help</span>
-              @if (sidebarOpen()) { <span>Sin respuesta</span> }
-            </a>
+            @if (isAdmin()) {
+              <a class="menu-item" routerLink="/knowledge-gaps" routerLinkActive="active" title="Preguntas sin respuesta">
+                <span class="material-symbols-outlined icon-sm">help</span>
+                @if (sidebarOpen()) { <span>Sin respuesta</span> }
+              </a>
+            }
           </div>
         </div>
       </div>

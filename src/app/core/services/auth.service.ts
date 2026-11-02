@@ -107,4 +107,17 @@ export class AuthService {
   getCurrentUserValue(): User | null {
     return this.currentUserSubject.value;
   }
+
+  /** Admin de empresa o superadmin: los únicos que gestionan lo que el asistente
+   * responde a todos (asistentes, categorías, documentos ajenos, preguntas sin
+   * respuesta, feedback de otros). El backend lo exige igual; esto solo oculta. */
+  isAdmin(): boolean {
+    const role = this.currentUserSubject.value?.role;
+    return role === 'admin' || role === 'superadmin';
+  }
+
+  /** Puede borrar, recategorizar o reprocesar este documento: lo subió él o es admin. */
+  canManageDocument(doc: { uploaded_by: number }): boolean {
+    return this.isAdmin() || doc.uploaded_by === this.currentUserSubject.value?.id;
+  }
 }

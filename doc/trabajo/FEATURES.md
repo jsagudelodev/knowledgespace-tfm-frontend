@@ -225,6 +225,10 @@ Diseño high-fidelity conforme al handoff: `max-width: 1000px`, `padding: 28px 2
 
 - **Autenticación JWT** con interceptor HTTP que inyecta el `Bearer token` automáticamente, validación de expiración en cliente y logout que limpia la sesión.
 - **Multi-tenant con roles jerárquicos** (`superadmin` > `admin` > `user`), condicionando qué acciones ve cada usuario en la UI.
+- **Permisos por rol** (2026-11-02; el backend los exige con 403, la UI solo oculta):
+  - `user`: chat, calificar, Mi perfil, Dashboard y Notificaciones; ver Documentos, Categorías y Asistentes; **subir documentos** y borrar o recategorizar **los suyos** (`AuthService.canManageDocument`). Recibe "Te pidieron un documento" cuando un admin se lo asigna desde Preguntas sin respuesta, con acceso directo a Subir documento.
+  - `admin` / `superadmin`, además: crear, editar y borrar asistentes y categorías; gestionar documentos ajenos; Feedback IA y Preguntas sin respuesta (ocultos del menú y con `adminGuard` para el resto), y Empresas/Usuarios.
+  - Antes la cuenta de demo de rol `user` podía borrar cualquier documento, borrar asistentes o indexar respuestas escritas a mano.
 - **Subida de archivos con progreso real**, reutilizada en la subida de documentos y en la pestaña de documentos del detalle de asistente.
 - **Descarga de documentos vía URL firmada** (almacenamiento S3).
 - **Polling de estado de procesamiento** de documentos mientras estén `pending`/`processing`.

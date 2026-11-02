@@ -57,3 +57,36 @@ describe('AuthService.isAuthenticated', () => {
     expect(servicio().isAuthenticated()).toBe(false);
   });
 });
+
+// Permisos por rol (2026-11-02): el backend los exige; esto decide qué botones
+// de gestión se muestran. Un usuario puede gestionar lo que subió él.
+describe('AuthService · rol', () => {
+  function conUsuario(user: object | null): AuthService {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        { provide: ApiService, useValue: {} },
+        { provide: StorageService, useValue: { getItem: (k: string) => (k === 'user' ? user : null) } },
+      ],
+    });
+    return TestBed.inject(AuthService);
+  }
+
+  it('admin y superadmin son administradores; user no', () => {
+    expect(conUsuario({ id: 1, role: 'admin' }).isAdmin()).toBe(true);
+    expect(conUsuario({ id: 1, role: 'superadmin' }).isAdmin()).toBe(true);
+    expect(conUsuario({ id: 1, role: 'user' }).isAdmin()).toBe(false);
+    expect(conUsuario(null).isAdmin()).toBe(false);
+  });
+
+  it('un usuario gestiona solo los documentos que subió', () => {
+    const auth = conUsuario({ id: 14, role: 'user' });
+    expect(auth.canManageDocument({ uploaded_by: 14 })).toBe(true);
+    expect(auth.canManageDocument({ uploaded_by: 8 })).toBe(false);
+  });
+
+  it('un admin gestiona cualquier documento', () => {
+    expect(conUsuario({ id: 8, role: 'admin' }).canManageDocument({ uploaded_by: 14 })).toBe(true);
+  });
+});

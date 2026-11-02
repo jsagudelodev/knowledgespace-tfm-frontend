@@ -4,7 +4,9 @@
   <header class="notif-header">
     <div class="notif-header__left">
       <h1 class="notif-h1">Notificaciones</h1>
-      <p class="notif-subtitle">Documentos, presupuesto y preguntas sin respuesta de tu empresa.</p>
+      <p class="notif-subtitle">
+        {{ isAdmin ? 'Documentos, presupuesto y preguntas sin respuesta de tu empresa.' : 'Tus documentos y lo que te pidan los administradores.' }}
+      </p>
     </div>
     <button
       class="mark-all-btn"

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { DashboardLayoutComponent } from '../../shared/layouts/dashboard-layout/dashboard-layout.component';
+import { adminGuard } from '../../core/guards/admin.guard';
 
 export const ASSISTANTS_ROUTES: Routes = [
   {
@@ -13,6 +14,7 @@ export const ASSISTANTS_ROUTES: Routes = [
       },
       {
         path: 'new',
+        canActivate: [adminGuard],
         loadComponent: () => import('./pages/assistant-form/assistant-form.component')
           .then(m => m.AssistantFormComponent)
       },
@@ -23,6 +25,7 @@ export const ASSISTANTS_ROUTES: Routes = [
       },
       {
         path: ':id/edit',
+        canActivate: [adminGuard],
         loadComponent: () => import('./pages/assistant-form/assistant-form.component')
           .then(m => m.AssistantFormComponent)
       }

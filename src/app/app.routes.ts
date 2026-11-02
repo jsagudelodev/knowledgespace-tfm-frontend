@@ -47,7 +47,7 @@ export const routes: Routes = [
   },
   {
     path: 'feedback',
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
     loadChildren: () => import('./features/feedback/feedback.routes').then(m => m.FEEDBACK_ROUTES)
   },
   {
@@ -57,7 +57,7 @@ export const routes: Routes = [
   },
   {
     path: 'knowledge-gaps',
-    canActivate: [authGuard],
+    canActivate: [authGuard, adminGuard],
     loadChildren: () => import('./features/knowledge-gaps/knowledge-gaps.routes').then(m => m.KNOWLEDGE_GAPS_ROUTES)
   },
   {

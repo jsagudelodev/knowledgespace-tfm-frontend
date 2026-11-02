@@ -20,6 +20,7 @@ import { CategoryService } from '../../../categories/services/category.service';
 import { Document } from '../../../../core/models/document.model';
 import { Category } from '../../../../core/models/category.model';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ChunksDrawerComponent } from '../../../../shared/components/chunks-drawer/chunks-drawer.component';
 import { TableSkeletonComponent } from '../../../../shared/components/table-skeleton/table-skeleton.component';
 
@@ -100,6 +101,12 @@ export class DocumentListComponent implements OnInit, OnDestroy {
   private destroyRef = inject(DestroyRef);
   private cdr = inject(ChangeDetectorRef);
   private notifications = inject(NotificationService);
+  private auth = inject(AuthService);
+
+  /** Lo subió el usuario o es admin: solo entonces puede borrar o recategorizar. */
+  canManage(doc: Document): boolean {
+    return this.auth.canManageDocument(doc);
+  }
   private searchSubject = new Subject<string>();
 
   ngOnInit(): void {

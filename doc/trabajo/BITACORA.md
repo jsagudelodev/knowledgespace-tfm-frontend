@@ -96,6 +96,38 @@ contadores bajan a la vez), cerrar sesión y login con credenciales falsas
 
 ---
 
+## 2026-11-02 (tarde) — Permisos por rol, probados con la cuenta de usuario normal
+
+**Hallazgo:** con la cuenta de demo de rol `user` el frontend solo ocultaba
+Empresas y Usuarios; el backend no frenaba nada más. Podía borrar cualquier
+documento, crear/borrar asistentes y categorías, indexar respuestas escritas a
+mano en Preguntas sin respuesta y ver/exportar el feedback de todos con nombre.
+
+**Hecho:**
+- Regla acordada con el autor: un usuario aporta (chatea, califica, sube y
+  gestiona lo suyo); lo que cambia lo que el asistente responde a todos, o
+  expone datos de otros, es de admin.
+- Backend: `get_current_admin_user` en las escrituras de asistentes y
+  categorías, en todo `knowledge_gaps` (dependencia del router) y en las
+  lecturas/gestión del feedback ajeno; documentos con "dueño o admin"
+  (`_exigir_dueno_o_admin`). `tests/test_permisos_por_rol.py` recorre el árbol
+  de dependencias de cada ruta (sabotaje verificado).
+- "Pedir documento" ahora avisa al responsable (`document_requested`);
+  `tests/test_aviso_documento_solicitado.py`. Migración de datos
+  `b7d2e4f6a813` para sembrar el tipo: **pendiente de aplicar** (el permiso
+  automático la bloqueó como despliegue); sin ella el aviso no se crea, sin
+  romper nada.
+- Frontend: menú sin Feedback IA ni Sin respuesta para `user`; `adminGuard` en
+  esas rutas y en crear/editar asistente; botones de gestión ocultos según
+  `AuthService.isAdmin()` / `canManageDocument()`; la notificación nueva lleva a
+  Subir documento.
+- Verificado en el navegador con la cuenta de usuario: menú, redirecciones,
+  botones (solo sobre su propio documento), subir y borrar uno propio, y 403
+  del backend en 10 llamadas de gestión frente a 200 en las de lectura.
+- Backend 249 tests, frontend 58; lint y build en verde.
+
+---
+
 ## 2026-11-01 — Pulido de Feedback y Preguntas sin respuesta: lo que la UI prometía y nadie llenaba
 
 **Hecho (backend `api/`):**

@@ -9,6 +9,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AssistantService } from '../../services/assistant.service';
 import { Assistant } from '../../../../core/models/assistant.model';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { CardSkeletonComponent } from '../../../../shared/components/card-skeleton/card-skeleton.component';
 
 @Component({
@@ -72,6 +73,8 @@ export class AssistantListComponent implements OnInit {
   private readonly router            = inject(Router);
   private readonly assistantService  = inject(AssistantService);
   private readonly notifications     = inject(NotificationService);
+  /** Solo un admin crea, edita o borra asistentes; el resto los usa y les sube documentos. */
+  readonly isAdmin = inject(AuthService).isAdmin();
   private readonly searchSubject     = new Subject<string>();
 
   ngOnInit(): void {

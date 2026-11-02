@@ -5,6 +5,7 @@ const ICON_BY_TYPE: Record<string, string> = {
   document_processed:       'task_alt',
   document_failed:          'error',
   document_deleted:         'delete',
+  document_requested:       'note_add',
   budget_warning:           'warning',
   budget_exceeded:          'report',
   budget_reset:             'refresh',
@@ -25,6 +26,10 @@ export function notificationAction(n: AppNotification): NotificationAction | nul
   const type = n.notification_type.name;
   const id   = n.entity_id;
 
+  // Un admin pidió un documento a este usuario: lo lleva a subirlo.
+  if (type === 'document_requested') {
+    return { text: 'Subir documento', commands: ['/documents/upload'] };
+  }
   if (type === 'document_processed' || type === 'document_failed' || type === 'document_uploaded') {
     // No existe una página de detalle `/documents/:id`: lleva a la lista.
     return { text: 'Ver documentos', commands: ['/documents'] };

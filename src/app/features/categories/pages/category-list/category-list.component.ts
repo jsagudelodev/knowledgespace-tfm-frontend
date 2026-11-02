@@ -15,6 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CategoryService } from '../../services/category.service';
 import { Category } from '../../../../core/models/category.model';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { CategoryFormComponent } from '../category-form/category-form.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { TableSkeletonComponent } from '../../../../shared/components/table-skeleton/table-skeleton.component';
@@ -36,6 +37,8 @@ export class CategoryListComponent implements OnInit {
   private readonly destroyRef    = inject(DestroyRef);
   private readonly categoryService = inject(CategoryService);
   private readonly notifications = inject(NotificationService);
+  /** Solo un admin crea, edita o borra categorías; el resto las consulta. */
+  readonly isAdmin = inject(AuthService).isAdmin();
   private readonly searchSubject = new Subject<string>();
 
   // ── Data ──────────────────────────────────────────────────────────────────

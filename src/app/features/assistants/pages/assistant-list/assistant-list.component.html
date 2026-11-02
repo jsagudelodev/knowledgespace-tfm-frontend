@@ -10,10 +10,13 @@
       <button class="al-btn-icon" (click)="loadAssistants()" [disabled]="loading" title="Actualizar">
         <span class="material-symbols-outlined icon-sm" [class.pi-spin]="loading">refresh</span>
       </button>
-      <button class="al-btn-primary" (click)="goToNew()">
-        <span class="material-symbols-outlined icon-sm">add</span>
-        Nuevo Asistente
-      </button>
+      <!-- Crear, editar y borrar asistentes: solo admin (el backend responde 403 si no). -->
+      @if (isAdmin) {
+        <button class="al-btn-primary" (click)="goToNew()">
+          <span class="material-symbols-outlined icon-sm">add</span>
+          Nuevo Asistente
+        </button>
+      }
     </div>
   </div>
 
@@ -91,9 +94,11 @@
       </div>
       <p class="al-state__title">Sin asistentes aún</p>
       <p class="al-state__sub">Crea tu primer asistente especializado para empezar a gestionar conocimiento corporativo</p>
-      <button class="al-btn-primary" (click)="goToNew()">
-        <span class="material-symbols-outlined icon-sm">add</span> Crear primer asistente
-      </button>
+      @if (isAdmin) {
+        <button class="al-btn-primary" (click)="goToNew()">
+          <span class="material-symbols-outlined icon-sm">add</span> Crear primer asistente
+        </button>
+      }
     </div>
   }
 
@@ -168,15 +173,17 @@
               <button class="al-action-btn al-action-btn--manage" (click)="goToDetail(assistant.id)" title="Gestionar asistente">
                 <span class="material-symbols-outlined icon-sm">settings</span> Gestionar
               </button>
-              <button class="al-action-btn" (click)="goToEdit(assistant.id, $event)" title="Editar">
-                <span class="material-symbols-outlined icon-sm">edit</span>
-              </button>
-              <button class="al-action-btn al-action-btn--danger"
-                [disabled]="deletingId === assistant.id"
-                (click)="confirmDelete(assistant.id, $event)"
-                title="Eliminar">
-                <span class="material-symbols-outlined icon-sm">delete</span>
-              </button>
+              @if (isAdmin) {
+                <button class="al-action-btn" (click)="goToEdit(assistant.id, $event)" title="Editar">
+                  <span class="material-symbols-outlined icon-sm">edit</span>
+                </button>
+                <button class="al-action-btn al-action-btn--danger"
+                  [disabled]="deletingId === assistant.id"
+                  (click)="confirmDelete(assistant.id, $event)"
+                  title="Eliminar">
+                  <span class="material-symbols-outlined icon-sm">delete</span>
+                </button>
+              }
             }
           </div>
 

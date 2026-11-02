@@ -201,15 +201,18 @@
                   <span class="doc-category-empty">Sin categoría</span>
                 }
 
-                <button
-                  class="doc-category-edit"
-                  [class.doc-category-edit--active]="categoryPickerDocId === doc.id"
-                  [disabled]="categoryActionIds.has(doc.id)"
-                  (click)="toggleCategoryPicker(doc.id, $event)"
-                  title="Cambiar categoría"
-                >
-                  <span class="material-symbols-outlined icon-sm">edit</span>
-                </button>
+                <!-- Solo quien lo subió o un admin (el backend responde 403 si no). -->
+                @if (canManage(doc)) {
+                  <button
+                    class="doc-category-edit"
+                    [class.doc-category-edit--active]="categoryPickerDocId === doc.id"
+                    [disabled]="categoryActionIds.has(doc.id)"
+                    (click)="toggleCategoryPicker(doc.id, $event)"
+                    title="Cambiar categoría"
+                  >
+                    <span class="material-symbols-outlined icon-sm">edit</span>
+                  </button>
+                }
 
                 @if (categoryPickerDocId === doc.id) {
                   <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
@@ -293,14 +296,16 @@
                     <span class="material-symbols-outlined icon-sm">download</span>
                   </button>
                 }
-                <button
-                  class="doc-action-btn doc-action-delete"
-                  [disabled]="deletingIds.has(doc.id)"
-                  title="Eliminar documento"
-                  (click)="confirmDelete(doc.id)"
-                >
-                  <span class="material-symbols-outlined icon-sm">delete</span>
-                </button>
+                @if (canManage(doc)) {
+                  <button
+                    class="doc-action-btn doc-action-delete"
+                    [disabled]="deletingIds.has(doc.id)"
+                    title="Eliminar documento"
+                    (click)="confirmDelete(doc.id)"
+                  >
+                    <span class="material-symbols-outlined icon-sm">delete</span>
+                  </button>
+                }
               }
             </div>
           </div>

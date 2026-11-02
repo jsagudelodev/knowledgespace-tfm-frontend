@@ -8,6 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NotificationsService } from '../../services/notifications.service';
 import { AppNotification, NotificationCounts } from '../../../../core/models/notification.model';
 import { notificationAction, notificationIcon, relativeTime } from '../../notification-display.util';
+import { AuthService } from '../../../../core/services/auth.service';
 
 export type FilterMode = 'all' | 'unread' | 'documents' | 'budget' | 'knowledge_gap';
 
@@ -44,7 +45,12 @@ export class NotificationListComponent implements OnInit {
   private readonly svc        = inject(NotificationsService);
   private readonly router     = inject(Router);
 
-  readonly chips        = CHIPS;
+  // Presupuesto y Preguntas sin respuesta son avisos de administración: a un
+  // usuario normal nunca le llegan, así que sus chips estarían siempre a 0.
+  readonly isAdmin      = inject(AuthService).isAdmin();
+  readonly chips        = this.isAdmin
+    ? CHIPS
+    : CHIPS.filter(c => c.mode !== 'budget' && c.mode !== 'knowledge_gap');
   readonly skeletonRows = [1, 2, 3, 4, 5, 6, 7];
 
   readonly filter        = signal<FilterMode>('all');
