@@ -117,6 +117,10 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
     'No fue útil',
   ];
   readonly assistants = signal<Assistant[]>([]);
+  /** Asistente con el que se habló en la conversación abierta (el del último
+   * mensaje que lo guarda). Sin esto, al reabrir una conversación se elegía el
+   * primero de la lista y seguir escribiendo preguntaba a otro asistente. */
+  private readonly asistenteDeLaConversacion = signal<number | null>(null);
   readonly selectedAssistant = signal<Assistant | null>(null);
   readonly assistantId = signal<number | undefined>(undefined);
 
@@ -246,6 +250,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
           next: ({ conversation, messages }) => {
             this.conversation.set(conversation);
             this.messages.set(messages);
+            this.recordarAsistente(messages);
             this.loading.set(false);
             this.currentPage.set(this.totalPages());
             this.restoreFeedbackState(messages.map((m) => m.id));
@@ -312,9 +317,11 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
         next: (all) => {
           const active = all.filter((a) => a.is_active);
           this.assistants.set(active);
-          // Al recargar se conserva el asistente elegido si sigue activo.
+          // Prioridad: el de la conversación abierta, luego el ya elegido (al
+          // recargar la lista), luego el primero.
+          const deLaConversacion = active.find((a) => a.id === this.asistenteDeLaConversacion());
           const keep = active.find((a) => a.id === this.selectedAssistant()?.id);
-          const chosen = keep ?? active[0];
+          const chosen = deLaConversacion ?? keep ?? active[0];
           if (chosen) {
             this.selectedAssistant.set(chosen);
             this.assistantId.set(chosen.id);
@@ -322,6 +329,17 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
         },
         error: () => {},
       });
+  }
+
+  /** Selecciona el asistente de la conversación recién cargada. Los asistentes
+   * pueden llegar antes o después que los mensajes: si aún no están,
+   * `loadAssistants` lo aplica al llegar. */
+  private recordarAsistente(messages: Message[]): void {
+    const ultimo = [...messages].reverse().find((m) => m.assistant_id != null);
+    const id = ultimo?.assistant_id ?? null;
+    this.asistenteDeLaConversacion.set(id);
+    const asistente = this.assistants().find((a) => a.id === id);
+    if (asistente) this.selectAssistant(asistente);
   }
 
   selectAssistant(assistant: Assistant): void {
@@ -821,6 +839,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
         next: ({ conversation, messages }) => {
           this.conversation.set(conversation);
           this.messages.set(messages);
+          this.recordarAsistente(messages);
           this.loading.set(false);
           this.currentPage.set(this.totalPages());
           this.restoreFeedbackState(messages.map((m) => m.id));

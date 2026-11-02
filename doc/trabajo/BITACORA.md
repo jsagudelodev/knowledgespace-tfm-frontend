@@ -68,8 +68,14 @@ notificaciones → exportar CSV. CRUD completo de categoría, empresa y usuario
   pregunta como alias y se verifica con esa misma pregunta. No prueba que el
   documento responda.
 - La #2 "resuelta" en junio da 0.00 al reverificar: su vector ya no está.
-- Los mensajes no guardan su asistente: calificar en una conversación
-  reabierta atribuye el feedback al asistente seleccionado, no al que respondió.
+- ✅ Resuelto el mismo día: los mensajes no guardaban su asistente y calificar
+  en una conversación reabierta atribuía el feedback al seleccionado en
+  pantalla. Migración `a1c3f5e7b902` (`messages.assistant_id`, NULL permitido,
+  `ON DELETE SET NULL`), aplicada con permiso del autor; el feedback toma el
+  asistente del mensaje (solo si es de la propia empresa) y el chat selecciona
+  el de la conversación al reabrirla. Tests: `test_feedback_asistente_del_mensaje.py`,
+  `test_chat_router_stream.py`, `chat-detail.asistente.spec.ts` (sabotaje
+  verificado). Backend 222 tests, frontend 55.
 - El texto indexado de un .txt mostró "12. 500 pesos" (espacio dentro de la
   cifra) — pendiente de investigar en la extracción.
 - Los avisos de herramienta de edición escribieron `` y `﻿` como

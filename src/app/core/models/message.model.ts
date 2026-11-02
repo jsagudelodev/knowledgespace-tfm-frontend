@@ -22,6 +22,8 @@ export interface Message {
   sources?: Source[];
   token_count?: number;
   cost_usd?: number;
+  /** Asistente que respondió. null en los mensajes anteriores al 2026-11-02. */
+  assistant_id?: number | null;
   created_at: string;
   /** true mientras un mensaje del asistente se está escribiendo por streaming
    * (`ChatService.sendMessageStream`). No existe en mensajes ya guardados —

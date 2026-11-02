@@ -270,7 +270,7 @@ Resumen de lo no implementado aún:
     los pinta se conserva pero no se muestra porque los datos nunca llegan.
 - **Presupuesto/Uso**: configuración de límite mensual de gasto y alertas al 80%/100% — no implementado (el tipo de notificación `budget_*` ya existe en el modelo, a la espera del módulo).
 - **Límites de empresa** (`max_users`, `max_documents`, `monthly_message_limit`): se guardan pero no se hacen cumplir; el formulario de Empresas lo dice (2026-11-01).
-- **Conversaciones sin asistente guardado**: el asistente se elige mensaje a mensaje y no se persiste; al reabrir una conversación se selecciona el primero activo.
+- ✅ **Asistente guardado en cada mensaje** (2026-11-02, migración `a1c3f5e7b902`): al reabrir una conversación se selecciona el asistente del último mensaje, y el feedback se atribuye al asistente que respondió, no al seleccionado en pantalla. Los mensajes anteriores quedan sin asistente (NULL) y se comportan como antes.
 - ✅ **Empresas — selector de contexto** (2026-10-25): resuelto, ver sección 3. Queda pendiente extender `X-Company-Context` a más módulos que Documentos y Asistentes, si hace falta.
 - **Widgets**: retirado de esta entrega — ver sección 9 y `ALCANCE_TFM.md`.
 - ✅ **404** (2026-10-22): `shared/pages/not-found/`, reutiliza `EmptyStateComponent`. La ruta comodín (`**`) redirige a `/not-found` en vez de a `/auth/login` — antes era indistinguible de una sesión expirada.
