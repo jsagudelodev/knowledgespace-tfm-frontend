@@ -26,11 +26,6 @@ export const routes: Routes = [
     loadChildren: () => import('./features/users/users.routes').then(m => m.USERS_ROUTES)
   },
   {
-    path: 'tags',
-    canActivate: [authGuard],
-    loadChildren: () => import('./features/tags/tags.routes').then(m => m.TAGS_ROUTES)
-  },
-  {
     path: 'categories',
     canActivate: [authGuard],
     loadChildren: () => import('./features/categories/categories.routes').then(m => m.CATEGORIES_ROUTES)
