@@ -26,7 +26,8 @@ export function notificationAction(n: AppNotification): NotificationAction | nul
   const type = n.notification_type.name;
   const id   = n.entity_id;
 
-  // Un admin pidió un documento a este usuario: lo lleva a subirlo.
+  // "Pedir documento" se retiró el 2026-11-03 y ya no se emiten; se conserva
+  // para que los avisos ya creados sigan llevando a subir el documento.
   if (type === 'document_requested') {
     return { text: 'Subir documento', commands: ['/documents/upload'] };
   }

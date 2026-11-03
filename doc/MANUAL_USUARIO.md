@@ -183,14 +183,19 @@ el documento.
 
 ![Preguntas sin respuesta](capturas/12-preguntas-sin-respuesta.jpg)
 
-Para resolver una pregunta hay cuatro opciones:
+La lista se ordena por **Más recientes** (opción por defecto) o por **Más
+consultadas**.
+
+Para resolver una pregunta hay tres opciones:
 
 | Opción | Cuándo usarla |
 |---|---|
 | **Vincular documento** | El documento ya está subido; se elige entre los candidatos que propone el sistema y se vuelve a indexar |
 | **Escribir respuesta** | La respuesta no está en ningún documento; se escribe directamente y se indexa |
-| **Pedir documento** | Hace falta un documento que todavía no existe; se asigna a un responsable y la pregunta pasa a «en curso» |
 | **Ignorar** | No merece resolverse; hay que elegir el motivo: fuera de alcance, puntual o duplicada |
+
+Si la respuesta debería estar en un documento que todavía no existe, se sube
+desde **Documentos** y después se vincula.
 
 Al resolverla, el sistema **verifica** la solución: vuelve a lanzar la pregunta
 contra el índice y compara la puntuación de antes y de después.

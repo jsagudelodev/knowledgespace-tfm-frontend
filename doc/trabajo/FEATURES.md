@@ -1,6 +1,6 @@
 # FEATURES.md
 
-Documento de funcionalidades implementadas en KnowledgeSpace Frontend, a la fecha del 2026-11-01.
+Documento de funcionalidades implementadas en KnowledgeSpace Frontend, a la fecha del 2026-11-03.
 
 ## Descripción general del producto
 
@@ -226,7 +226,7 @@ Diseño high-fidelity conforme al handoff: `max-width: 1000px`, `padding: 28px 2
 - **Autenticación JWT** con interceptor HTTP que inyecta el `Bearer token` automáticamente, validación de expiración en cliente y logout que limpia la sesión.
 - **Multi-tenant con roles jerárquicos** (`superadmin` > `admin` > `user`), condicionando qué acciones ve cada usuario en la UI.
 - **Permisos por rol** (2026-11-02; el backend los exige con 403, la UI solo oculta):
-  - `user`: chat, calificar, Mi perfil, Dashboard y Notificaciones; ver Documentos, Categorías y Asistentes; **subir documentos** y borrar o recategorizar **los suyos** (`AuthService.canManageDocument`). Recibe "Te pidieron un documento" cuando un admin se lo asigna desde Preguntas sin respuesta, con acceso directo a Subir documento.
+  - `user`: chat, calificar, Mi perfil, Dashboard y Notificaciones; ver Documentos, Categorías y Asistentes; **subir documentos** y borrar o recategorizar **los suyos** (`AuthService.canManageDocument`).
   - `admin` / `superadmin`, además: crear, editar y borrar asistentes y categorías; gestionar documentos ajenos; Feedback IA y Preguntas sin respuesta (ocultos del menú y con `adminGuard` para el resto), y Usuarios de su empresa.
   - Solo `superadmin`: **Empresas** (`superadminGuard`; el backend exige superadmin en todo `/companies` salvo `/me`). Antes un admin de empresa veía el menú y entraba a una pantalla que solo recibía 403.
   - Antes la cuenta de demo de rol `user` podía borrar cualquier documento, borrar asistentes o indexar respuestas escritas a mano.
@@ -244,12 +244,14 @@ Diseño high-fidelity conforme al handoff: `max-width: 1000px`, `padding: 28px 2
 Resumen de lo no implementado aún:
 
 - ✅ **Auth — edición de perfil propio** (2026-10-25): resuelto, ver sección 1b.
-- **Auth — registro público**: sigue sin existir como ruta ni como página. El
-  backend lo tiene completo (`POST /v1/auth/register`), pero no se conecta a
-  propósito: sin un módulo de presupuesto/límites de gasto (ver `ALCANCE_TFM.md`,
-  declarado fuera de alcance), abrir el registro a cualquiera dispararía
-  llamadas reales a OpenAI sin control de cuota. No es trabajo pendiente, es
-  una decisión de alcance ligada a esa misma limitación.
+- **Auth — registro público**: no existe ni como página ni en el backend. El
+  frontend nunca lo conectó: sin un módulo de presupuesto/límites de gasto (ver
+  `ALCANCE_TFM.md`, declarado fuera de alcance), abrir el registro a cualquiera
+  dispararía llamadas reales a OpenAI sin control de cuota. El 2026-11-02 se
+  eliminó también `POST /v1/auth/register` del backend: era público y tomaba
+  `company_id` del cuerpo, así que permitía darse de alta en una empresa ajena.
+  Los usuarios los crea un administrador desde Usuarios. No es trabajo
+  pendiente, es una decisión de alcance.
   El login conservaba un método `goToRegister()` que apuntaba a una ruta
   inexistente, sin que ninguna plantilla lo invocara; se retiró.
 - **Conversaciones (vista admin)**: listado/detalle administrativo de conversaciones (distinto del Chat IA de la sección 10) — no implementado.
@@ -261,6 +263,17 @@ Resumen de lo no implementado aún:
   respuesta") como las notificaciones (sección 12, tipos
   `knowledge_gap_found` / `knowledge_gap_resolved`) generan y enlazan
   `KnowledgeGap` correctamente.
+  - ✅ **Retirado "Pedir documento"** (2026-11-03): asignaba la pregunta a una
+    persona y la dejaba "en curso" sin resolverla, y junto a "Vincular
+    documento" confundía. Quedan dos vías: **Vincular documento** y **Escribir
+    respuesta** (más **Ignorar**). En cada fila, "Pedir doc" pasa a
+    **Responder**, que abre "Escribir respuesta". Simétrico con el backend
+    (endpoint `request-document` eliminado). Las preguntas que quedaran
+    `in_progress` se tratan como abiertas; los avisos `document_requested` ya
+    creados siguen llevando a Subir documento.
+  - ✅ **Orden** (2026-11-03): **Más recientes** por defecto y **Más
+    consultadas** (antes "Impacto"); se quitó "Antigüedad", que mostraba primero
+    las más viejas.
   - ✅ **Reincidencia real** (2026-11-01): la píldora "reincidente" nunca
     aparecía porque `recurrence_count` no se escribía en ningún sitio. Ahora,
     si una pregunta ya **resuelta** vuelve a llegar como fallo, el gap nuevo

@@ -14,8 +14,8 @@ export type GapStatus = 'open' | 'in_progress' | 'resolved' | 'ignored';
 export type GapType   = 'hard' | 'soft';
 export type GapTrend  = 'rising' | 'stable' | 'declining';
 export type GapTab    = 'open' | 'resolved' | 'ignored';
-export type GapSort   = 'impact' | 'age';
-export type ResMode   = 'link' | 'answer' | 'request';
+export type GapSort   = 'recent' | 'impact';
+export type ResMode   = 'link' | 'answer';
 export type IgnoreReason = 'out_of_scope' | 'one_off' | 'duplicate';
 
 export interface KnowledgeGap {
@@ -64,7 +64,6 @@ export interface KnowledgeGap {
   // Enriched
   assistant_name: string | null;
   resolved_document_name: string | null;
-  assignee_name: string | null;
 }
 
 export interface KnowledgeGapSummary {

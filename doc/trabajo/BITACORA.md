@@ -19,6 +19,39 @@ Formato de cada entrada:
 
 ---
 
+## 2026-11-03 — Preguntas sin respuesta: se retira "Pedir documento"
+
+**Hecho:**
+- Retirado "Pedir documento" de Preguntas sin respuesta, en los dos repos. En
+  el frontend: la pestaña, el selector de responsable, la nota, la píldora "en
+  curso" y `requestDocument()` del servicio. En el backend: el endpoint
+  `request-document`, el aviso `document_requested` y su siembra.
+- Se mantienen **Vincular documento** y **Escribir respuesta**. En la fila,
+  "Pedir doc" pasa a **Responder**, que abre "Escribir respuesta". Sin
+  candidatos, el panel abre en "Escribir respuesta".
+- Orden: **Más recientes** por defecto y **Más consultadas** como segunda
+  opción; se quitó "Antigüedad". El backend acepta `sort=recent|impact`.
+- Pie de lista: "15 preguntas en abiertas" → "15 preguntas abiertas".
+- Manual de usuario, `FEATURES.md` y `ALCANCE_TFM.md` del backend
+  actualizados. `FEATURES.md` decía además que el backend tenía el registro
+  público completo; ya no existe desde el 2026-11-02, y se corrigió.
+- Verificado: frontend 61 tests, lint y build en verde; backend 247 tests.
+
+**Decisiones / notas:**
+- Motivo: el administrador resuelve respondiendo o con un documento; pedírselo
+  a otra persona no resolvía nada y se confundía con "Vincular documento".
+- Se conservan las columnas `assigned_to`/`requested_at`/`due_at` y la migración
+  `b7d2e4f6a813` (aplicada en producción). Una pregunta `in_progress` se trata
+  como abierta, para que no quede atascada.
+- La memoria del TFM no mencionaba "Pedir documento": no hay que tocarla por
+  esto, salvo el número de tests del 6.1 al cerrar el código.
+
+**Pendiente para después:**
+- Volver a actualizar el número de tests del apartado 6.1 de la memoria cuando
+  se congele el código.
+
+---
+
 ## 2026-11-02 — Prueba de cada botón con datos "[PRUEBA TFM]" (crear, editar, borrar)
 
 **Bugs reales encontrados y corregidos:**

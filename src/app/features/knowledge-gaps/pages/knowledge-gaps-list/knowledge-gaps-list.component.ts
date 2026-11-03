@@ -6,10 +6,7 @@ import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 import { KnowledgeGapsService } from '../../services/knowledge-gaps.service';
-import { UserService } from '../../../users/services/user.service';
-import { AuthService } from '../../../../core/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { User } from '../../../../core/models/user.model';
 import {
   KnowledgeGap,
   KnowledgeGapSummary,
@@ -28,8 +25,6 @@ import {
 })
 export class KnowledgeGapsListComponent implements OnInit {
   private readonly svc        = inject(KnowledgeGapsService);
-  private readonly userSvc    = inject(UserService);
-  private readonly auth       = inject(AuthService);
   private readonly route      = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toast      = inject(NotificationService);
@@ -37,7 +32,7 @@ export class KnowledgeGapsListComponent implements OnInit {
 
   // ── UI state ──────────────────────────────────────────────────────────────
   gapTab       = signal<GapTab>('open');
-  gapSort      = signal<GapSort>('impact');
+  gapSort      = signal<GapSort>('recent');
   gapQuery     = signal('');
   selectedId   = signal<number | null>(null);
   resMode      = signal<ResMode>('link');
@@ -46,14 +41,12 @@ export class KnowledgeGapsListComponent implements OnInit {
   ignoring     = signal(false);
   ignoreReason = signal<IgnoreReason>('out_of_scope');
   submitting   = signal(false);
-  assigneeId   = signal<number | null>(null);
 
   // ── Data ──────────────────────────────────────────────────────────────────
   private readonly pageSize = 25;
 
   gaps        = signal<KnowledgeGap[]>([]);
   summary     = signal<KnowledgeGapSummary | null>(null);
-  assignees   = signal<User[]>([]);
   loading     = signal(false);
   loadingMore = signal(false);
   hasMore     = signal(false);
@@ -61,7 +54,6 @@ export class KnowledgeGapsListComponent implements OnInit {
 
   // ── Form fields (not signals — bound via ngModel) ─────────────────────────
   answerText  = '';
-  requestNote = '';
 
   // ── Computed ──────────────────────────────────────────────────────────────
   selectedGap = computed(() => this.gaps().find(g => g.id === this.selectedId()) ?? null);
@@ -82,7 +74,6 @@ export class KnowledgeGapsListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSummary();
-    this.loadAssignees();
 
     const idParam = this.route.snapshot.paramMap.get('id');
     const deepLinkId = idParam ? Number(idParam) : null;
@@ -114,21 +105,6 @@ export class KnowledgeGapsListComponent implements OnInit {
   private loadSummary(): void {
     this.svc.getSummary().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: s => this.summary.set(s),
-    });
-  }
-
-  private loadAssignees(): void {
-    // `GET /users` es solo para administradores. Pedirla con un usuario normal
-    // devolvía 403 y el interceptor mostraba "No tienes permiso" al abrir la
-    // página. Un usuario normal puede pedir un documento, pero solo asignándoselo
-    // a sí mismo: no puede ver al resto de usuarios de la empresa.
-    const yo = this.auth.getCurrentUserValue();
-    if (yo && yo.role !== 'admin' && yo.role !== 'superadmin') {
-      this.assignees.set([yo]);
-      return;
-    }
-    this.userSvc.getUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: list => this.assignees.set(list),
     });
   }
 
@@ -219,11 +195,9 @@ export class KnowledgeGapsListComponent implements OnInit {
     this.showModes.set(false);
     this.ignoring.set(false);
     this.answerText  = '';
-    this.requestNote = '';
     this.linkSel.set(0);
-    this.assigneeId.set(null);
     const hasCandidates = !!(gap.candidates?.length);
-    this.resMode.set(hasCandidates ? 'link' : 'request');
+    this.resMode.set(hasCandidates ? 'link' : 'answer');
   }
 
   setTab(tab: GapTab): void {
@@ -329,15 +303,13 @@ export class KnowledgeGapsListComponent implements OnInit {
     const label = tab === 'open' ? 'abiertas' : tab === 'resolved' ? 'resueltas' : 'ignoradas';
     const query = this.gapQuery();
     const total = query ? this.gaps().length : this.tabCount(tab);
-    return `${total} preguntas en ${label}${query ? ' que coinciden con la búsqueda' : ''}`;
+    return `${total} preguntas ${label}${query ? ' que coinciden con la búsqueda' : ''}`;
   }
 
+  // `in_progress` venía de "Pedir documento", retirado: las que quedaran así se
+  // tratan como abiertas para que se puedan resolver.
   isOpen(gap: KnowledgeGap): boolean {
     return gap.status === 'open' || gap.status === 'in_progress';
-  }
-
-  isInProgress(gap: KnowledgeGap): boolean {
-    return gap.status === 'in_progress';
   }
 
   isRecurrent(gap: KnowledgeGap): boolean {
@@ -353,7 +325,7 @@ export class KnowledgeGapsListComponent implements OnInit {
       const name = gap.candidates![0].name;
       return `Recomendado: "${name}" pasa el umbral de relevancia. Si responde la pregunta, vincúlalo y se indexará con ella.`;
     }
-    return 'Recomendado: ningún documento pasa el umbral. Pide el documento a quien lo tenga.';
+    return 'Ningún documento pasa el umbral. Escribe la respuesta, o sube un documento que la contenga.';
   }
 
   variantTop3(gap: KnowledgeGap) {
@@ -380,11 +352,10 @@ export class KnowledgeGapsListComponent implements OnInit {
       });
   }
 
-  openRequestPanel(gap: KnowledgeGap, event: Event): void {
+  openAnswerPanel(gap: KnowledgeGap, event: Event): void {
     event.stopPropagation();
-    this.selectedId.set(gap.id);
-    this.resMode.set('request');
-    this.showModes.set(false);
+    this.selectGap(gap);
+    this.resMode.set('answer');
   }
 
   // ── Panel resolution actions ──────────────────────────────────────────────
@@ -441,25 +412,6 @@ export class KnowledgeGapsListComponent implements OnInit {
           this.advanceToNext(gap.id);
         },
         error: () => this.fallo('No se pudo guardar la respuesta.'),
-      });
-  }
-
-  doRequestDocument(): void {
-    const gap = this.selectedGap();
-    const assigneeId = this.assigneeId();
-    if (!gap || !assigneeId) return;
-    this.submitting.set(true);
-    this.svc.requestDocument(gap.id, { assignee_id: assigneeId, note: this.requestNote || undefined })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: updated => {
-          this.patchInList(updated);
-          this.submitting.set(false);
-          this.requestNote = '';
-          this.toast.success(`Documento solicitado para la #${updated.id}.`);
-          this.selectGap(updated);
-        },
-        error: () => this.fallo('No se pudo solicitar el documento.'),
       });
   }
 

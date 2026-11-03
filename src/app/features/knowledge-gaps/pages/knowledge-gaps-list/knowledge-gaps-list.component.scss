@@ -41,10 +41,6 @@ $c-recur-2:      #9f5060;
 $c-recur-bg:     #fff1f2;
 $c-recur-brd:    #fecdd3;
 
-$c-inprog:       #1e40af;
-$c-inprog-brd:   #dbe6fe;
-$c-inprog-bg:    #eff6ff;
-
 $c-btn-dark:     #344054;
 $c-btn-dark-hov: #1f2937;
 
@@ -364,7 +360,6 @@ $shadow-seg:     0 1px 2px rgba(16, 24, 40, 0.08);
 
   &--hard      { background: $c-error-bg;  color: $c-error; }
   &--soft      { background: $c-warn-bg;   color: $c-warn; }
-  &--inprogress { background: $c-inprog-bg; color: $c-inprog; }
   &--recurrent  { background: $c-recur-bg;  color: $c-recur; }
 
   &--priority {
@@ -506,12 +501,6 @@ $shadow-seg:     0 1px 2px rgba(16, 24, 40, 0.08);
   padding: 9px 12px;
   border-radius: 9px;
   font-size: 12px;
-
-  &--inprogress {
-    background: $c-inprog-bg;
-    border: 1px solid $c-inprog-brd;
-    color: $c-inprog;
-  }
 
   &--recurrent {
     background: $c-recur-bg;
@@ -726,26 +715,6 @@ $shadow-seg:     0 1px 2px rgba(16, 24, 40, 0.08);
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
-}
-
-// Selector de responsable (modo pedir documento)
-.assignee-select {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  padding: 9px 12px;
-  margin-bottom: 8px;
-  border: 1px solid $c-border-sec;
-  border-radius: 9px;
-  font-size: 12.5px;
-  font-family: inherit;
-  color: $c-title;
-  background: $c-surface;
-  outline: none;
-  box-sizing: border-box;
-  transition: border-color 0.15s;
-
-  &:focus { border-color: $c-primary; }
 }
 
 // Textarea

@@ -60,10 +60,10 @@
     <div class="sort-control">
       <span class="sort-label">Ordenar por</span>
       <div class="sort-seg">
+        <button class="sort-opt" [class.sort-opt--active]="gapSort() === 'recent'"
+                (click)="setSort('recent')" type="button">Más recientes</button>
         <button class="sort-opt" [class.sort-opt--active]="gapSort() === 'impact'"
-                (click)="setSort('impact')" type="button">Impacto</button>
-        <button class="sort-opt" [class.sort-opt--active]="gapSort() === 'age'"
-                (click)="setSort('age')" type="button">Antigüedad</button>
+                (click)="setSort('impact')" type="button">Más consultadas</button>
       </div>
     </div>
   </div>
@@ -121,9 +121,6 @@
                     <span class="pill" [class.pill--hard]="gap.gap_type === 'hard'" [class.pill--soft]="gap.gap_type === 'soft'">
                       {{ gapTypeLabel(gap) }}
                     </span>
-                    @if (isInProgress(gap)) {
-                      <span class="pill pill--inprogress">en curso</span>
-                    }
                     @if (isRecurrent(gap)) {
                       <span class="pill pill--recurrent">reincidente</span>
                     }
@@ -150,11 +147,11 @@
                         [class.pill--prio-low]="priorityOf(gap) === 'baja'">
                     prioridad {{ priorityOf(gap) }}
                   </span>
-                  @if (gapTab() === 'open' && !isInProgress(gap)) {
+                  @if (gapTab() === 'open') {
                     @if (hasCandidates(gap)) {
                       <button class="quick-action" (click)="quickLink(gap, $event)" type="button">Vincular</button>
                     } @else {
-                      <button class="quick-action" (click)="openRequestPanel(gap, $event)" type="button">Pedir doc</button>
+                      <button class="quick-action" (click)="openAnswerPanel(gap, $event)" type="button">Responder</button>
                     }
                   }
                 </div>
@@ -203,13 +200,6 @@
                 <a [routerLink]="['/chat', gap.conversation_id]" class="panel-link">Ver conversación</a>
               }
             </div>
-
-            @if (isInProgress(gap)) {
-              <div class="panel-badge panel-badge--inprogress">
-                <span class="badge-dot badge-dot--blue"></span>
-                Documento solicitado&nbsp;&mdash;&nbsp;pendiente de recibir
-              </div>
-            }
 
             @if (isRecurrent(gap)) {
               <div class="panel-badge panel-badge--recurrent">
@@ -267,8 +257,6 @@
                           (click)="resMode.set('link')" type="button">Vincular documento</button>
                   <button class="mode-opt" [class.mode-opt--active]="resMode() === 'answer'"
                           (click)="resMode.set('answer')" type="button">Escribir respuesta</button>
-                  <button class="mode-opt" [class.mode-opt--active]="resMode() === 'request'"
-                          (click)="resMode.set('request')" type="button">Pedir documento</button>
                 </div>
               }
 
@@ -322,36 +310,6 @@
                     </button>
                     <button class="btn-secondary" (click)="ignoring.set(true)" type="button">Ignorar</button>
                   </div>
-                </div>
-              }
-
-              <!-- ── Modo: Pedir documento ── -->
-              @if (resMode() === 'request') {
-                <div class="request-mode">
-                  <select
-                    class="assignee-select"
-                    [ngModel]="assigneeId()"
-                    (ngModelChange)="assigneeId.set($event)"
-                  >
-                    <option [ngValue]="null" disabled>Selecciona un responsable</option>
-                    @for (u of assignees(); track u.id) {
-                      <option [ngValue]="u.id">{{ u.full_name }}</option>
-                    }
-                  </select>
-                  <textarea
-                    class="res-textarea"
-                    [(ngModel)]="requestNote"
-                    placeholder="Nota para el responsable (opcional)..."
-                    rows="3"
-                  ></textarea>
-                  <div class="res-actions">
-                    <button class="btn-primary" [disabled]="submitting() || !assigneeId()"
-                            (click)="doRequestDocument()" type="button">
-                      {{ submitting() ? 'Solicitando...' : 'Solicitar documento' }}
-                    </button>
-                    <button class="btn-secondary" (click)="ignoring.set(true)" type="button">Ignorar</button>
-                  </div>
-                  <p class="res-note">No resuelve la pregunta: la deja en curso hasta que llegue el documento.</p>
                 </div>
               }
 

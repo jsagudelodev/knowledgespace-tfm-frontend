@@ -45,10 +45,6 @@ export class KnowledgeGapsService {
     return this.api.post<KnowledgeGap>(`${this.base}/${id}/answer`, body);
   }
 
-  requestDocument(id: number, body: { assignee_id?: number; note?: string; due_days?: number }): Observable<KnowledgeGap> {
-    return this.api.post<KnowledgeGap>(`${this.base}/${id}/request-document`, body);
-  }
-
   ignore(id: number, body: { reason: string }): Observable<KnowledgeGap> {
     return this.api.post<KnowledgeGap>(`${this.base}/${id}/ignore`, body);
   }
