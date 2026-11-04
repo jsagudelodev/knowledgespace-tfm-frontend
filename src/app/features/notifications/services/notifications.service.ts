@@ -47,4 +47,16 @@ export class NotificationsService {
       tap(() => this._unreadCount.set(0)),
     );
   }
+
+  /** Borra una notificación propia; si no estaba leída, descuenta del contador. */
+  delete(n: AppNotification): Observable<void> {
+    return this.api.delete<void>(`${this.basePath}/${n.id}`).pipe(
+      tap(() => { if (!n.read) this._unreadCount.update(c => Math.max(0, c - 1)); }),
+    );
+  }
+
+  /** Borra las ya leídas: no cambia el contador de no leídas. */
+  deleteRead(): Observable<{ deleted: number }> {
+    return this.api.delete<{ deleted: number }>(`${this.basePath}/read`);
+  }
 }

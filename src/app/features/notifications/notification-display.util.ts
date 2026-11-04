@@ -59,6 +59,29 @@ export function notificationAction(n: AppNotification): NotificationAction | nul
   return null;
 }
 
+// La app dice "Preguntas sin respuesta" en todas partes, pero hasta el
+// 2026-11-03 estos avisos se titulaban "Brecha de conocimiento" / "Brecha
+// resuelta". El backend ya los crea con el título nuevo; esto cubre los antiguos.
+const TITLE_BY_TYPE: Record<string, string> = {
+  knowledge_gap_found:    'Nueva pregunta sin respuesta',
+  knowledge_gap_resolved: 'Pregunta resuelta',
+};
+
+export function notificationTitle(n: AppNotification): string {
+  return TITLE_BY_TYPE[n.notification_type.name] ?? n.title;
+}
+
+/** Los avisos de documento fallido antiguos incluían el error técnico
+ *  ("Error descargando archivo de S3: ... NoSuchKey"), que no le sirve al
+ *  usuario. Se muestra solo la parte legible. */
+export function notificationMessage(n: AppNotification): string {
+  const corte = n.message.indexOf(' no pudo procesarse:');
+  if (n.notification_type.name === 'document_failed' && corte > 0) {
+    return `${n.message.slice(0, corte)} no se pudo procesar. Puedes reintentarlo desde Documentos.`;
+  }
+  return n.message;
+}
+
 export function notificationIcon(typeName: string | undefined): string {
   return (typeName && ICON_BY_TYPE[typeName]) || 'notifications';
 }

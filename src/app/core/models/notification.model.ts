@@ -35,6 +35,7 @@ export interface NotificationListParams {
 export interface NotificationCounts {
   todas: number;
   unread: number;
+  read: number;
   documents: number;
   budget: number;
   knowledge_gap: number;

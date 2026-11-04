@@ -19,6 +19,67 @@ Formato de cada entrada:
 
 ---
 
+## 2026-11-03 — Vincular documento: un candidato por documento
+
+**Hecho:**
+- En "Vincular documento" la pregunta #33 ofrecía agentes_ia.md tres veces
+  (0,78, 0,68 y 0,54): eran tres fragmentos del mismo documento. Ahora sale una
+  vez, con su mejor fragmento.
+- Backend: `find_candidates` pide más fragmentos (`top_k * 4`) y se queda con el
+  primero de cada documento, hasta `top_k` documentos. Test:
+  `tests/test_candidatos_por_documento.py`.
+- Frontend: `candidatesOf(gap)` agrupa por documento al mostrar y al vincular,
+  porque las preguntas ya creadas guardaron los candidatos repetidos. Además la
+  lista usaba `track c.document_id` con claves repetidas. Test:
+  `knowledge-gaps-list.candidatos.spec.ts`.
+- Verificado: frontend 63 tests, lint y build en verde; backend 250 tests.
+- "Vincular y reindexar" e "Ignorar" tenían el botón pegado al candidato: 12 px
+  de separación.
+- Feedback IA: cada tarjeta muestra ahora la **pregunta** del usuario, en todas
+  las calificaciones y resaltada. Una negativa decía "No encontré información
+  sobre este tema" sin decir qué tema. El backend ya enviaba `question`; solo
+  faltaba mostrarla. La respuesta calificada sigue solo en las de ≤ 3 estrellas.
+- Feedback IA: el nombre del asistente, destacado dentro de la línea de fecha.
+- Feedback IA: lista de 10 en 10 con "Ver 10 más" (10 y no 25: cada tarjeta mide unos 200 px). Antes se pedía sin límite y
+  el backend devolvía 50: a partir del 51 la lista se cortaba sin avisar
+  mientras las tarjetas de arriba contaban todos, y el filtro por estrellas
+  filtraba solo esos 50 en el navegador. Ahora el filtro lo aplica el backend
+  (`rating`, ya existía) y el contador dice "N comentarios · mostrando M". Test:
+  `feedback-list.paginacion.spec.ts`. Frontend: 65 tests.
+- Notificaciones: "Marcar todas como leídas" quedaba atenuado pero pulsable
+  cuando ya no había nada que marcar, y no se sabía si había funcionado. Ahora
+  solo aparece si hay no leídas, dice cuántas ("Marcar 5 como leídas") y
+  desaparece al pulsarlo.
+- Notificaciones: fuera el chip "Presupuesto" (módulo fuera de alcance; su
+  único aviso, de junio, sigue en "Todas"). Subtítulo del user: decía "lo que te
+  pidan los administradores", resto de "Pedir documento".
+- Notificaciones **por usuario y con borrado**, en los dos repos. Backend: un
+  aviso para admins se crea como una copia por admin activo (antes una fila
+  compartida: marcarla leída se la quitaba a todos); `DELETE
+  /notifications/{id}` y `DELETE /notifications/read`, solo sobre lo propio;
+  migración de datos `c4e8a2f6d1b3` que reparte las filas compartidas; títulos
+  "Nueva pregunta sin respuesta" / "Pregunta resuelta" en vez de "Brecha…"; el
+  aviso de documento fallido ya no incluye el error técnico. Frontend: papelera
+  por fila, "Eliminar N leídas" con confirmación, sin la píldora que repetía el
+  título, y títulos y mensajes antiguos traducidos también en la campana.
+  Tests: backend 256 (6 nuevos con SQLite en memoria), frontend 70.
+- Corregido en el backend (`RAG_PIPELINE.md`, `PINECONE_VECTORES.md`): decían
+  que el chat cae al namespace de empresa; eso solo lo hace la búsqueda de
+  candidatos.
+
+**Decisiones / notas:**
+- No toca el RAG del chat: solo la búsqueda de candidatos de esta pantalla.
+- Probado antes por el autor, con datos reales, el ciclo completo: "que es un
+  agente?" sin respuesta en EBIS → feedback → pregunta sin respuesta → respuesta
+  escrita → EBIS responde citando "Respuesta directa" (0,73). En Demo responde
+  con agentes_ia.md: cada asistente ve solo su conocimiento.
+
+**Pendiente para después:**
+- Propuestas sin decidir: mostrar en el panel a qué asistente se añade la
+  respuesta, y ocultar el recuadro "·" de fragmento en las respuestas directas.
+
+---
+
 ## 2026-11-03 — Preguntas sin respuesta: se retira "Pedir documento"
 
 **Hecho:**

@@ -339,6 +339,22 @@
   }
 }
 
+.load-more {
+  width: 100%;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #e8eaee;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2563eb;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { background: #f8fafc; }
+  &:disabled { color: #98a2b3; cursor: default; }
+}
+
 .fb-empty {
   padding: 46px 20px;
   text-align: center;
@@ -515,6 +531,15 @@
   color: #b6bcc7;
 }
 
+// El asistente se perdía entre la fecha y la conversación: se destaca para
+// saber de un vistazo de cuál viene la calificación.
+.comment-meta-assistant {
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #57657a;
+}
+
 .comment-text {
   margin: 0;
   font-size: 13.5px;
@@ -532,6 +557,10 @@
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: #98a2b3;
+
+  &--after {
+    margin-top: 10px;
+  }
 }
 
 .answer-text {
@@ -540,6 +569,13 @@
   line-height: 1.55;
   color: #475467;
   text-wrap: pretty;
+
+  // La pregunta es lo primero que hay que leer para entender la calificación.
+  &--question {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #1e293b;
+  }
 }
 
 .answer-meta {

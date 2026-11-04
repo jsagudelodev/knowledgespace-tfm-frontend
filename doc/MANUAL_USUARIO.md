@@ -202,9 +202,15 @@ contra el índice y compara la puntuación de antes y de después.
 
 ### Notificaciones
 
-Avisos de la empresa, por ejemplo cuando un documento terminó de procesarse,
-falló o lo borró otra persona. Se filtran por tipo, se marcan como leídas al
-abrirlas y cada una lleva a lo que la originó.
+Tu bandeja de avisos, por ejemplo cuando un documento terminó de procesarse,
+falló o lo borró otra persona; los administradores reciben además las
+preguntas sin respuesta nuevas y resueltas. Cada usuario tiene la suya. Se
+filtran por tipo, se marcan como leídas al abrirlas y cada una lleva a lo que
+la originó.
+
+Para limpiar la bandeja: la papelera al final de cada aviso lo elimina, y
+**Eliminar N leídas** borra de golpe las ya leídas (pide confirmación). Las no
+leídas nunca se borran en bloque.
 
 ![Notificaciones](capturas/14-notificaciones.jpg)
 

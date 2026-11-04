@@ -170,7 +170,7 @@ Panel de análisis de la calidad de las respuestas del asistente: cómo califica
   - Skeleton de carga animado mientras llegan las stats.
 - **Columna izquierda**: *Distribución* — barras por estrella (1–5) con color por tier (verde ≥4 / ámbar =3 / rojo ≤2), clicable para filtrar la lista derecha (cambia automáticamente el modo de la columna derecha a "Comentarios" si estaba en "Temas").
 - **Columna derecha**, con selector de modo (segmentado Comentarios / Temas):
-  - *Modo Comentarios*: tarjetas de feedback — identidad del usuario (o "Anónimo · widget" para feedback de widget embebido), estrellas, fecha, asistente, `# conversación`, comentario; pill "Obsoleto" y aviso `stale-notice` cuando la fuente de la respuesta se reindexó después (`status === 'stale'`); bloque de "Respuesta calificada" (con fuentes y score RAG) visible solo si el rating es ≤ 3; barra de acciones ("Ver conversación" → `[routerLink]`, "Enviar a preguntas sin respuesta" si rating ≤ 2, pill de estado o de brecha vinculada "Pregunta #N abierta/resuelta").
+  - *Modo Comentarios*: tarjetas de feedback — identidad del usuario (o "Anónimo · widget" para feedback de widget embebido), estrellas, fecha, asistente, `# conversación`, comentario; pill "Obsoleto" y aviso `stale-notice` cuando la fuente de la respuesta se reindexó después (`status === 'stale'`); bloque con la **pregunta** del usuario, en todas las calificaciones y resaltada (2026-11-03: antes una negativa decía "No encontré información sobre este tema" sin decir qué tema), y debajo la "Respuesta calificada" (con fuentes y score RAG), visible solo si el rating es ≤ 3; el nombre del asistente va destacado dentro de la línea de fecha; **paginación de 10 en 10** con el botón "Ver 10 más" (2026-11-03: antes se pedía sin límite, el backend cortaba en 50 sin avisar y el filtro por estrellas se aplicaba en el navegador solo sobre esos 50; ahora el filtro va al backend como `rating` y el contador muestra el total del período, "N comentarios · mostrando M"); barra de acciones ("Ver conversación" → `[routerLink]`, "Enviar a preguntas sin respuesta" si rating ≤ 2, pill de estado o de brecha vinculada "Pregunta #N abierta/resuelta").
   - *Modo Temas*: buscador sobre los temas del período, filas expandibles por tema (nombre, tendencia ↑/↓ vs período anterior, % de las quejas, volumen); al expandir: resumen semántico opcional, comentarios de muestra representativos (`ThemeSample`), acción "Enviar tema a preguntas sin respuesta" (conversión en bloque — backend pendiente) y botón "Ver los N comentarios" (aún no navega).
   - Sin avatar ni chips de temas en la columna izquierda (eliminados en v2); sin gráfico de satisfacción semanal (eliminado del layout, campo `weeks` se conserva en el modelo por compatibilidad pero no se renderiza).
 - **Modal "Enviar a preguntas sin respuesta"** (antes "Convertir en brecha"): textarea editable con la pregunta original, pre-rellenada desde el feedback individual o desde el nombre del tema; confirmar llama a `POST /v1/feedback/{id}/convert-gap` → crea `KnowledgeGap` y vincula por FK (la variante de conversión de tema en bloque solo cierra el modal — el endpoint de backend aún no existe).
@@ -180,7 +180,7 @@ Panel de análisis de la calidad de las respuestas del asistente: cómo califica
 
 ### 12. Notificaciones (`/notifications`)
 
-Bandeja de avisos internos de empresa: documentos procesados o fallidos, alertas de presupuesto y preguntas sin respuesta detectadas. Implementado el 2026-08-16 conforme al handoff de diseño (`doc/ia-handoff/design_handoff_notificaciones`).
+Bandeja **personal** de avisos: documentos procesados o fallidos y preguntas sin respuesta detectadas o resueltas. Desde el 2026-11-03 cada notificación es de un usuario: un aviso para administradores se crea como una copia por admin activo, y cada uno marca y borra lo suyo sin afectar a los demás (antes era una fila compartida y marcarla como leída se la quitaba a todos). Implementado el 2026-08-16 conforme al handoff de diseño (`doc/ia-handoff/design_handoff_notificaciones`).
 
 #### Generación de eventos (backend)
 
@@ -202,9 +202,9 @@ Cada notificación guarda `entity_type = 'document'` y `entity_id = document_id`
 
 Diseño high-fidelity conforme al handoff: `max-width: 1000px`, `padding: 28px 26px 44px`, tarjeta contenedora única sin padding con filas que llegan a los bordes.
 
-- **Chips de filtro** (5): Todas · No leídas · Documentos · Presupuesto · Sin respuesta. Los recuentos se calculan sobre el total (no sobre el filtro activo), en tipografía `IBM Plex Mono`. El backend resuelve cada categoría con una cláusula LIKE (`document%`, `budget%`, `knowledge%`) mediante el endpoint `GET /v1/notifications/counts`.
+- **Chips de filtro** (4): Todas · No leídas · Documentos · Sin respuesta. "Presupuesto" se quitó el 2026-11-03: el módulo está fuera de alcance y su único aviso es un resto de junio, que sigue visible en "Todas". Los recuentos se calculan sobre el total (no sobre el filtro activo), en tipografía `IBM Plex Mono`. El backend resuelve cada categoría con una cláusula LIKE (`document%`, `budget%`, `knowledge%`) mediante el endpoint `GET /v1/notifications/counts`.
 - **Separadores de día** internos a la tarjeta: `Hoy` / `Ayer` / `Anteriores`, fondo `#fbfcfd`, sin recalcular el estado — es derivado de `created_at`.
-- **Fila de notificación**: punto de no leída (5 × 5 px, reserva espacio aunque esté leída para evitar salto), icono de tipo (30 × 30 px, radio 8 px, color del tipo al 10% de opacidad), título + píldora de tipo, mensaje, tiempo relativo, enlace de acción específico por tipo.
+- **Fila de notificación**: punto de no leída (5 × 5 px, reserva espacio aunque esté leída para evitar salto), icono de tipo (30 × 30 px, radio 8 px, color del tipo al 10% de opacidad), título, mensaje, tiempo relativo, enlace de acción específico por tipo.
 - **Enlace de acción por tipo**:
   - `document_processed / document_failed / document_uploaded` → "Ver documento" → `/documents/:entity_id`
   - `budget_*` → "Ver costos" → `/dashboard` (hasta que exista el módulo de costos)
@@ -212,12 +212,14 @@ Diseño high-fidelity conforme al handoff: `max-width: 1000px`, `padding: 28px 2
   - `knowledge_gap_resolved` → "Revisar" → `/knowledge-gaps/:entity_id` (ruta pendiente)
   - `user_invited / user_joined` → "Ver usuarios" → `/users`
 - **Click en fila**: marca como leída (actualización optimista en cliente + `PATCH` al servidor) y navega al destino. No hay botón separado de "marcar como leída".
-- **Marcar todas como leídas**: aplica sobre el filtro activo. Si el filtro es "No leídas", la lista queda vacía tras la acción.
+- **Marcar N como leídas** (2026-11-03): solo aparece si hay no leídas y dice cuántas marca ("Marcar 5 como leídas"); al pulsarlo desaparece, y eso confirma que funcionó. Antes quedaba atenuado pero pulsable, y no se sabía si había hecho algo. Subtítulos: admin "Tus avisos de documentos y de preguntas sin respuesta."; user "Avisos sobre tus documentos." (decía "lo que te pidan los administradores", resto de "Pedir documento").
+- **Eliminar** (2026-11-03), al estilo correo: una papelera al final de cada fila (aparece al pasar el ratón o con el teclado; siempre visible en pantallas táctiles) borra esa notificación al momento; "Eliminar N leídas" en la cabecera borra las ya leídas tras confirmar. Las no leídas nunca se borran en bloque.
+- **Textos más claros** (2026-11-03): sin la píldora del tipo, que repetía el título; los avisos antiguos "Brecha de conocimiento" / "Brecha resuelta" se muestran como "Nueva pregunta sin respuesta" / "Pregunta resuelta" (`notificationTitle`), y los de documento fallido ya no enseñan el error técnico de S3 (`notificationMessage`). Lo mismo en la campana.
 - **Paginación**: "Cargar más" al pie de la tarjeta, 25 registros por página. Sin scroll interno (el scroll es el de la página).
 - **Skeleton**: 7 filas animadas (`@keyframes sk-pulse`) con la misma forma que una fila real, dentro de la tarjeta.
 - **Estado vacío / error**: dentro de la tarjeta, texto centrado. El error incluye botón "Reintentar".
 - **Tiempo relativo** (`relativeTime()` en `notification-display.util.ts`): "ahora mismo" / "hace X min" / "hace X h" / "ayer HH:mm" / "DD/MM HH:mm" a partir de 48 h. Se recalcula en cliente; no se cachea el texto.
-- **Backend consumido**: `GET /v1/notifications/` (con parámetros `read`, `type`, `skip`, `limit`), `GET /v1/notifications/counts`, `GET /v1/notifications/unread-count`, `PATCH /v1/notifications/{id}/read`, `POST /v1/notifications/read-all`.
+- **Backend consumido**: `GET /v1/notifications/` (con parámetros `read`, `type`, `skip`, `limit`), `GET /v1/notifications/counts`, `GET /v1/notifications/unread-count`, `PATCH /v1/notifications/{id}/read`, `POST /v1/notifications/read-all`, `DELETE /v1/notifications/{id}`, `DELETE /v1/notifications/read`.
 
 ---
 
@@ -274,6 +276,12 @@ Resumen de lo no implementado aún:
   - ✅ **Orden** (2026-11-03): **Más recientes** por defecto y **Más
     consultadas** (antes "Impacto"); se quitó "Antigüedad", que mostraba primero
     las más viejas.
+  - ✅ **Un candidato por documento** (2026-11-03): "Vincular documento"
+    mostraba el mismo documento repetido, uno por fragmento (agentes_ia.md tres
+    veces con 0,78, 0,68 y 0,54). El backend devuelve ahora el mejor fragmento de
+    cada documento, hasta tres documentos; el frontend agrupa también al mostrar
+    (`candidatesOf`), para las preguntas creadas antes que ya guardaron los
+    repetidos.
   - ✅ **Reincidencia real** (2026-11-01): la píldora "reincidente" nunca
     aparecía porque `recurrence_count` no se escribía en ningún sitio. Ahora,
     si una pregunta ya **resuelta** vuelve a llegar como fallo, el gap nuevo

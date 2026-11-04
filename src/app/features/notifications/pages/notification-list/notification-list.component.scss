@@ -49,7 +49,25 @@
 
   &:hover:not(:disabled) { background: #f7f8fa; }
   &:disabled             { cursor: not-allowed; }
-  &--dim                 { color: #98a2b3; }
+
+  &--danger {
+    border-color: #fecdca;
+    color: #b42318;
+    &:hover:not(:disabled) { background: #fef3f2; }
+  }
+}
+
+.notif-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.confirm-label {
+  font-size: 12.5px;
+  color: #344054;
 }
 
 // ── Filter chips ──────────────────────────────────────────────────────────────
@@ -141,6 +159,45 @@
   }
 }
 
+// ── Fila + botón de borrar ────────────────────────────────────────────────────
+// El borde pasa de la fila a este contenedor, que agrupa la fila y su papelera.
+.notif-item {
+  display: flex;
+  align-items: stretch;
+  background: #fff;
+  border-bottom: 1px solid #f1f2f5;
+  transition: opacity 0.15s;
+
+  &:last-child { border-bottom: none; }
+  &--removing  { opacity: 0.4; }
+
+  .notif-row { border-bottom: none; }
+
+  // La papelera aparece al pasar por la fila o al llegar con el teclado.
+  &:hover .notif-delete,
+  &:focus-within .notif-delete { opacity: 1; }
+}
+
+.notif-delete {
+  flex-shrink: 0;
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #98a2b3;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.12s, color 0.12s;
+
+  &:hover:not(:disabled), &:focus-visible { color: #d92d20; }
+  &:disabled { cursor: default; }
+
+  // En pantallas táctiles no hay hover: siempre visible.
+  @media (hover: none) { opacity: 1; }
+}
+
 // ── Unread dot ────────────────────────────────────────────────────────────────
 .unread-dot {
   width: 5px;
@@ -188,15 +245,6 @@
   font-weight: 500;
 
   &--unread { font-weight: 600; }
-}
-
-.type-pill {
-  padding: 2px 8px;
-  border-radius: 99px;
-  font-size: 10.5px;
-  font-weight: 500;
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .notif-msg {

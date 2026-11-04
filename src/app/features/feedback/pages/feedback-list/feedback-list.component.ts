@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 
 import { FeedbackService } from '../../../chat/services/feedback.service';
 import {
@@ -60,12 +61,24 @@ export class FeedbackListComponent implements OnInit {
   // ── Asistentes activos de la empresa (desde el servicio) ──────────────
   readonly assistantOptions = computed(() => this.assistants());
 
-  // ── Lista filtrada por rating ─────────────────────────────────────────
-  readonly filteredList = computed(() => {
+  // ── Paginación: de 10 en 10 ───────────────────────────────────────────
+  // Antes se pedía la lista sin límite y el backend devolvía 50: a partir del
+  // comentario 51 la lista se cortaba sin avisar, y el filtro por estrellas se
+  // aplicaba en el navegador solo sobre esos 50. Ahora el filtro lo aplica el
+  // backend y la lista se completa con "Ver más". 10 y no 25: cada tarjeta mide
+  // unos 200 px y 25 eran cinco o seis pantallas de scroll.
+  readonly pageSize          = 10;
+  readonly hasMore           = signal(false);
+  readonly loadingMore       = signal(false);
+  private listSub?: Subscription;
+
+  /** Total del período con el filtro activo, según las stats (no lo cargado). */
+  readonly listTotal = computed(() => {
+    const d  = this.stats()?.distribution;
+    if (!d) return null;
     const rf = this.ratingFilter();
-    return rf == null
-      ? this.feedbacks()
-      : this.feedbacks().filter(fb => fb.rating === rf);
+    if (rf != null) return d[rf] ?? 0;
+    return Object.values(d).reduce<number>((acc, v) => acc + (v ?? 0), 0);
   });
 
   // ── Distribución: máximo para escalar barras ──────────────────────────
@@ -83,12 +96,14 @@ export class FeedbackListComponent implements OnInit {
       const item = themeCount === 1 ? 'tema' : 'temas';
       return `${themeCount} ${item} · ${negCount.toLocaleString('es-CO')} comentarios negativos ${this.periodSuffix()}`;
     }
-    const count = this.filteredList().length;
-    const rf    = this.ratingFilter();
-    const item  = count === 1 ? 'comentario reciente' : 'comentarios recientes';
-    if (rf == null) return `${count} ${item}`;
-    const star = rf === 1 ? 'estrella' : 'estrellas';
-    return `${count} ${item} de ${rf} ${star}`;
+    const loaded = this.feedbacks().length;
+    const total  = this.listTotal();
+    const count  = total != null && total > loaded ? total : loaded;
+    const rf     = this.ratingFilter();
+    const item   = count === 1 ? 'comentario' : 'comentarios';
+    const stars  = rf == null ? '' : ` de ${rf} ${rf === 1 ? 'estrella' : 'estrellas'}`;
+    const shown  = count > loaded ? ` · mostrando ${loaded}` : '';
+    return `${count} ${item}${stars}${shown}`;
   });
 
   // ── Modal activo (feedback individual o tema) ─────────────────────────
@@ -144,20 +159,52 @@ export class FeedbackListComponent implements OnInit {
         },
       });
 
+    this.loadList();
+  }
+
+  /** Primera página de la lista. Cancela la petición anterior para que una
+   *  respuesta tardía de otro filtro no pise la actual. */
+  private loadList(): void {
+    this.listSub?.unsubscribe();
     this.loadingList.set(true);
+    this.loadingMore.set(false);
     this.errorList.set(false);
-    this.feedbackSvc.getAll({ assistant_id: aid ?? undefined, period: per })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: list => {
-          this.feedbacks.set(list);
-          this.loadingList.set(false);
-        },
-        error: () => {
-          this.loadingList.set(false);
-          this.errorList.set(true);
-        },
-      });
+    this.listSub = this.fetchPage(0).subscribe({
+      next: list => {
+        this.feedbacks.set(list);
+        this.hasMore.set(list.length === this.pageSize);
+        this.loadingList.set(false);
+      },
+      error: () => {
+        this.loadingList.set(false);
+        this.errorList.set(true);
+      },
+    });
+  }
+
+  loadMore(): void {
+    if (this.loadingMore() || !this.hasMore()) return;
+    this.loadingMore.set(true);
+    this.listSub = this.fetchPage(this.feedbacks().length).subscribe({
+      next: list => {
+        this.feedbacks.update(cur => [...cur, ...list]);
+        this.hasMore.set(list.length === this.pageSize);
+        this.loadingMore.set(false);
+      },
+      error: () => this.loadingMore.set(false),
+    });
+  }
+
+  private fetchPage(skip: number) {
+    return this.feedbackSvc
+      .getAll({
+        assistant_id: this.selectedAssistant() ?? undefined,
+        period: this.period(),
+        rating: this.ratingFilter() ?? undefined,
+        skip,
+        limit: this.pageSize,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef));
   }
 
   // ── Acciones ──────────────────────────────────────────────────────────
@@ -188,10 +235,12 @@ export class FeedbackListComponent implements OnInit {
       this.mode.set('comments');
     }
     this.ratingFilter.update(cur => (cur === rating ? null : rating));
+    this.loadList();
   }
 
   clearRatingFilter(): void {
     this.ratingFilter.set(null);
+    this.loadList();
   }
 
   toggleTheme(label: string): void {

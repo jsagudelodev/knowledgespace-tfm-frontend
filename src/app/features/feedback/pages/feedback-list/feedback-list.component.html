@@ -216,10 +216,10 @@
           <div class="fb-card">
             <p class="fb-inline-error">No se pudo cargar la lista de comentarios.</p>
           </div>
-        } @else if (filteredList().length === 0) {
+        } @else if (feedbacks().length === 0) {
           <div class="fb-empty"><p>No hay calificaciones con este filtro.</p></div>
         } @else {
-          @for (fb of filteredList(); track fb.id) {
+          @for (fb of feedbacks(); track fb.id) {
             <div class="comment-card">
 
               <!-- Cabecera -->
@@ -237,7 +237,7 @@
                     >{{ stars(fb.rating) }}</span>
                     <span class="comment-meta-info">
                       {{ fb.created_at | date:'d MMM yyyy · HH:mm':'':'es-CO' }}
-                      @if (fb.assistant_name) { · {{ fb.assistant_name }} }
+                      @if (fb.assistant_name) { · <span class="comment-meta-assistant">{{ fb.assistant_name }}</span> }
                       @if (fb.conversation_id) { · conv #{{ fb.conversation_id }} }
                     </span>
                     @if (fb.status === 'stale') {
@@ -251,16 +251,22 @@
                 </div>
               </div>
 
-              <!-- Respuesta calificada (solo si rating ≤ 3) -->
-              @if (isNegOrNeutral(fb.rating) && fb.answer) {
+              <!-- La pregunta, en todas; la respuesta calificada, solo si rating ≤ 3 -->
+              @if (fb.question || (isNegOrNeutral(fb.rating) && fb.answer)) {
                 <div class="comment-card__answer">
-                  <span class="answer-label">Respuesta calificada</span>
-                  <p class="answer-text">{{ fb.answer }}</p>
-                  @if (fb.sources_count != null || fb.rag_score != null) {
-                    <span class="answer-meta">
-                      @if (fb.sources_count != null) { {{ fb.sources_count }} fuentes }
-                      @if (fb.rag_score != null) { · score {{ fb.rag_score | number:'1.2-2' }} }
-                    </span>
+                  @if (fb.question) {
+                    <span class="answer-label">Pregunta</span>
+                    <p class="answer-text answer-text--question">{{ fb.question }}</p>
+                  }
+                  @if (isNegOrNeutral(fb.rating) && fb.answer) {
+                    <span class="answer-label" [class.answer-label--after]="!!fb.question">Respuesta calificada</span>
+                    <p class="answer-text">{{ fb.answer }}</p>
+                    @if (fb.sources_count != null || fb.rag_score != null) {
+                      <span class="answer-meta">
+                        @if (fb.sources_count != null) { {{ fb.sources_count }} fuentes }
+                        @if (fb.rag_score != null) { · score {{ fb.rag_score | number:'1.2-2' }} }
+                      </span>
+                    }
                   }
                 </div>
               }
@@ -306,6 +312,11 @@
 
               </div>
             </div>
+          }
+          @if (hasMore()) {
+            <button class="load-more" type="button" [disabled]="loadingMore()" (click)="loadMore()">
+              {{ loadingMore() ? 'Cargando...' : 'Ver ' + pageSize + ' más' }}
+            </button>
           }
         }
       }

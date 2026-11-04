@@ -5,18 +5,38 @@
     <div class="notif-header__left">
       <h1 class="notif-h1">Notificaciones</h1>
       <p class="notif-subtitle">
-        {{ isAdmin ? 'Documentos, presupuesto y preguntas sin respuesta de tu empresa.' : 'Tus documentos y lo que te pidan los administradores.' }}
+        {{ isAdmin ? 'Tus avisos de documentos y de preguntas sin respuesta.' : 'Avisos sobre tus documentos.' }}
       </p>
     </div>
-    <button
-      class="mark-all-btn"
-      type="button"
-      [class.mark-all-btn--dim]="counts().unread === 0"
-      [disabled]="markingAll()"
-      (click)="markAllAsRead()"
-    >
-      Marcar todas como leídas
-    </button>
+    <!-- Cada botón solo aparece si tiene algo que hacer: atenuado y pulsable
+         confundía. Al usarlo desaparece, y eso ya confirma que funcionó. -->
+    <div class="notif-header__actions">
+      @if (counts().unread) {
+        <button
+          class="mark-all-btn"
+          type="button"
+          [disabled]="markingAll()"
+          (click)="markAllAsRead()"
+        >
+          {{ markingAll() ? 'Marcando...' : counts().unread === 1 ? 'Marcar 1 como leída' : 'Marcar ' + counts().unread + ' como leídas' }}
+        </button>
+      }
+      @if (counts().read) {
+        @if (confirmingDeleteRead()) {
+          <span class="confirm-label">
+            ¿Eliminar {{ counts().read === 1 ? 'la leída' : 'las ' + counts().read + ' leídas' }}?
+          </span>
+          <button class="mark-all-btn mark-all-btn--danger" type="button" [disabled]="deletingRead()" (click)="deleteRead()">
+            {{ deletingRead() ? 'Eliminando...' : 'Eliminar' }}
+          </button>
+          <button class="mark-all-btn" type="button" (click)="confirmingDeleteRead.set(false)">Cancelar</button>
+        } @else {
+          <button class="mark-all-btn" type="button" (click)="confirmingDeleteRead.set(true)">
+            {{ counts().read === 1 ? 'Eliminar 1 leída' : 'Eliminar ' + counts().read + ' leídas' }}
+          </button>
+        }
+      }
+    </div>
   </header>
 
   <!-- ── Chips de filtro ────────────────────────────────────── -->
@@ -68,11 +88,14 @@
         <div class="day-sep" role="separator">{{ group.label }}</div>
 
         @for (n of group.items; track n.id) {
+          <!-- El botón de borrar va al lado de la fila y no dentro: un botón
+               dentro de otro no es HTML válido. -->
+          <div class="notif-item" [class.notif-item--removing]="removingIds().has(n.id)">
           <button
             class="notif-row"
             type="button"
             [class.notif-row--unread]="!n.read"
-            [attr.aria-label]="n.title + (!n.read ? ' · No leída' : '')"
+            [attr.aria-label]="title(n) + (!n.read ? ' · No leída' : '')"
             (click)="rowClick(n)"
           >
             <span
@@ -91,15 +114,12 @@
             </span>
 
             <div class="notif-body">
+              <!-- Sin la píldora del tipo: repetía el título ("Brecha resuelta"
+                   junto a "Brecha resuelta"); el icono ya lleva el color. -->
               <div class="notif-title-row">
-                <span class="notif-title" [class.notif-title--unread]="!n.read">{{ n.title }}</span>
-                <span
-                  class="type-pill"
-                  [style.background]="typeBg(n)"
-                  [style.color]="typeColor(n)"
-                >{{ n.notification_type.label }}</span>
+                <span class="notif-title" [class.notif-title--unread]="!n.read">{{ title(n) }}</span>
               </div>
-              <p class="notif-msg">{{ n.message }}</p>
+              <p class="notif-msg">{{ message(n) }}</p>
             </div>
 
             <div class="notif-meta">
@@ -109,6 +129,17 @@
               }
             </div>
           </button>
+          <button
+            class="notif-delete"
+            type="button"
+            title="Eliminar"
+            [attr.aria-label]="'Eliminar: ' + title(n)"
+            [disabled]="removingIds().has(n.id)"
+            (click)="remove(n, $event)"
+          >
+            <span class="material-symbols-outlined" style="font-size:18px">delete</span>
+          </button>
+          </div>
         }
 
       }

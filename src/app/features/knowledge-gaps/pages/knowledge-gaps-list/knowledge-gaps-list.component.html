@@ -226,7 +226,7 @@
             <div class="panel-section">
               <div class="section-title">LO MEJOR QUE ENCONTRÓ EL ÍNDICE</div>
               @if (gap.candidates?.length) {
-                @for (c of gap.candidates!; track c.document_id) {
+                @for (c of candidatesOf(gap); track c.document_id) {
                   <div class="candidate-display-row">
                     <span class="candidate-display-name">{{ c.name }}</span>
                     <span class="candidate-score">{{ c.score.toFixed(2) }}</span>
@@ -264,7 +264,7 @@
               @if (resMode() === 'link') {
                 @if (gap.candidates?.length) {
                   <div class="link-mode">
-                    @for (c of gap.candidates!; track c.document_id; let i = $index) {
+                    @for (c of candidatesOf(gap); track c.document_id; let i = $index) {
                       <label
                         class="candidate-radio"
                         [class.candidate-radio--selected]="linkSel() === i"

@@ -320,6 +320,14 @@ export class KnowledgeGapsListComponent implements OnInit {
     return !!(gap.candidates?.length);
   }
 
+  /** Un candidato por documento, el de mejor score (vienen ordenados). El backend
+   *  ya los agrupa, pero las preguntas creadas antes guardaron un candidato por
+   *  fragmento, y el mismo documento salía repetido. */
+  candidatesOf(gap: KnowledgeGap) {
+    const vistos = new Set<number>();
+    return (gap.candidates ?? []).filter(c => !vistos.has(c.document_id) && !!vistos.add(c.document_id));
+  }
+
   recommendationText(gap: KnowledgeGap): string {
     if (this.hasCandidates(gap)) {
       const name = gap.candidates![0].name;
@@ -363,7 +371,7 @@ export class KnowledgeGapsListComponent implements OnInit {
   doLink(): void {
     const gap = this.selectedGap();
     if (!gap?.candidates?.length) return;
-    const chosen = gap.candidates[this.linkSel()];
+    const chosen = this.candidatesOf(gap)[this.linkSel()];
     this.submitting.set(true);
     this.svc.link(gap.id, { document_id: chosen.document_id, chunk_id: chosen.chunk_id })
       .pipe(takeUntilDestroyed(this.destroyRef))
