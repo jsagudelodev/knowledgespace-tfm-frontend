@@ -93,7 +93,7 @@ Prettier — `printWidth: 100`, `singleQuote: true`, Angular parser for HTML fil
 
 ## Documentation Rules (OBLIGATORIO al final de cada sesión)
 
-Al terminar cualquier sesión de trabajo en este repositorio, Claude **siempre** debe actualizar estos tres archivos:
+Al terminar cualquier sesión de trabajo en este repositorio, Claude **siempre** debe actualizar estos cuatro archivos:
 
 ### 1. `doc/trabajo/BITACORA.md`
 
@@ -125,3 +125,19 @@ Añadir una entrada nueva al inicio (orden descendente — lo más reciente arri
 - Si un módulo pasó a estado Completo: cambiar `**Estado:** Pendiente` → `**Estado:** Completo ✅` y marcar cada tarea con ✅.
 - Si se agregaron tareas nuevas: añadirlas con ⬜.
 - Si se detectaron pendientes nuevos: agregarlos con ⬜.
+
+### 4. `CHANGELOG.md` (raíz de este repositorio)
+
+Registro de **todo lo que se hizo cada día, en los dos repos**: es el resumen
+que se consulta para saber qué pasó cuándo. La BITACORA es el diario de trabajo
+con decisiones y pendientes; el CHANGELOG es el resumen limpio de resultados.
+
+- Una entrada por día, `## AAAA-MM-DD`, al inicio (lo más reciente arriba).
+- Agrupar por área (p. ej. *Notificaciones*, *Preguntas sin respuesta*,
+  *Experimentos*, *Documentación*) y, en cada punto, qué cambió y por qué, con
+  el hash del commit entre comillas invertidas cuando ya exista, indicando el
+  repo si es del backend (p. ej. "backend `d6d7cd0`").
+- Si el usuario todavía no hizo el commit, escribir la entrada sin hash y
+  completarlo en la siguiente sesión.
+- Cerrar con el número de tests si cambió.
+- Las migraciones de datos aplicadas en producción se nombran con su id.

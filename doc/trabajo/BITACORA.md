@@ -80,6 +80,15 @@ Formato de cada entrada:
   `d9f1b3c5a7e2`, para que tampoco salgan en "Todas"; con ellos se quitaron
   del frontend los títulos y acciones que solo servían para ese tipo. Tests:
   backend 263, frontend 74.
+- 2026-11-04, **CHANGELOG** pasa del backend a la raíz del frontend, puesto al
+  día desde el 2026-10-17, con la regla nº 4 en `doc/CLAUDE.md` para
+  actualizarlo cada día.
+- 2026-11-04, **documentos obsoletos eliminados**: en el backend
+  `AWS_S3_IMPLEMENTACION.md`, `DEVELOPMENT_GUIDE.md` y
+  `ESTADO_SOFTWARE_ENTREGA.md`; en el frontend `doc/ia-handoff/` (13 archivos:
+  maquetas HTML, README, tres `MODELO_DATOS.md` idénticos, tres `support.js` y
+  un `.zip` del proyecto de diseño). Nadie los enlazaba salvo FEATURES, ya
+  corregido.
 - Corregido en el backend (`RAG_PIPELINE.md`, `PINECONE_VECTORES.md`): decían
   que el chat cae al namespace de empresa; eso solo lo hace la búsqueda de
   candidatos.

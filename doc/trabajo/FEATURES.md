@@ -180,7 +180,7 @@ Panel de análisis de la calidad de las respuestas del asistente: cómo califica
 
 ### 12. Notificaciones (`/notifications`)
 
-Bandeja **personal** de avisos: documentos procesados o fallidos y preguntas sin respuesta detectadas o resueltas. Desde el 2026-11-03 cada notificación es de un usuario: un aviso para administradores se crea como una copia por admin activo, y cada uno marca y borra lo suyo sin afectar a los demás (antes era una fila compartida y marcarla como leída se la quitaba a todos). Implementado el 2026-08-16 conforme al handoff de diseño (`doc/ia-handoff/design_handoff_notificaciones`).
+Bandeja **personal** de avisos sobre documentos: procesados, fallidos o borrados por otra persona. Desde el 2026-11-03 cada notificación es de un usuario y cada uno marca y borra lo suyo sin afectar a los demás (antes los avisos para administradores eran una fila compartida y marcarla como leída se la quitaba a todos). Los avisos de preguntas sin respuesta se retiraron el 2026-11-04. Implementado el 2026-08-16 conforme a un encargo de diseño de septiembre; esa carpeta (`doc/ia-handoff/`) se eliminó el 2026-11-04 porque describía funciones ya retiradas.
 
 #### Generación de eventos (backend)
 
