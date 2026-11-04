@@ -8,7 +8,7 @@ import { UiStatusService } from '../../../core/services/ui-status.service';
 import { NotificationsService } from '../../../features/notifications/services/notifications.service';
 import { AppNotification } from '../../../core/models/notification.model';
 import {
-  notificationAction, notificationIcon, notificationMessage, notificationTitle, relativeTime,
+  notificationAction, notificationIcon, notificationMessage, relativeTime,
 } from '../../../features/notifications/notification-display.util';
 import { CompanyService } from '../../../features/companies/services/company.service';
 import { Company } from '../../../core/models/company.model';
@@ -44,7 +44,6 @@ export class HeaderComponent implements OnInit {
   readonly notifBadge        = computed(() => this.unreadCount() > 9 ? '9+' : String(this.unreadCount()));
 
   readonly notificationIcon = notificationIcon;
-  readonly notificationTitle = notificationTitle;
   readonly notificationMessage = notificationMessage;
   readonly relativeTime     = relativeTime;
 

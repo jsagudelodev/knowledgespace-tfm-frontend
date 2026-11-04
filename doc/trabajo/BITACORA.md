@@ -63,6 +63,23 @@ Formato de cada entrada:
   por fila, "Eliminar N leídas" con confirmación, sin la píldora que repetía el
   título, y títulos y mensajes antiguos traducidos también en la campana.
   Tests: backend 256 (6 nuevos con SQLite en memoria), frontend 70.
+- 2026-11-04, **selección al estilo Gmail** en Notificaciones: casilla por
+  aviso, casilla general con menú Todas/Leídas/No leídas/Ninguna, y barra
+  "N seleccionadas" con Marcar como leídas y Eliminar (confirmación si son
+  varias). Backend: `POST /notifications/bulk` (`ids` + `action`), que filtra
+  por propietario en la misma consulta; sustituye a `DELETE
+  /notifications/read`, que se quitó junto con el botón "Eliminar N leídas".
+  Tests: backend 264, frontend 75 (`notification-list.seleccion.spec.ts`).
+- 2026-11-04, **fuera los avisos de preguntas sin respuesta**: "Nueva pregunta
+  sin respuesta" y "Pregunta resuelta" los creaba la acción de un admin y le
+  llegaban a él mismo (en la bandeja del autor, 9 de 11 eran de este tipo).
+  Backend: convertir y resolver ya no notifican, `setup` no siembra esos tipos
+  y se quitó `create_for_admins`, que no usaba nadie más. Frontend: fuera la
+  pestaña "Sin respuesta"; un solo subtítulo para todos. Los 22 avisos
+  antiguos (11 nuevas, 11 resueltas) los borra la migración de datos
+  `d9f1b3c5a7e2`, para que tampoco salgan en "Todas"; con ellos se quitaron
+  del frontend los títulos y acciones que solo servían para ese tipo. Tests:
+  backend 263, frontend 74.
 - Corregido en el backend (`RAG_PIPELINE.md`, `PINECONE_VECTORES.md`): decían
   que el chat cae al namespace de empresa; eso solo lo hace la búsqueda de
   candidatos.

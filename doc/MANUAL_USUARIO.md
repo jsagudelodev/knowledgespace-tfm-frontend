@@ -202,15 +202,19 @@ contra el índice y compara la puntuación de antes y de después.
 
 ### Notificaciones
 
-Tu bandeja de avisos, por ejemplo cuando un documento terminó de procesarse,
-falló o lo borró otra persona; los administradores reciben además las
-preguntas sin respuesta nuevas y resueltas. Cada usuario tiene la suya. Se
+Tu bandeja de avisos sobre tus documentos: cuándo terminaron de procesarse,
+si fallaron o si los borró otra persona. Cada usuario tiene la suya. Se
 filtran por tipo, se marcan como leídas al abrirlas y cada una lleva a lo que
-la originó.
+la originó. Las preguntas sin respuesta no generan avisos: lo pendiente se ve
+en su propia pantalla.
 
-Para limpiar la bandeja: la papelera al final de cada aviso lo elimina, y
-**Eliminar N leídas** borra de golpe las ya leídas (pide confirmación). Las no
-leídas nunca se borran en bloque.
+Para limpiar la bandeja, como en el correo:
+
+- La **papelera** al final de cada aviso lo elimina.
+- Para varios, se marcan sus **casillas**. La casilla de arriba marca todos, y
+  su flecha permite elegir **Todas, Leídas, No leídas o Ninguna**. Con algo
+  marcado aparecen **Marcar como leídas** y **Eliminar** (pide confirmación si
+  son varios).
 
 ![Notificaciones](capturas/14-notificaciones.jpg)
 

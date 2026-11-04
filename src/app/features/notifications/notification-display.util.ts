@@ -9,8 +9,6 @@ const ICON_BY_TYPE: Record<string, string> = {
   budget_warning:           'warning',
   budget_exceeded:          'report',
   budget_reset:             'refresh',
-  knowledge_gap_found:      'help',
-  knowledge_gap_resolved:   'check_circle',
   user_invited:             'person_add',
   user_joined:              'group',
   system_alert:             'notifications',
@@ -24,7 +22,6 @@ export interface NotificationAction {
 /** A dónde lleva una notificación al pulsarla; la usan la página y la campana. */
 export function notificationAction(n: AppNotification): NotificationAction | null {
   const type = n.notification_type.name;
-  const id   = n.entity_id;
 
   // "Pedir documento" se retiró el 2026-11-03 y ya no se emiten; se conserva
   // para que los avisos ya creados sigan llevando a subir el documento.
@@ -43,32 +40,10 @@ export function notificationAction(n: AppNotification): NotificationAction | nul
   if (type.startsWith('budget')) {
     return null;
   }
-  if (type === 'knowledge_gap_found') {
-    return id
-      ? { text: 'Resolver',    commands: ['/knowledge-gaps', String(id)] }
-      : { text: 'Ver la lista', commands: ['/knowledge-gaps'] };
-  }
-  if (type === 'knowledge_gap_resolved') {
-    return id
-      ? { text: 'Revisar',     commands: ['/knowledge-gaps', String(id)] }
-      : { text: 'Ver la lista', commands: ['/knowledge-gaps'] };
-  }
   if (type === 'user_invited' || type === 'user_joined') {
     return { text: 'Ver usuarios', commands: ['/users'] };
   }
   return null;
-}
-
-// La app dice "Preguntas sin respuesta" en todas partes, pero hasta el
-// 2026-11-03 estos avisos se titulaban "Brecha de conocimiento" / "Brecha
-// resuelta". El backend ya los crea con el título nuevo; esto cubre los antiguos.
-const TITLE_BY_TYPE: Record<string, string> = {
-  knowledge_gap_found:    'Nueva pregunta sin respuesta',
-  knowledge_gap_resolved: 'Pregunta resuelta',
-};
-
-export function notificationTitle(n: AppNotification): string {
-  return TITLE_BY_TYPE[n.notification_type.name] ?? n.title;
 }
 
 /** Los avisos de documento fallido antiguos incluían el error técnico

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AppNotification } from '../../core/models/notification.model';
 import { ApiService } from '../../core/services/api.service';
-import { notificationMessage, notificationTitle } from './notification-display.util';
+import { notificationMessage } from './notification-display.util';
 import { NotificationsService } from './services/notifications.service';
 
 function aviso(type: string, title: string, message: string, read = false): AppNotification {
@@ -17,10 +17,12 @@ describe('NotificationsService · borrado', () => {
   const api = {
     get: vi.fn(() => of({ count: 3 })),
     delete: vi.fn(() => of({})),
+    post: vi.fn(() => of({ affected: 2 })),
   };
 
   beforeEach(() => {
     api.delete.mockClear();
+    api.post.mockClear();
     TestBed.configureTestingModule({
       providers: [NotificationsService, { provide: ApiService, useValue: api }],
     });
@@ -39,19 +41,15 @@ describe('NotificationsService · borrado', () => {
     expect(svc.unreadCount()).toBe(3);
   });
 
-  it('eliminar las leídas llama a su endpoint', () => {
-    svc.deleteRead().subscribe();
-    expect(api.delete).toHaveBeenCalledWith('/v1/notifications/read');
+  it('la acción en bloque envía los ids elegidos y refresca la campana', () => {
+    api.get.mockClear();
+    svc.bulk([4, 9], 'delete').subscribe();
+    expect(api.post).toHaveBeenCalledWith('/v1/notifications/bulk', { ids: [4, 9], action: 'delete' });
+    expect(api.get).toHaveBeenCalledWith('/v1/notifications/unread-count');
   });
 });
 
 describe('Notificaciones · textos', () => {
-  it('los avisos antiguos de "Brecha" se muestran como preguntas sin respuesta', () => {
-    expect(notificationTitle(aviso('knowledge_gap_found', 'Brecha de conocimiento', ''))).toBe('Nueva pregunta sin respuesta');
-    expect(notificationTitle(aviso('knowledge_gap_resolved', 'Brecha resuelta', ''))).toBe('Pregunta resuelta');
-    expect(notificationTitle(aviso('document_processed', 'Documento procesado', ''))).toBe('Documento procesado');
-  });
-
   it('un documento fallido antiguo no muestra el error técnico', () => {
     const n = aviso('document_failed', 'Error', '"a.pdf" no pudo procesarse: Error descargando archivo de S3: NoSuchKey');
     expect(notificationMessage(n)).toBe('"a.pdf" no se pudo procesar. Puedes reintentarlo desde Documentos.');

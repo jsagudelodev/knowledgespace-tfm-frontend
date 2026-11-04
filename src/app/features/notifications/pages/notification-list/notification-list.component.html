@@ -5,7 +5,7 @@
     <div class="notif-header__left">
       <h1 class="notif-h1">Notificaciones</h1>
       <p class="notif-subtitle">
-        {{ isAdmin ? 'Tus avisos de documentos y de preguntas sin respuesta.' : 'Avisos sobre tus documentos.' }}
+        Avisos sobre tus documentos: cuándo terminan de procesarse, si fallan o si alguien los borra.
       </p>
     </div>
     <!-- Cada botón solo aparece si tiene algo que hacer: atenuado y pulsable
@@ -20,21 +20,6 @@
         >
           {{ markingAll() ? 'Marcando...' : counts().unread === 1 ? 'Marcar 1 como leída' : 'Marcar ' + counts().unread + ' como leídas' }}
         </button>
-      }
-      @if (counts().read) {
-        @if (confirmingDeleteRead()) {
-          <span class="confirm-label">
-            ¿Eliminar {{ counts().read === 1 ? 'la leída' : 'las ' + counts().read + ' leídas' }}?
-          </span>
-          <button class="mark-all-btn mark-all-btn--danger" type="button" [disabled]="deletingRead()" (click)="deleteRead()">
-            {{ deletingRead() ? 'Eliminando...' : 'Eliminar' }}
-          </button>
-          <button class="mark-all-btn" type="button" (click)="confirmingDeleteRead.set(false)">Cancelar</button>
-        } @else {
-          <button class="mark-all-btn" type="button" (click)="confirmingDeleteRead.set(true)">
-            {{ counts().read === 1 ? 'Eliminar 1 leída' : 'Eliminar ' + counts().read + ' leídas' }}
-          </button>
-        }
       }
     </div>
   </header>
@@ -56,6 +41,68 @@
 
   <!-- ── Tarjeta contenedora ────────────────────────────────── -->
   <div class="notif-card">
+
+    <!-- Barra de selección al estilo Gmail: casilla general con menú y, si hay
+         algo elegido, las acciones sobre lo elegido. -->
+    @if (!loading() && !error() && notifications().length) {
+      <div class="bulk-bar" [class.bulk-bar--active]="selectedCount()">
+        <div class="select-menu-wrap">
+          <input
+            type="checkbox"
+            class="row-check"
+            aria-label="Seleccionar todas"
+            [checked]="allSelected()"
+            [indeterminate]="someSelected()"
+            (change)="toggleSelectAll()"
+          />
+          <button
+            class="select-menu-btn"
+            type="button"
+            aria-label="Opciones de selección"
+            [attr.aria-expanded]="selectMenuOpen()"
+            (click)="selectMenuOpen.set(!selectMenuOpen())"
+          >
+            <span class="material-symbols-outlined" style="font-size:18px">arrow_drop_down</span>
+          </button>
+          @if (selectMenuOpen()) {
+            <div class="select-menu" role="menu">
+              <button type="button" role="menuitem" (click)="selectBy('all')">Todas</button>
+              <button type="button" role="menuitem" (click)="selectBy('read')">Leídas</button>
+              <button type="button" role="menuitem" (click)="selectBy('unread')">No leídas</button>
+              <button type="button" role="menuitem" (click)="selectBy('none')">Ninguna</button>
+            </div>
+          }
+        </div>
+
+        @if (selectedCount()) {
+          <span class="bulk-count">
+            {{ selectedCount() === 1 ? '1 seleccionada' : selectedCount() + ' seleccionadas' }}
+          </span>
+          <div class="bulk-actions">
+            @if (confirmingDelete()) {
+              <span class="confirm-label">¿Eliminar {{ selectedCount() }}?</span>
+              <button class="mark-all-btn mark-all-btn--danger" type="button" [disabled]="bulkBusy()" (click)="bulkDelete()">
+                {{ bulkBusy() ? 'Eliminando...' : 'Sí, eliminar' }}
+              </button>
+              <button class="mark-all-btn" type="button" (click)="confirmingDelete.set(false)">Cancelar</button>
+            } @else {
+              @if (selectedHasUnread()) {
+                <button class="mark-all-btn" type="button" [disabled]="bulkBusy()" (click)="bulkMarkRead()">
+                  <span class="material-symbols-outlined" style="font-size:16px">drafts</span>
+                  Marcar como leídas
+                </button>
+              }
+              <button class="mark-all-btn mark-all-btn--danger" type="button" [disabled]="bulkBusy()" (click)="bulkDelete()">
+                <span class="material-symbols-outlined" style="font-size:16px">delete</span>
+                Eliminar
+              </button>
+            }
+          </div>
+        } @else {
+          <span class="bulk-hint">Selecciona avisos para marcarlos como leídos o eliminarlos</span>
+        }
+      </div>
+    }
 
     @if (loading()) {
       @for (i of skeletonRows; track i) {
@@ -90,12 +137,25 @@
         @for (n of group.items; track n.id) {
           <!-- El botón de borrar va al lado de la fila y no dentro: un botón
                dentro de otro no es HTML válido. -->
-          <div class="notif-item" [class.notif-item--removing]="removingIds().has(n.id)">
+          <div
+            class="notif-item"
+            [class.notif-item--removing]="removingIds().has(n.id)"
+            [class.notif-item--selected]="isSelected(n)"
+          >
+          <label class="row-check-cell">
+            <input
+              type="checkbox"
+              class="row-check"
+              [attr.aria-label]="'Seleccionar: ' + n.title"
+              [checked]="isSelected(n)"
+              (change)="toggleSelect(n, $event)"
+            />
+          </label>
           <button
             class="notif-row"
             type="button"
             [class.notif-row--unread]="!n.read"
-            [attr.aria-label]="title(n) + (!n.read ? ' · No leída' : '')"
+            [attr.aria-label]="n.title + (!n.read ? ' · No leída' : '')"
             (click)="rowClick(n)"
           >
             <span
@@ -117,7 +177,7 @@
               <!-- Sin la píldora del tipo: repetía el título ("Brecha resuelta"
                    junto a "Brecha resuelta"); el icono ya lleva el color. -->
               <div class="notif-title-row">
-                <span class="notif-title" [class.notif-title--unread]="!n.read">{{ title(n) }}</span>
+                <span class="notif-title" [class.notif-title--unread]="!n.read">{{ n.title }}</span>
               </div>
               <p class="notif-msg">{{ message(n) }}</p>
             </div>
@@ -133,7 +193,7 @@
             class="notif-delete"
             type="button"
             title="Eliminar"
-            [attr.aria-label]="'Eliminar: ' + title(n)"
+            [attr.aria-label]="'Eliminar: ' + n.title"
             [disabled]="removingIds().has(n.id)"
             (click)="remove(n, $event)"
           >

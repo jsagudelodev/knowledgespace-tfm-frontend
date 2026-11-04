@@ -1,5 +1,5 @@
 import {
-  Component, DestroyRef, OnInit, inject, signal, computed,
+  Component, DestroyRef, ElementRef, HostListener, OnInit, inject, signal, computed,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -8,13 +8,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NotificationsService } from '../../services/notifications.service';
 import { AppNotification, NotificationCounts } from '../../../../core/models/notification.model';
 import {
-  notificationAction, notificationIcon, notificationMessage, notificationTitle, relativeTime,
+  notificationAction, notificationIcon, notificationMessage, relativeTime,
 } from '../../notification-display.util';
-import { AuthService } from '../../../../core/services/auth.service';
 
 // Sin "Presupuesto": el módulo está fuera de alcance (ALCANCE_TFM.md del backend)
-// y su único aviso es un resto de junio de 2026. Sigue visible en "Todas".
-export type FilterMode = 'all' | 'unread' | 'documents' | 'knowledge_gap';
+// y su único aviso es un resto de junio de 2026. Sin "Sin respuesta" (2026-11-04):
+// esos avisos los creaba la acción de un admin y le llegaban a él mismo, así que
+// el backend ya no los emite, y la migración d9f1b3c5a7e2 borró los antiguos.
+export type FilterMode = 'all' | 'unread' | 'documents';
 
 interface ChipDef {
   mode: FilterMode;
@@ -31,7 +32,6 @@ const CHIPS: ChipDef[] = [
   { mode: 'all',           label: 'Todas',          countKey: 'todas'         },
   { mode: 'unread',        label: 'No leídas',      countKey: 'unread'        },
   { mode: 'documents',     label: 'Documentos',     countKey: 'documents'     },
-  { mode: 'knowledge_gap', label: 'Sin respuesta',  countKey: 'knowledge_gap' },
 ];
 
 const PAGE_SIZE = 25;
@@ -48,20 +48,28 @@ export class NotificationListComponent implements OnInit {
   private readonly svc        = inject(NotificationsService);
   private readonly router     = inject(Router);
 
-  // Preguntas sin respuesta son avisos de administración: a un usuario normal
-  // nunca le llegan, así que su chip estaría siempre a 0.
-  readonly isAdmin      = inject(AuthService).isAdmin();
-  readonly chips        = this.isAdmin
-    ? CHIPS
-    : CHIPS.filter(c => c.mode !== 'knowledge_gap');
+  readonly chips        = CHIPS;
   readonly skeletonRows = [1, 2, 3, 4, 5, 6, 7];
 
   readonly filter        = signal<FilterMode>('all');
   readonly notifications = signal<AppNotification[]>([]);
-  readonly counts        = signal<NotificationCounts>({ todas: 0, unread: 0, read: 0, documents: 0, budget: 0, knowledge_gap: 0 });
+  readonly counts        = signal<NotificationCounts>({ todas: 0, unread: 0, read: 0, documents: 0, budget: 0 });
   readonly removingIds   = signal<ReadonlySet<number>>(new Set());
-  readonly deletingRead  = signal(false);
-  readonly confirmingDeleteRead = signal(false);
+
+  // ── Selección al estilo Gmail ─────────────────────────────────────────
+  // Solo sobre las cargadas en pantalla, y se vacía al cambiar de pestaña o
+  // recargar: nunca se actúa sobre avisos que el usuario no está viendo.
+  readonly selected         = signal<ReadonlySet<number>>(new Set());
+  readonly selectMenuOpen   = signal(false);
+  readonly confirmingDelete = signal(false);
+  readonly bulkBusy         = signal(false);
+
+  readonly selectedCount = computed(() => this.selected().size);
+  readonly allSelected   = computed(() =>
+    this.notifications().length > 0 && this.selected().size === this.notifications().length);
+  readonly someSelected  = computed(() => this.selected().size > 0 && !this.allSelected());
+  readonly selectedHasUnread = computed(() =>
+    this.notifications().some(n => !n.read && this.selected().has(n.id)));
   readonly loading       = signal(true);
   readonly error         = signal(false);
   readonly loadingMore   = signal(false);
@@ -94,6 +102,21 @@ export class NotificationListComponent implements OnInit {
     this.load(true);
   }
 
+  private readonly el = inject(ElementRef);
+
+  // El menú "Seleccionar" se cierra al hacer clic fuera o con Escape.
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const menu = (this.el.nativeElement as HTMLElement).querySelector('.select-menu-wrap');
+    if (menu && !menu.contains(event.target as Node)) this.selectMenuOpen.set(false);
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    this.selectMenuOpen.set(false);
+    this.confirmingDelete.set(false);
+  }
+
   private loadCounts(): void {
     this.svc.getCounts()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -110,7 +133,6 @@ export class NotificationListComponent implements OnInit {
     switch (this.filter()) {
       case 'unread':        return { read: false };
       case 'documents':     return { type: 'document' };
-      case 'knowledge_gap': return { type: 'knowledge' };
       default:              return {};
     }
   }
@@ -119,6 +141,7 @@ export class NotificationListComponent implements OnInit {
     if (reset) {
       this.loading.set(true);
       this.error.set(false);
+      this.clearSelection();
     } else {
       this.loadingMore.set(true);
     }
@@ -186,6 +209,7 @@ export class NotificationListComponent implements OnInit {
       .subscribe({
         next: () => {
           this.notifications.update(list => list.filter(x => x.id !== n.id));
+          this.selected.update(s => { const next = new Set(s); next.delete(n.id); return next; });
           this.loadCounts();
           this.forgetRemoving(n.id);
         },
@@ -197,25 +221,88 @@ export class NotificationListComponent implements OnInit {
     this.removingIds.update(s => { const next = new Set(s); next.delete(id); return next; });
   }
 
-  /** Las leídas en bloque sí piden confirmación: son varias de golpe. */
-  deleteRead(): void {
-    if (this.deletingRead()) return;
-    this.deletingRead.set(true);
-    this.svc.deleteRead()
+  // ── Selección y acciones en bloque ───────────────────────────────────
+
+  isSelected(n: AppNotification): boolean {
+    return this.selected().has(n.id);
+  }
+
+  toggleSelect(n: AppNotification, event: Event): void {
+    event.stopPropagation();
+    this.confirmingDelete.set(false);
+    this.selected.update(s => {
+      const next = new Set(s);
+      if (next.has(n.id)) next.delete(n.id); else next.add(n.id);
+      return next;
+    });
+  }
+
+  /** La casilla general: si hay algo marcado lo quita; si no, marca todas. */
+  toggleSelectAll(): void {
+    this.selectBy(this.selected().size ? 'none' : 'all');
+  }
+
+  selectBy(kind: 'all' | 'read' | 'unread' | 'none'): void {
+    this.selectMenuOpen.set(false);
+    this.confirmingDelete.set(false);
+    const pick = this.notifications().filter(n =>
+      kind === 'all' ? true : kind === 'read' ? n.read : kind === 'unread' ? !n.read : false);
+    this.selected.set(new Set(pick.map(n => n.id)));
+  }
+
+  clearSelection(): void {
+    this.selected.set(new Set());
+    this.selectMenuOpen.set(false);
+    this.confirmingDelete.set(false);
+  }
+
+  bulkMarkRead(): void {
+    const ids = [...this.selected()];
+    if (!ids.length || this.bulkBusy()) return;
+    this.bulkBusy.set(true);
+    this.svc.bulk(ids, 'read')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.deletingRead.set(false);
-          this.confirmingDeleteRead.set(false);
-          this.loadCounts();
-          this.load(true);
+          const elegidas = new Set(ids);
+          this.notifications.update(list =>
+            this.filter() === 'unread'
+              ? list.filter(n => !elegidas.has(n.id))
+              : list.map(n => elegidas.has(n.id) ? { ...n, read: true } : n));
+          this.afterBulk();
         },
-        error: () => this.deletingRead.set(false),
+        error: () => this.bulkBusy.set(false),
       });
   }
 
+  /** Una sola se borra sin preguntar; varias, con confirmación. */
+  bulkDelete(): void {
+    const ids = [...this.selected()];
+    if (!ids.length || this.bulkBusy()) return;
+    if (ids.length > 1 && !this.confirmingDelete()) {
+      this.confirmingDelete.set(true);
+      return;
+    }
+    this.bulkBusy.set(true);
+    this.svc.bulk(ids, 'delete')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          const elegidas = new Set(ids);
+          this.notifications.update(list => list.filter(n => !elegidas.has(n.id)));
+          this.afterBulk();
+        },
+        error: () => this.bulkBusy.set(false),
+      });
+  }
+
+  private afterBulk(): void {
+    this.bulkBusy.set(false);
+    this.clearSelection();
+    this.loadCounts();
+  }
+
   readonly entityAction = notificationAction;
-  readonly title        = notificationTitle;
   readonly message      = notificationMessage;
 
   typeColor(n: AppNotification): string {

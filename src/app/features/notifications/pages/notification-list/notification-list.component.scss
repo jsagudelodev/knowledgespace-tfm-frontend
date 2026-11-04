@@ -159,6 +159,108 @@
   }
 }
 
+// ── Barra de selección (estilo Gmail) ─────────────────────────────────────────
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 6px 20px 6px 14px;
+  border-bottom: 1px solid #f1f2f5;
+  background: #fbfcfd;
+  flex-wrap: wrap;
+
+  &--active { background: #eff4ff; }
+}
+
+.select-menu-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.select-menu-btn {
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #667085;
+  cursor: pointer;
+
+  &:hover { background: #eaecf0; }
+}
+
+.select-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 10;
+  min-width: 140px;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid #e3e6eb;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.12);
+  display: flex;
+  flex-direction: column;
+
+  button {
+    padding: 7px 10px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    font: inherit;
+    font-size: 13px;
+    color: #344054;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover { background: #f2f4f7; }
+  }
+}
+
+.bulk-count {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1d4ed8;
+}
+
+.bulk-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  .mark-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.bulk-hint {
+  font-size: 12.5px;
+  color: #98a2b3;
+}
+
+.row-check {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #2563eb;
+  cursor: pointer;
+}
+
+.row-check-cell {
+  display: flex;
+  align-items: flex-start;
+  padding: 22px 0 0 14px;
+  cursor: pointer;
+}
+
 // ── Fila + botón de borrar ────────────────────────────────────────────────────
 // El borde pasa de la fila a este contenedor, que agrupa la fila y su papelera.
 .notif-item {
@@ -170,6 +272,8 @@
 
   &:last-child { border-bottom: none; }
   &--removing  { opacity: 0.4; }
+  &--selected,
+  &--selected .notif-row { background: #f5f8ff; }
 
   .notif-row { border-bottom: none; }
 

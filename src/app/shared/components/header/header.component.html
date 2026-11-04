@@ -149,7 +149,7 @@
                   <span class="material-symbols-outlined icon-sm">{{ notificationIcon(n.notification_type.name) }}</span>
                 </span>
                 <span class="notif-item__body">
-                  <span class="notif-item__title">{{ notificationTitle(n) }}</span>
+                  <span class="notif-item__title">{{ n.title }}</span>
                   <span class="notif-item__message">{{ notificationMessage(n) }}</span>
                   <span class="notif-item__time">{{ relativeTime(n.created_at) }}</span>
                 </span>

@@ -55,8 +55,11 @@ export class NotificationsService {
     );
   }
 
-  /** Borra las ya leídas: no cambia el contador de no leídas. */
-  deleteRead(): Observable<{ deleted: number }> {
-    return this.api.delete<{ deleted: number }>(`${this.basePath}/read`);
+  /** Acción sobre varias elegidas (estilo correo). El contador de la campana se
+   *  vuelve a pedir al backend: solo él sabe cuántas de esas seguían sin leer. */
+  bulk(ids: number[], action: 'read' | 'delete'): Observable<{ affected: number }> {
+    return this.api.post<{ affected: number }>(`${this.basePath}/bulk`, { ids, action }).pipe(
+      tap(() => this.refreshUnreadCount()),
+    );
   }
 }

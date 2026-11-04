@@ -202,7 +202,7 @@ Cada notificación guarda `entity_type = 'document'` y `entity_id = document_id`
 
 Diseño high-fidelity conforme al handoff: `max-width: 1000px`, `padding: 28px 26px 44px`, tarjeta contenedora única sin padding con filas que llegan a los bordes.
 
-- **Chips de filtro** (4): Todas · No leídas · Documentos · Sin respuesta. "Presupuesto" se quitó el 2026-11-03: el módulo está fuera de alcance y su único aviso es un resto de junio, que sigue visible en "Todas". Los recuentos se calculan sobre el total (no sobre el filtro activo), en tipografía `IBM Plex Mono`. El backend resuelve cada categoría con una cláusula LIKE (`document%`, `budget%`, `knowledge%`) mediante el endpoint `GET /v1/notifications/counts`.
+- **Chips de filtro** (3): Todas · No leídas · Documentos. "Presupuesto" se quitó el 2026-11-03 (módulo fuera de alcance; su único aviso, de junio, sigue en "Todas") y "Sin respuesta" el 2026-11-04 (el backend ya no emite esos avisos y la migración `d9f1b3c5a7e2` borró los antiguos). Los recuentos se calculan sobre el total (no sobre el filtro activo), en tipografía `IBM Plex Mono`. El backend resuelve cada categoría con una cláusula LIKE (`document%`, `budget%`, `knowledge%`) mediante el endpoint `GET /v1/notifications/counts`.
 - **Separadores de día** internos a la tarjeta: `Hoy` / `Ayer` / `Anteriores`, fondo `#fbfcfd`, sin recalcular el estado — es derivado de `created_at`.
 - **Fila de notificación**: punto de no leída (5 × 5 px, reserva espacio aunque esté leída para evitar salto), icono de tipo (30 × 30 px, radio 8 px, color del tipo al 10% de opacidad), título, mensaje, tiempo relativo, enlace de acción específico por tipo.
 - **Enlace de acción por tipo**:
@@ -213,13 +213,13 @@ Diseño high-fidelity conforme al handoff: `max-width: 1000px`, `padding: 28px 2
   - `user_invited / user_joined` → "Ver usuarios" → `/users`
 - **Click en fila**: marca como leída (actualización optimista en cliente + `PATCH` al servidor) y navega al destino. No hay botón separado de "marcar como leída".
 - **Marcar N como leídas** (2026-11-03): solo aparece si hay no leídas y dice cuántas marca ("Marcar 5 como leídas"); al pulsarlo desaparece, y eso confirma que funcionó. Antes quedaba atenuado pero pulsable, y no se sabía si había hecho algo. Subtítulos: admin "Tus avisos de documentos y de preguntas sin respuesta."; user "Avisos sobre tus documentos." (decía "lo que te pidan los administradores", resto de "Pedir documento").
-- **Eliminar** (2026-11-03), al estilo correo: una papelera al final de cada fila (aparece al pasar el ratón o con el teclado; siempre visible en pantallas táctiles) borra esa notificación al momento; "Eliminar N leídas" en la cabecera borra las ya leídas tras confirmar. Las no leídas nunca se borran en bloque.
-- **Textos más claros** (2026-11-03): sin la píldora del tipo, que repetía el título; los avisos antiguos "Brecha de conocimiento" / "Brecha resuelta" se muestran como "Nueva pregunta sin respuesta" / "Pregunta resuelta" (`notificationTitle`), y los de documento fallido ya no enseñan el error técnico de S3 (`notificationMessage`). Lo mismo en la campana.
+- **Eliminar y seleccionar al estilo Gmail** (2026-11-03/04): una papelera al final de cada fila (aparece al pasar el ratón o con el teclado; siempre visible en pantallas táctiles) borra esa notificación al momento. Para varias: casilla en cada aviso y, arriba de la lista, casilla general (marca o quita todas; estado intermedio si hay algunas) con menú **Todas · Leídas · No leídas · Ninguna**. Con algo elegido aparece "N seleccionadas" con **Marcar como leídas** (solo si alguna sigue sin leer) y **Eliminar**, que pide confirmación si son varias. La selección se limita a lo cargado en pantalla y se vacía al cambiar de pestaña o recargar. Sustituye al botón "Eliminar N leídas" de la primera versión: el menú hace lo mismo con Leídas → Eliminar.
+- **Textos más claros** (2026-11-03): sin la píldora del tipo, que repetía el título; los de documento fallido ya no enseñan el error técnico de S3 (`notificationMessage`). Lo mismo en la campana.
 - **Paginación**: "Cargar más" al pie de la tarjeta, 25 registros por página. Sin scroll interno (el scroll es el de la página).
 - **Skeleton**: 7 filas animadas (`@keyframes sk-pulse`) con la misma forma que una fila real, dentro de la tarjeta.
 - **Estado vacío / error**: dentro de la tarjeta, texto centrado. El error incluye botón "Reintentar".
 - **Tiempo relativo** (`relativeTime()` en `notification-display.util.ts`): "ahora mismo" / "hace X min" / "hace X h" / "ayer HH:mm" / "DD/MM HH:mm" a partir de 48 h. Se recalcula en cliente; no se cachea el texto.
-- **Backend consumido**: `GET /v1/notifications/` (con parámetros `read`, `type`, `skip`, `limit`), `GET /v1/notifications/counts`, `GET /v1/notifications/unread-count`, `PATCH /v1/notifications/{id}/read`, `POST /v1/notifications/read-all`, `DELETE /v1/notifications/{id}`, `DELETE /v1/notifications/read`.
+- **Backend consumido**: `GET /v1/notifications/` (con parámetros `read`, `type`, `skip`, `limit`), `GET /v1/notifications/counts`, `GET /v1/notifications/unread-count`, `PATCH /v1/notifications/{id}/read`, `POST /v1/notifications/read-all`, `DELETE /v1/notifications/{id}`, `POST /v1/notifications/bulk` (`{ids, action: "read" | "delete"}`).
 
 ---
 
@@ -262,9 +262,13 @@ Resumen de lo no implementado aún:
 - **Knowledge Gaps** (preguntas sin respuesta): ✅ implementado. Las rutas
   `/knowledge-gaps` y `/knowledge-gaps/:id` están registradas en
   `app.routes.ts`, y tanto el feedback (sección 11, "Enviar a preguntas sin
-  respuesta") como las notificaciones (sección 12, tipos
-  `knowledge_gap_found` / `knowledge_gap_resolved`) generan y enlazan
-  `KnowledgeGap` correctamente.
+  respuesta") genera y enlaza `KnowledgeGap` correctamente.
+  - ✅ **Sin notificaciones** (2026-11-04): "Nueva pregunta sin respuesta" y
+    "Pregunta resuelta" las creaba la acción de un admin (convertir, resolver)
+    y le llegaban a él mismo; solo llenaban la bandeja. Se retiraron en los dos
+    repos, con la pestaña "Sin respuesta" de Notificaciones, y la migración
+    `d9f1b3c5a7e2` borró los ya emitidos. Lo pendiente ya lo
+    muestra esta pantalla con su contador de abiertas.
   - ✅ **Retirado "Pedir documento"** (2026-11-03): asignaba la pregunta a una
     persona y la dejaba "en curso" sin resolverla, y junto a "Vincular
     documento" confundía. Quedan dos vías: **Vincular documento** y **Escribir

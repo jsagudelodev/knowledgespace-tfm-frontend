@@ -38,5 +38,4 @@ export interface NotificationCounts {
   read: number;
   documents: number;
   budget: number;
-  knowledge_gap: number;
 }
