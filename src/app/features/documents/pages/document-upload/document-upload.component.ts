@@ -52,6 +52,7 @@ export class DocumentUploadComponent implements OnInit {
           this.availableCategories = categories.filter((c) => c.is_active);
           this.cdr.markForCheck();
         },
+        // Secundario: sin la lista se sube sin categoría; red y 5xx los avisa el interceptor.
         error: () => {},
       });
 
@@ -63,6 +64,7 @@ export class DocumentUploadComponent implements OnInit {
           this.availableAssistants = assistants.filter((a) => a.is_active);
           this.cdr.markForCheck();
         },
+        // Secundario: sin la lista se sube sin asignar asistente; red y 5xx los avisa el interceptor.
         error: () => {},
       });
   }

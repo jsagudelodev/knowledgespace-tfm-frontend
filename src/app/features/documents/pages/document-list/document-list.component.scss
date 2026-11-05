@@ -496,14 +496,13 @@
 
   .doc-error-msg {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 4px;
     margin-top: 4px;
+    max-width: 420px;
     color: $red-text;
     font-size: $size-xs;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    line-height: 1.4;
 
     .material-symbols-outlined { flex-shrink: 0; font-size: 13px; }
   }

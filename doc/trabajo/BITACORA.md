@@ -89,6 +89,40 @@ Formato de cada entrada:
   maquetas HTML, README, tres `MODELO_DATOS.md` idénticos, tres `support.js` y
   un `.zip` del proyecto de diseño). Nadie los enlazaba salvo FEATURES, ya
   corregido.
+- 2026-11-04, **README de los dos repos** revisados contra el código y
+  corregidos (recuentos de modelos y routers, ubicación del `.venv`, `tags/`,
+  puerto local, entornos de relleno, comandos de tests y lint, URL de la
+  demo).
+- 2026-11-04, **manejo de errores** (nos evalúan código y manejo de errores).
+  Diagnóstico: el backend no tenía manejador global (un fallo no previsto era
+  un 500 en texto plano), un `except: pass` al borrar vectores de Pinecone, y
+  en el frontend 15 `error: () => {}`, de los que cinco eran acciones del
+  usuario que fallaban en silencio ante un 4xx. Hecho: `error_handlers.py`
+  (503/500 en JSON, detalle solo en el log), aviso en el log del borrado,
+  `avisadoPorElInterceptor` para no avisar dos veces, avisos en calificar,
+  descargar, eliminar y marcar notificaciones, y comentario con el motivo en
+  los errores ignorados a propósito (cargas secundarias y actualizaciones
+  optimistas). Tests: backend 276, frontend 80.
+- 2026-11-04, documentado en `docs/TFM/MANEJO_ERRORES.md` (backend), enlazado
+  desde los dos README. Al reunir los datos salieron cuatro respuestas de
+  `documents.py` que devolvían `str(e)` al cliente: corregidas, con un test
+  que lo vigila (comprobado contra el código anterior). Queda declarado como
+  limitación el 500 del manejador global, que sale sin cabeceras CORS.
+- 2026-11-05, **mensaje legible para un documento fallido**: el listado
+  mostraba el `error_message` crudo (`NoSuchKey` de S3). La API lo traduce al
+  responder, con un validador en `DocumentResponse`, según el prefijo que
+  ponen nuestros propios servicios; el original se queda en la base de datos y
+  en el log, y sirve también para los documentos que ya habían fallado, sin
+  migración. Frontend: el mensaje se muestra entero (antes recortado a 70
+  caracteres, que cortaba justo el "qué hacer"); fuera `truncateError`.
+  Tests: backend 285, frontend 80.
+- 2026-11-04, **MANUAL_USUARIO corregido contra el código**: tabla de roles de
+  los permisos por rol (Feedback IA y Sin respuesta solo admin, Empresas solo
+  superadmin, documentos propios frente a ajenos); fuera Etiquetas (§1, §2,
+  §4); el chat **sí** responde en streaming (§3 y §7; existe desde el
+  2026-10-24, backend `530b3cf`); la propia contraseña **sí** se cambia desde
+  Mi perfil (§7 decía que no). Comprobado en `app.routes.ts`, el menú lateral
+  y `auth.py` (`PUT /auth/change-password`).
 - Corregido en el backend (`RAG_PIPELINE.md`, `PINECONE_VECTORES.md`): decían
   que el chat cae al namespace de empresa; eso solo lo hace la búsqueda de
   candidatos.

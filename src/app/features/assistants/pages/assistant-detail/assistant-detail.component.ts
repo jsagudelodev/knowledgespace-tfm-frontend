@@ -97,6 +97,7 @@ export class AssistantDetailComponent implements OnInit, OnDestroy {
 
     this.categoryService.getCategories()
       .pipe(takeUntilDestroyed(this.destroyRef))
+      // Secundario: sin categorías el filtro queda vacío; red y 5xx los avisa el interceptor.
       .subscribe({ next: (cats) => this.categories.set(cats.filter(c => c.is_active)), error: () => {} });
 
     this.assistantService.getAssistant(id)

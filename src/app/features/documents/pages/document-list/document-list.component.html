@@ -170,9 +170,11 @@
                 <div class="doc-title-sub">{{ formatFileSize(doc.file_size) }}</div>
               }
               @if (doc.error_message && doc.status === 'failed') {
-                <div class="doc-error-msg" [title]="doc.error_message">
+                <!-- Mensaje legible que traduce el backend (qué pasó y qué hacer):
+                     se muestra entero; recortado se perdía la parte de qué hacer. -->
+                <div class="doc-error-msg">
                   <span class="material-symbols-outlined icon-sm">info</span>
-                  {{ truncateError(doc.error_message) }}
+                  <span>{{ doc.error_message }}</span>
                 </div>
               }
             </div>

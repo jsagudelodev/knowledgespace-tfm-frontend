@@ -6,6 +6,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
 import { UiStatusService } from '../../../core/services/ui-status.service';
 import { NotificationsService } from '../../../features/notifications/services/notifications.service';
+import { NotificationService } from '../../../core/services/notification.service';
+import { avisadoPorElInterceptor } from '../../../core/interceptors/error.interceptor';
 import { AppNotification } from '../../../core/models/notification.model';
 import {
   notificationAction, notificationIcon, notificationMessage, relativeTime,
@@ -30,6 +32,7 @@ export class HeaderComponent implements OnInit {
   private readonly notificationsService = inject(NotificationsService);
   private readonly companyService      = inject(CompanyService);
   private readonly destroyRef          = inject(DestroyRef);
+  private readonly toasts              = inject(NotificationService);
 
   @Input() sidebarOpen = true;
   @Output() sidebarToggle = new EventEmitter<void>();
@@ -135,6 +138,7 @@ export class HeaderComponent implements OnInit {
   clearCompanyContext(): void {
     this.companyService.getMyCompany()
       .pipe(takeUntilDestroyed(this.destroyRef))
+      // Si falla, se mantiene la empresa actual; red, permisos y 5xx los avisa el interceptor.
       .subscribe({ next: (own) => this.selectCompany(own), error: () => {} });
   }
 
@@ -170,6 +174,7 @@ export class HeaderComponent implements OnInit {
       );
       this.notificationsService.markAsRead(notification.id)
         .pipe(takeUntilDestroyed(this.destroyRef))
+        // Optimista, como en /notifications: si falla, el interceptor avisa y al recargar vuelve a salir.
         .subscribe({ error: () => {} });
     }
     // Mismo destino que en la página de Notificaciones.
@@ -189,7 +194,10 @@ export class HeaderComponent implements OnInit {
         next: () => {
           this.recentNotifications.update(list => list.map(n => ({ ...n, read: true })));
         },
-        error: () => {}
+        // Antes se ignoraba: la campana seguía con sus no leídas y sin aviso.
+        error: (err) => {
+          if (!avisadoPorElInterceptor(err)) this.toasts.error('No se pudieron marcar como leídas.');
+        },
       });
   }
 

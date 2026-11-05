@@ -48,6 +48,39 @@ backend.
   `ESTADO_SOFTWARE_ENTREGA.md` (foto del 20 de octubre; lo vigente está en
   `ENTREGA_TFM.md`). Frontend: `doc/ia-handoff/`, los encargos de diseño de
   septiembre, que describían funciones ya retiradas.
+- **README de los dos repos corregidos contra el código.** Backend: 14
+  modelos (decía 13 tablas), 15 routers (decía 16), el `.venv` en `api/` y el
+  nombre KnowledgeSpace. Frontend: fuera `tags/`, con `profile/` y los
+  componentes compartidos reales; puerto local 8002 (decía 8080, también en
+  `doc/CLAUDE.md`); producción apunta a Cloud Run, no a `api.example.com`;
+  añadidos tests, lint, URL de Vercel y enlaces al manual y al CHANGELOG.
+- **Manejo de errores, revisado de cara a la evaluación del código.**
+  Backend: manejador global (`app/core/error_handlers.py`) — 503 si falla un
+  proveedor externo, 500 si no, siempre JSON y sin detalle técnico, que va al
+  log; antes un fallo no previsto era un 500 en texto plano. El borrado de
+  vectores de Pinecone ya no falla en silencio (`documents.py`). Frontend:
+  `avisadoPorElInterceptor` evita avisos dobles, y calificar, descargar un
+  documento del chat, eliminar notificaciones y marcar como leídas (en bloque
+  y desde la campana) avisan si el backend las rechaza; los errores que se
+  ignoran a propósito llevan su motivo comentado. Tests: backend 276 (10
+  nuevos), frontend 80 (6 nuevos).
+- Cuatro respuestas de `documents.py` (subir, borrar y descargar de S3; listar
+  fragmentos de Pinecone) devolvían `str(e)` al cliente: ahora deja el error al
+  manejador global. Un test vigila que ningún router vuelva a hacerlo.
+- **Un documento fallido ya no muestra el error técnico** (p. ej. el
+  `NoSuchKey` de S3). La API traduce `error_message` al responder
+  (`app/schemas/mensajes_documento.py`) a qué pasó y qué hacer; el original
+  sigue en la base de datos y en el log. Vale también para los que fallaron
+  antes. El listado de Documentos lo muestra entero en vez de recortarlo a 70
+  caracteres. Tests: backend 285.
+- **Documento nuevo `docs/TFM/MANEJO_ERRORES.md`** (backend): principios,
+  capas y códigos, excepciones propias, manejador global, chat y streaming,
+  procesos en segundo plano, efectos secundarios, interceptor y avisos del
+  frontend, un recorrido completo, tests y limitaciones conocidas.
+- **MANUAL_USUARIO (anexo 10.1) corregido contra el código.** La tabla de
+  roles refleja los permisos por rol del 2026-11-02; fuera Etiquetas; el chat
+  responde en streaming (el manual decía que no) y la propia contraseña se
+  cambia desde Mi perfil (decía que no existía).
 
 ```
 tests  backend 263 · frontend 74

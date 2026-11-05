@@ -20,16 +20,25 @@ roles:
 
 | Sección | `user` | `admin` | `superadmin` |
 |---|---|---|---|
-| Documentos, Etiquetas, Categorías | ✅ | ✅ | ✅ |
-| Asistentes y Chat IA | ✅ | ✅ | ✅ |
-| Dashboard, Feedback IA, Notificaciones, Sin respuesta | ✅ | ✅ | ✅ |
+| Chat IA, Dashboard, Notificaciones, Mi perfil | ✅ | ✅ | ✅ |
+| Documentos: ver, subir, y borrar o recategorizar **los propios** | ✅ | ✅ | ✅ |
+| Documentos de otros usuarios: borrar o recategorizar | — | ✅ | ✅ |
+| Asistentes y Categorías: ver | ✅ | ✅ | ✅ |
+| Asistentes y Categorías: crear, editar y borrar | — | ✅ | ✅ |
+| Feedback IA y Sin respuesta | — | ✅ | ✅ |
 | Usuarios | — | ✅ | ✅ |
-| Empresas | — | ✅ | ✅ |
+| Empresas | — | — | ✅ |
 
-**Limitación conocida:** el rol solo restringe **Usuarios** y **Empresas** (y la
-consulta de costos en la API). En el resto de secciones, un usuario normal
-puede hacer lo mismo que un administrador de su empresa, incluido borrar
-documentos o editar asistentes. No hay permisos por documento ni por acción.
+La regla es que un `user` **aporta** (pregunta, califica, sube documentos) y
+el `admin` **gestiona** lo que cambia lo que el asistente responde a toda la
+empresa o expone datos de otros usuarios. Calificar una respuesta sí lo puede
+hacer cualquiera; revisar las calificaciones de todos, solo un administrador.
+**Empresas** es de la plataforma, no de una empresa: solo la ve el
+superadministrador.
+
+**Limitación conocida:** dentro de su empresa, un administrador ve y gestiona
+todos los asistentes y documentos. No hay permisos por asistente ni por
+documento.
 
 ---
 
@@ -40,15 +49,17 @@ documentos o editar asistentes. No hay permisos por documento ni por acción.
 Al iniciar sesión se llega al **Dashboard**. El menú lateral agrupa las
 secciones:
 
-- **Conocimiento:** Documentos, Etiquetas, Categorías.
+- **Conocimiento:** Documentos, Categorías.
 - **Plataforma:** Asistentes.
-- **Administración** (solo administradores): Empresas, Usuarios.
-- **Analytics:** Dashboard, Feedback IA, Notificaciones (con el número de avisos
-  sin leer) y Sin respuesta.
+- **Administración** (solo administradores): Usuarios, y Empresas solo para el
+  superadministrador.
+- **Analytics:** Dashboard, Notificaciones (con el número de avisos sin leer) y,
+  para administradores, Feedback IA y Sin respuesta.
 
 En la cabecera, el botón **Chat IA** abre el chat en un panel lateral desde
 cualquier sección, sin salir de la pantalla en la que se está. El botón ☰
-pliega el menú lateral.
+pliega el menú lateral. El menú del avatar lleva a **Mi perfil**, donde cada
+usuario cambia su nombre y su contraseña.
 
 ![Dashboard de un usuario normal: sin la sección Administración](capturas/02-dashboard.jpg)
 
@@ -59,7 +70,8 @@ pliega el menú lateral.
 ### Paso 1. Crear un asistente
 
 Un asistente es un espacio de conocimiento: responde **solo** con los
-documentos que se le asignan.
+documentos que se le asignan. Crearlo y editarlo es tarea de un
+administrador; un usuario normal elige entre los que ya existen.
 
 1. **Asistentes → Nuevo Asistente.**
 
@@ -108,7 +120,8 @@ eligiendo a qué asistente se asignan.
    lateral; no tiene entrada propia en el menú.
 2. Si la empresa tiene varios asistentes, elegir uno en la fila
    **Asistente**, en la parte superior del panel.
-3. Escribir la pregunta y enviarla.
+3. Escribir la pregunta y enviarla. La respuesta aparece a medida que se
+   genera, palabra a palabra, y al terminar se añaden sus fuentes.
 
 Cada respuesta muestra sus **fuentes**: los documentos consultados, con su
 puntuación de relevancia. Desde ahí se puede ver el fragmento exacto que usó
@@ -152,12 +165,19 @@ En **Documentos** están todos los documentos de la empresa:
 - Descargar el original: cada descarga genera un enlace temporal nuevo.
 - Reintentar los fallidos y eliminar con confirmación.
 
-**Etiquetas** y **Categorías** son catálogos para organizar los documentos:
-nombre y color, y en las categorías también descripción, icono y orden.
+Un usuario normal puede borrar o recategorizar **sus** documentos; los de
+otros, solo un administrador.
+
+**Categorías** es el catálogo para organizar los documentos: nombre, color,
+descripción, icono y orden. Lo gestiona un administrador.
 
 ---
 
 ## 5. Revisar la calidad de las respuestas
+
+Feedback IA y Sin respuesta son pantallas de administración: lo que se resuelve
+en ellas cambia lo que el asistente responde a toda la empresa. Notificaciones y
+Dashboard los ve cualquier usuario.
 
 ### Feedback IA
 
@@ -230,8 +250,8 @@ usuarios y mensajes. Una empresa sin documentos ve una guía de primeros pasos.
 - **Usuarios:** crear cuentas (quedan asociadas a la empresa del
   administrador), asignar el rol, activar o desactivar y **restablecer la
   contraseña** de otro usuario.
-- **Empresas:** alta y edición de las empresas, con su plan y sus límites de
-  usuarios, documentos y mensajes al mes.
+- **Empresas** (solo superadministrador): alta y edición de las empresas, con
+  su plan y sus límites de usuarios, documentos y mensajes al mes.
 
 ![Dashboard de un administrador, con la sección Administración](capturas/15-dashboard-administrador.jpg)
 
@@ -243,11 +263,11 @@ usuarios y mensajes. Una empresa sin documentos ve una guía de primeros pasos.
 
 ## 7. Lo que la aplicación no hace
 
-- **Registro público** y **cambio de la propia contraseña**: no existen; las
-  cuentas y los restablecimientos los gestiona un administrador.
-- **Respuestas en streaming**: la respuesta del chat llega completa, no palabra
-  por palabra.
-- **Permisos finos**: ver la limitación de la sección 1.
+- **Registro público**: no existe; las cuentas las crea un administrador. La
+  propia contraseña sí se cambia desde **Mi perfil**, y si se olvida, la
+  restablece un administrador.
+- **Recuperar la contraseña por correo**: no hay envío de correos.
+- **Permisos por asistente o por documento**: ver la limitación de la sección 1.
 - **Corregir premisas falsas**: si la pregunta da por cierto algo falso, el
   asistente puede abstenerse o, en algún caso, aceptar la premisa (ver la
   evaluación en el capítulo 5 de la memoria). Conviene formular las preguntas

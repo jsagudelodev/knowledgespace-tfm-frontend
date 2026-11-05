@@ -164,6 +164,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (categories) => this.availableCategories.set(categories),
+        // Secundario: sin categorías el filtro queda vacío; red y 5xx los avisa el interceptor.
         error: () => {},
       });
   }
@@ -261,10 +262,6 @@ export class DocumentListComponent implements OnInit, OnDestroy {
       failed: 'Fallido',
     };
     return map[status] ?? status;
-  }
-
-  truncateError(msg: string, max = 70): string {
-    return msg.length > max ? msg.slice(0, max) + '…' : msg;
   }
 
   formatFileSize(bytes?: number): string {

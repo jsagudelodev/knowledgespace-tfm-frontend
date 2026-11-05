@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { NotificationsService } from '../../services/notifications.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { avisadoPorElInterceptor } from '../../../../core/interceptors/error.interceptor';
 import { AppNotification, NotificationCounts } from '../../../../core/models/notification.model';
 import {
   notificationAction, notificationIcon, notificationMessage, relativeTime,
@@ -47,6 +49,7 @@ export class NotificationListComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly svc        = inject(NotificationsService);
   private readonly router     = inject(Router);
+  private readonly toasts     = inject(NotificationService);
 
   readonly chips        = CHIPS;
   readonly skeletonRows = [1, 2, 3, 4, 5, 6, 7];
@@ -120,6 +123,8 @@ export class NotificationListComponent implements OnInit {
   private loadCounts(): void {
     this.svc.getCounts()
       .pipe(takeUntilDestroyed(this.destroyRef))
+      // Secundario: si falla, los chips se quedan con el último valor; red y
+      // 5xx ya los avisa el interceptor.
       .subscribe({ next: c => this.counts.set(c), error: () => {} });
   }
 
@@ -174,6 +179,8 @@ export class NotificationListComponent implements OnInit {
     if (!n.read) {
       this.notifications.update(list => list.map(x => x.id === n.id ? { ...x, read: true } : x));
       this.counts.update(c => ({ ...c, unread: Math.max(0, c.unread - 1), read: c.read + 1 }));
+      // Optimista: se marca en pantalla al abrirla. Si el servidor falla, el
+      // interceptor avisa y al recargar vuelve a salir como no leída.
       this.svc.markAsRead(n.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ error: () => {} });
     }
     const action = this.entityAction(n);
@@ -213,7 +220,10 @@ export class NotificationListComponent implements OnInit {
           this.loadCounts();
           this.forgetRemoving(n.id);
         },
-        error: () => this.forgetRemoving(n.id),
+        error: (err) => {
+          this.forgetRemoving(n.id);
+          this.avisarFallo(err, 'No se pudo eliminar la notificación.');
+        },
       });
   }
 
@@ -271,7 +281,10 @@ export class NotificationListComponent implements OnInit {
               : list.map(n => elegidas.has(n.id) ? { ...n, read: true } : n));
           this.afterBulk();
         },
-        error: () => this.bulkBusy.set(false),
+        error: (err) => {
+          this.bulkBusy.set(false);
+          this.avisarFallo(err, 'No se pudieron marcar como leídas.');
+        },
       });
   }
 
@@ -292,8 +305,17 @@ export class NotificationListComponent implements OnInit {
           this.notifications.update(list => list.filter(n => !elegidas.has(n.id)));
           this.afterBulk();
         },
-        error: () => this.bulkBusy.set(false),
+        error: (err) => {
+          this.bulkBusy.set(false);
+          this.avisarFallo(err, 'No se pudieron eliminar las notificaciones.');
+        },
       });
+  }
+
+  /** Aviso para las acciones del usuario. Red, permisos y 5xx ya los muestra
+   *  el interceptor: aquí solo el resto, para no avisar dos veces. */
+  private avisarFallo(err: unknown, mensaje: string): void {
+    if (!avisadoPorElInterceptor(err)) this.toasts.error(mensaje);
   }
 
   private afterBulk(): void {

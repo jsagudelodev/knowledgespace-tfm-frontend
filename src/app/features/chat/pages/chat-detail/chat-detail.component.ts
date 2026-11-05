@@ -60,6 +60,8 @@ interface FuenteAgrupada {
 }
 import { AuthService } from '../../../../core/services/auth.service';
 import { UiStatusService } from '../../../../core/services/ui-status.service';
+import { NotificationService } from '../../../../core/services/notification.service';
+import { avisadoPorElInterceptor } from '../../../../core/interceptors/error.interceptor';
 import { User } from '../../../../core/models/user.model';
 import { DocumentService } from '../../../documents/services/document.service';
 import { AssistantService } from '../../../assistants/services/assistant.service';
@@ -82,6 +84,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
   private documentService = inject(DocumentService);
   private assistantService = inject(AssistantService);
   private uiStatus = inject(UiStatusService);
+  private toasts = inject(NotificationService);
 
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
   @ViewChild('messageInput') messageInput?: ElementRef<HTMLTextAreaElement>;
@@ -327,6 +330,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
             this.assistantId.set(chosen.id);
           }
         },
+        // Secundario: sin la lista de asistentes el chat sigue con el seleccionado; red y 5xx los avisa el interceptor.
         error: () => {},
       });
   }
@@ -380,6 +384,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
           });
           this.messageFeedback.set(map);
         },
+        // Secundario: si falla, los pulgares salen sin marcar; volver a calificar no duplica nada visible.
         error: () => {},
       });
   }
@@ -556,7 +561,10 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
           a.target = '_blank';
           a.click();
         },
-        error: () => {},
+        // Antes se ignoraba: al pulsar "descargar" no pasaba nada.
+        error: (err) => {
+          if (!avisadoPorElInterceptor(err)) this.toasts.error('No se pudo descargar el documento.');
+        },
       });
   }
 
@@ -777,7 +785,12 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
           this.feedbackSent.set(messageId);
           setTimeout(() => this.feedbackSent.set(null), 2000);
         },
-        error: () => {},
+        // Antes se ignoraba: si el backend rechazaba la calificación, el
+        // pulgar no se marcaba y no había ningún aviso. Red, permisos y 5xx ya
+        // los avisa el interceptor; aquí, el resto.
+        error: (err) => {
+          if (!avisadoPorElInterceptor(err)) this.toasts.error('No se pudo guardar la calificación.');
+        },
       });
   }
 

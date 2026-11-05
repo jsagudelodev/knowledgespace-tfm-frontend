@@ -2,6 +2,13 @@
 
 Plataforma de Conocimiento Empresarial IA. SPA Angular 21 con diseño **Deep Blue Premium**.
 
+- **Aplicación desplegada:** https://knowledgespace-tfm-frontend.vercel.app
+  (Vercel, despliega en cada `push` a `main`; el usuario de demostración se
+  indica en la memoria, no en el repositorio).
+- **Backend:** [knowledgespace-tfm-backend](https://github.com/jsagudelodev/knowledgespace-tfm-backend)
+  (FastAPI en Google Cloud Run).
+- **Manual de usuario:** [doc/MANUAL_USUARIO.md](doc/MANUAL_USUARIO.md).
+
 ---
 
 ## Stack tecnológico
@@ -21,16 +28,20 @@ Plataforma de Conocimiento Empresarial IA. SPA Angular 21 con diseño **Deep Blu
 ## Comandos
 
 ```bash
-npm start                # Local   → http://localhost:4200 (environment.ts)
-npm run start:dev        # Dev     → api-dev.example.com
-npm run start:qa         # QA      → api-qa.example.com
-npm run start:pdn        # Prod    → api.example.com
+npm start                # Local → http://localhost:4200, contra el backend local (127.0.0.1:8002)
+npm run start:pdn        # Contra el backend de producción (Cloud Run)
 
-npm run build            # Build producción → dist/
+npm run build            # Build de producción → dist/ (el que usa Vercel)
 npm run build:dev        # Build development (source maps)
-npm run build:qa         # Build QA (optimizado)
-npm run build:pdn        # Build producción (alias explícito)
+
+npm test                 # Tests unitarios (Vitest), en modo watch
+npx ng test --watch=false  # Una sola pasada
+npm run lint             # ESLint
 ```
+
+`start:dev`, `start:qa`, `build:qa` y sus entornos existen en `angular.json`,
+pero apuntan a direcciones de relleno (`api-dev.example.com`,
+`api-qa.example.com`): no hay entornos de desarrollo ni de QA desplegados.
 
 **Generadores:**
 ```bash
@@ -43,7 +54,7 @@ npx ng generate guard core/guards/<nombre>
 
 ## Arquitectura
 
-### Estructura de carpetas (objetivo)
+### Estructura de carpetas
 
 ```
 src/
@@ -60,14 +71,15 @@ src/
 │   │   ├── documents/
 │   │   ├── assistants/
 │   │   ├── categories/
-│   │   ├── tags/
 │   │   ├── companies/
 │   │   ├── users/
+│   │   ├── profile/
 │   │   ├── notifications/
 │   │   ├── knowledge-gaps/
 │   │   └── feedback/
 │   ├── shared/                # Componentes y layouts reutilizables
-│   │   ├── components/        # header, empty-state, toast-host
+│   │   ├── components/        # header, empty-state, toast-host, chunks-drawer,
+│   │   │                      # card-skeleton, table-skeleton
 │   │   └── layouts/           # dashboard-layout
 │   ├── app.config.ts          # Providers globales (router, HTTP, etc.)
 │   ├── app.routes.ts          # Rutas raíz con lazy loading
@@ -211,17 +223,17 @@ Target `ES2022`, `isolatedModules: true`. Los componentes generados usarán SCSS
 
 | Entorno | Script serve | Script build | `environment.ts` activo | `production` flag |
 |---|---|---|---|---|
-| **local** | `npm start` | `npm run build:dev` | `environment.ts` → `127.0.0.1:8002` | `false` |
-| **dev** | `npm run start:dev` | `npm run build:dev` | `environment.development.ts` | `false` |
-| **qa** | `npm run start:qa` | `npm run build:qa` | `environment.qa.ts` | `false` |
-| **pdn** | `npm run start:pdn` | `npm run build:pdn` | `environment.production.ts` | `true` |
+| **local** | `npm start` | — | `environment.ts` → `127.0.0.1:8002` | `false` |
+| **dev** | `npm run start:dev` | `npm run build:dev` | `environment.development.ts` (dirección de relleno) | `false` |
+| **qa** | `npm run start:qa` | `npm run build:qa` | `environment.qa.ts` (dirección de relleno) | `false` |
+| **pdn** | `npm run start:pdn` | `npm run build` / `build:pdn` | `environment.production.ts` → Cloud Run | `true` |
 
 Los archivos viven en `src/environments/`. El consumo en código es siempre desde `environment.ts`:
 
 ```typescript
 import { environment } from '../environments/environment';
 
-// En local apunta a localhost:8080, en pdn al backend configurado en environment.production.ts
+// En local apunta a 127.0.0.1:8002, en pdn al backend de Cloud Run (environment.production.ts)
 const apiUrl = environment.apiUrl;
 ```
 
@@ -231,5 +243,10 @@ Angular sustituye automáticamente el archivo según la configuración de build 
 
 ## Documentación interna
 
-- [`doc/CLAUDE.md`](doc/CLAUDE.md) — guía para Claude Code al trabajar en este repositorio
+- [`doc/MANUAL_USUARIO.md`](doc/MANUAL_USUARIO.md) — manual de usuario (anexo 10.1 de la memoria)
 - [`ALCANCE_TFM.md`](ALCANCE_TFM.md) — alcance académico de esta entrega (TFM)
+- [`CHANGELOG.md`](CHANGELOG.md) — lo hecho cada día, en los dos repositorios
+- [Manejo de errores](https://github.com/jsagudelodev/knowledgespace-tfm-backend/blob/main/docs/TFM/MANEJO_ERRORES.md) — del backend a la pantalla, en los dos repositorios (`docs/TFM/MANEJO_ERRORES.md` del backend)
+- [`doc/trabajo/FEATURES.md`](doc/trabajo/FEATURES.md) — inventario de funcionalidades
+- [`doc/trabajo/BITACORA.md`](doc/trabajo/BITACORA.md) — diario de trabajo, con decisiones y pendientes
+- [`doc/CLAUDE.md`](doc/CLAUDE.md) — guía para Claude Code al trabajar en este repositorio

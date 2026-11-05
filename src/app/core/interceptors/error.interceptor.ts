@@ -27,6 +27,15 @@ import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 import { NotificationService } from '../services/notification.service';
 
+/** `true` si este interceptor ya mostró un aviso por ese error (sesión caducada,
+ *  sin permiso, red o servidor caídos). Los componentes lo usan para dar su
+ *  mensaje propio solo en el resto —sobre todo los 4xx de negocio— sin que
+ *  salgan dos avisos por el mismo fallo. */
+export function avisadoPorElInterceptor(err: unknown): boolean {
+  const status = (err as HttpErrorResponse | null)?.status ?? 0;
+  return status === 0 || status === 401 || status === 403 || status >= 500;
+}
+
 export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const authService = inject(AuthService);

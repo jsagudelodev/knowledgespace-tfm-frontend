@@ -15,6 +15,7 @@ export class NotificationsService {
   readonly unreadCount = this._unreadCount.asReadonly();
 
   refreshUnreadCount(): void {
+    // Sondeo de fondo: si falla, la campana conserva el último valor hasta el siguiente.
     this.getUnreadCount().subscribe({ next: ({ count }) => this._unreadCount.set(count), error: () => {} });
   }
 

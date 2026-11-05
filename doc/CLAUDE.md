@@ -10,7 +10,7 @@ KnowledgeSpace — Plataforma de Conocimiento Empresarial IA. Frontend Angular 2
 
 ```bash
 # Serve por entorno
-npm start              # local   → localhost:8080  (environment.ts sin reemplazo)
+npm start              # local   → backend en 127.0.0.1:8002  (environment.ts sin reemplazo)
 npm run start:dev      # dev     → api-dev.example.com
 npm run start:qa       # qa      → api-qa.example.com
 npm run start:pdn      # pdn     → api.example.com

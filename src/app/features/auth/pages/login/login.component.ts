@@ -73,6 +73,7 @@ export class LoginComponent {
             .getMyCompany()
             .subscribe({
               next: (company) => this.authService.setSelectedCompany(company),
+              // Opcional tras el login: sin la empresa, la cabecera la pide de nuevo al cargar.
               error: () => {},
             });
           this.router.navigate(['/dashboard']);
