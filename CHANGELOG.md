@@ -10,6 +10,101 @@ backend.
 
 ---
 
+## 2026-11-07
+
+### Memoria
+
+- **Figura 2 (4.1) repetida** con la cuenta de rol usuario: el menú ya no
+  muestra «Etiquetas» ni la sección Administración. Con ella, las cuatro
+  figuras de la interfaz que usa la memoria están al día. 59 páginas.
+  Respaldo previo en `docs/Memoria_TFM_respaldo_2026-11-07.docx` (backend).
+- **Portada:** «Trabajo Fin de Máster · KnowledgeSpace · Plataforma
+  multiempresa de asistentes conversacionales basados en generación aumentada
+  por recuperación, con control y evaluación de alucinaciones · MID · EBIS
+  Business Techschool · Autor: Johan Sebastian Agudelo Sierra · Noviembre de
+  2026». Sin tutor. Índice actualizado.
+- **Anexo 10.1:** credenciales de los dos usuarios de demostración (las puso
+  el autor; comprobadas contra el backend local) y fuera los signos ⟨ ⟩. Solo
+  queda el marcador del enlace al vídeo.
+- La memoria queda en **60 páginas**, el máximo de la guía. Respaldo previo en
+  `docs/Memoria_TFM_respaldo_2026-11-07b.docx`.
+- **Estilo menos «de IA» en toda la memoria**, sin cambiar datos ni ideas: 127
+  sustituciones aplicadas con Word para conservar el formato. Rayas de 114 a 2
+  (las de dos celdas vacías de una tabla), «Conviene/Procede…» de 15 a 0,
+  «no es X, sino Y» de 12 a 0, «precisamente», «deliberadamente» y «la
+  distinción» a 0, «resulta» de 17 a 3. 68 palabras menos; sigue en 60
+  páginas. El capítulo 2 no se tocó. Respaldos: `..._2026-11-07c.docx` (antes
+  de empezar) y `..._2026-11-07d.docx` (tras el capítulo 5).
+- **«Ningún enrutador consulta la base de datos» (3.2 y 4.1) volvía a ser
+  falso**: `feedback.py` leía el asistente de un mensaje y `knowledge_gaps.py`
+  los nombres de asistente y documento directamente. Backend: las tres
+  lecturas pasan a sus repositorios (`MessageRepository.assistant_id_of_company`,
+  `AssistantRepository`/`DocumentRepository.get`), sin cambio de
+  comportamiento, y un test nuevo (`test_capas_sin_consultas_en_routers.py`)
+  falla si un enrutador vuelve a leer o escribir la base directamente, salvo
+  `setup.py`; comprobado contra el código anterior. Memoria: la frase nombra
+  esa excepción (el arranque inicial) y las cifras pasan de «doce» y
+  «diecisiete» a once y dieciséis, que cambiaron al retirar Etiquetas. 6.1 a
+  286 pruebas (Aislamiento 57). Corregido de paso un «y que» sobrante que dejó
+  la limpieza de estilo. 60 páginas; respaldo `..._2026-11-07e.docx`.
+- **Portada:** añadido el tutor, Alberto Ruiz Arteaga. 60 páginas; respaldo
+  `..._2026-11-07f.docx`.
+
+### Capturas del manual
+
+- **Todas repetidas** con la interfaz actual (17 de 18), en localhost: la 01
+  sin sesión; 03–13, 15, 16 y 18 con la cuenta de administrador de
+  demostración; 02 y 14 con la de rol usuario (en la 14, dos casillas marcadas
+  para enseñar la selección, sin borrar nada). En la **16 (Usuarios)** la
+  columna de correos va difuminada. Queda la **17 (Empresas)**, que solo ve un
+  superadministrador y que todavía muestra «Etiquetas» y empresas reales.
+
+---
+
+## 2026-11-05
+
+### Memoria
+
+- **6.1 al día:** 285 pruebas en el servidor (antes decía 266) y una frase con
+  las 80 de la interfaz; fila nueva en la tabla, *Manejo de errores, 19*
+  (`test_manejo_de_errores.py` 10 y `test_mensaje_documento_fallido.py` 9); la
+  tabla suma 285.
+- **3.2:** párrafo nuevo sobre el manejador común (503/500, mismo formato, sin
+  detalle técnico, traza en el registro) y el interceptor de la interfaz; el
+  motivo de un documento fallido se muestra traducido; fuera «una de las
+  treinta y cinco pruebas», cifra de cuando había 35.
+- Índice actualizado; 59 páginas en Word y en PDF, 24.819 palabras. Respaldo
+  previo en `docs/Memoria_TFM_respaldo_2026-11-05.docx` (backend, fuera de git).
+- **Figuras 3 y 4 y la de temperatura, repetidas**: las tres mostraban
+  «Etiquetas» en el menú, retirada el 2026-11-02, y la de temperatura, además,
+  a una cuenta de rol usuario editando un asistente, algo que hoy solo puede
+  hacer un administrador. Misma proporción que las anteriores: el maquetado no
+  cambia (59 páginas). Respaldo en `Memoria_TFM_respaldo_2026-11-05b.docx`.
+
+### Chat
+
+- **Restos de LaTeX:** los comandos de espaciado (`\,`, `\;`, `\:`, `\ `,
+  `\!`, `\quad`) no tienen nombre y se colaban literales: la figura 3 de la
+  memoria mostraba `cos \, θ`. Ahora se traducen a un espacio (el negativo
+  desaparece). Test: `chat-detail.latex.spec.ts` (3).
+- **Fuente «Respuesta directa»:** el chip mostraba un «·» que no se entendía;
+  ahora dice «ver texto», y el texto desplegado se titula «Respuesta escrita»
+  en vez de «Fragmento null».
+- Figura 3 de la memoria y captura 08 rehechas con los dos arreglos. Tests:
+  frontend 83.
+
+### Capturas del manual
+
+- **Catorce capturas de `doc/capturas/` repetidas** con la interfaz actual, en
+  localhost y con la cuenta de administrador: 03, 04, 05, 06, 07, 08, 09, 10,
+  11, 12, 13, 14, 15 y 18. Mismos nombres, así que el manual las toma sin
+  cambios. Las de Feedback, Notificaciones y Preguntas sin respuesta enseñan
+  lo de estos días (pregunta resaltada, selección al estilo Gmail, botón
+  Responder). Pendientes: la 02 (necesita la cuenta de rol usuario) y la 16 y
+  la 17 (muestran correos reales).
+
+---
+
 ## 2026-11-04
 
 ### Notificaciones

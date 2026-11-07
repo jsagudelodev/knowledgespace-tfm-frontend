@@ -211,12 +211,14 @@
                             <!-- Un chip por fragmento: al pulsarlo se ve su
                                  texto, que es lo que permite comprobar la
                                  cita en el documento original. -->
+                            <!-- Una respuesta escrita a mano no tiene número de
+                                 fragmento: antes salía un «·» que no se entendía. -->
                             @for (f of grupo.fragmentos; track f.chunk_id || f.chunk_index) {
                               <button class="source-chunk"
                                       [class.is-open]="expandedSource() === f"
-                                      [title]="'Ver el fragmento ' + f.chunk_index"
+                                      [title]="f.chunk_index != null ? 'Ver el fragmento ' + f.chunk_index : 'Ver la respuesta escrita'"
                                       (click)="toggleSourcePreview(f)">
-                                {{ f.chunk_index ?? '·' }}
+                                {{ f.chunk_index ?? 'ver texto' }}
                               </button>
                             }
                           </div>
@@ -234,7 +236,7 @@
                     @for (f of grupo.fragmentos; track f.chunk_id || f.chunk_index) {
                       @if (expandedSource() === f) {
                         <div class="source-preview">
-                          <span class="source-preview-tag">Fragmento {{ f.chunk_index }}</span>
+                          <span class="source-preview-tag">{{ f.chunk_index != null ? 'Fragmento ' + f.chunk_index : 'Respuesta escrita' }}</span>
                           <p>{{ f.text }}</p>
                         </div>
                       }

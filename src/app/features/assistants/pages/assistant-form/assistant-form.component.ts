@@ -33,7 +33,8 @@ export class AssistantFormComponent implements OnInit {
   error: string | null = null;
 
   readonly availableModels = MODELS;
-  readonly avatarPresets   = ['🤖', '🧠', '💼', '📚', '🎯', '👔', '⚙️', '🔬', '🌐', '💡'];
+  readonly avatarPresets   = ['🤖', '🧠', '💼', '📚', '🎯', '👔', '⚙️', '🔬', '🌐', '💡',
+                              '🎓', '🏫', '📘', '💻', '📊'];
 
   name         = '';
   description  = '';

@@ -248,5 +248,4 @@ Angular sustituye automáticamente el archivo según la configuración de build 
 - [`CHANGELOG.md`](CHANGELOG.md) — lo hecho cada día, en los dos repositorios
 - [Manejo de errores](https://github.com/jsagudelodev/knowledgespace-tfm-backend/blob/main/docs/TFM/MANEJO_ERRORES.md) — del backend a la pantalla, en los dos repositorios (`docs/TFM/MANEJO_ERRORES.md` del backend)
 - [`doc/trabajo/FEATURES.md`](doc/trabajo/FEATURES.md) — inventario de funcionalidades
-- [`doc/trabajo/BITACORA.md`](doc/trabajo/BITACORA.md) — diario de trabajo, con decisiones y pendientes
 - [`doc/CLAUDE.md`](doc/CLAUDE.md) — guía para Claude Code al trabajar en este repositorio

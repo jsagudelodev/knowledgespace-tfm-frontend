@@ -56,6 +56,10 @@ desktop.ini
 # Archivos personales, ajenos al proyecto
 objetos.csv
 
+# Diario de trabajo y preparación de la defensa: se quedan en local
+doc/trabajo/BITACORA.md
+doc/trabajo/DEFENSA_TFM.md
+
 # Environment — nunca commitear overrides locales
 .env
 .env.*

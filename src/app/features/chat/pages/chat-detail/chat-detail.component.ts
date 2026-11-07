@@ -674,6 +674,12 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
         // el argumento y pierde el comando. Va después de los casos concretos
         // para que aquellos tengan preferencia.
         .replace(/\\[a-zA-Z]+\s*\{([^{}]*)\}/g, '$1')
+        // Espaciado: `\,` `\;` `\:` `\ ` son espacios finos y `\!` uno
+        // negativo. No tienen nombre, así que la regla de símbolos no los
+        // veía y se leía `cos \, θ` (visto en la figura 3 de la memoria).
+        .replace(/\\!/g, '')
+        .replace(/\s*\\[,;: ]\s*/g, ' ')
+        .replace(/\s*\\q?quad\b\s*/g, ' ')
         // Símbolos con nombre.
         .replace(/\\([a-zA-Z]+)/g, (completo, nombre) => SIMBOLOS[nombre] ?? nombre)
         // Dobles barras de la norma: `||x||` → `‖x‖`
