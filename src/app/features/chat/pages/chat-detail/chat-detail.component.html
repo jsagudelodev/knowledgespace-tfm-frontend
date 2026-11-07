@@ -173,7 +173,9 @@
             ></div>
 
             <!-- ── Sources ────────────────────── -->
-            @if (message.sources && message.sources.length > 0) {
+            <!-- Una abstención no lleva fuentes aunque algún fragmento haya
+                 pasado el umbral: ver `esAbstencion`. -->
+            @if (message.sources && message.sources.length > 0 && !esAbstencion(message)) {
               <div class="sources-wrapper">
                 <!-- Plegable: con descomposición de consultas una respuesta
                      puede apoyarse en diez fragmentos, y desplegados ocupan
@@ -196,30 +198,46 @@
                   <!-- Agrupadas por documento: repetir siete veces el mismo
                        nombre de PDF convertía el bloque en lo más largo de la
                        respuesta. -->
-                  @for (grupo of agruparFuentes(message.sources); track grupo.nombre) {
+                  @for (grupo of agruparFuentes(message.sources); track grupo.nombre; let primerGrupo = $first) {
                     <div class="source-row">
                       <div class="source-info">
                         <span class="material-symbols-outlined icon-sm source-pdf-icon">{{ grupo.nombre.toLowerCase().endsWith('.pdf') ? 'picture_as_pdf' : 'description' }}</span>
                         <div class="source-meta">
                           <span class="source-name">{{ grupo.nombre }}</span>
                           <div class="source-badges">
-                            <span class="source-score"
-                                  [class.score-high]="grupo.mejorScore >= 0.75"
-                                  [class.score-mid]="grupo.mejorScore >= 0.5 && grupo.mejorScore < 0.75">
-                              {{ (grupo.mejorScore * 100).toFixed(0) }}%
-                            </span>
                             <!-- Un chip por fragmento: al pulsarlo se ve su
                                  texto, que es lo que permite comprobar la
                                  cita en el documento original. -->
                             <!-- Una respuesta escrita a mano no tiene número de
                                  fragmento: antes salía un «·» que no se entendía. -->
-                            @for (f of grupo.fragmentos; track f.chunk_id || f.chunk_index) {
+                            <!-- Sin porcentaje en la fila: la similitud va en el
+                                 tooltip y el más cercano de la respuesta se
+                                 destaca por posición, no por un corte fijo
+                                 (ver `similitud`). -->
+                            @for (f of grupo.fragmentos; track f.chunk_id || f.chunk_index; let primero = $first) {
                               <button class="source-chunk"
+                                      [class.is-best]="primerGrupo && primero"
                                       [class.is-open]="expandedSource() === f"
-                                      [title]="f.chunk_index != null ? 'Ver el fragmento ' + f.chunk_index : 'Ver la respuesta escrita'"
+                                      [pTooltip]="tipFragmento"
+                                      tooltipPosition="top"
+                                      tooltipStyleClass="fuente-tooltip"
+                                      [showDelay]="150"
+                                      [attr.aria-label]="etiquetaFragmento(f)"
                                       (click)="toggleSourcePreview(f)">
                                 {{ f.chunk_index ?? 'ver texto' }}
                               </button>
+                              <!-- PrimeNG lo pinta en <body>: sus estilos viven en
+                                   styles.scss (`.fuente-tooltip`), no en este componente. -->
+                              <ng-template #tipFragmento>
+                                <span class="fuente-tip__titulo">
+                                  {{ f.chunk_index != null ? 'Fragmento ' + f.chunk_index : 'Respuesta escrita' }}
+                                  @if (primerGrupo && primero) { <span class="fuente-tip__marca">Más cercano</span> }
+                                </span>
+                                @if (similitud(f); as sim) {
+                                  <span class="fuente-tip__dato">Similitud <strong>{{ sim }}</strong> con tu pregunta</span>
+                                }
+                                <span class="fuente-tip__accion">Clic para ver el texto</span>
+                              </ng-template>
                             }
                           </div>
                         </div>

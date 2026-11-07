@@ -46,6 +46,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, forkJoin, EMPTY } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { TooltipModule } from 'primeng/tooltip';
 import { ChatService } from '../../services/chat.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { Conversation } from '../../../../core/models/conversation.model';
@@ -68,10 +69,17 @@ import { AssistantService } from '../../../assistants/services/assistant.service
 import { Assistant } from '../../../../core/models/assistant.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
+/**
+ * Frase literal con la que el modelo se abstiene. Debe coincidir carácter a
+ * carácter con la de `REGLAS_DE_RESPUESTA` en `rag_service.py` del backend:
+ * si cambia allí, hay que cambiarla aquí.
+ */
+const FRASE_ABSTENCION = 'No encontré información sobre este tema en los documentos de la empresa.';
+
 @Component({
   selector: 'app-chat-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, EmptyStateComponent, TooltipModule],
   templateUrl: './chat-detail.component.html',
   styleUrls: ['./chat-detail.component.scss'],
 })
@@ -728,7 +736,11 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
 
   /**
    * Agrupa las fuentes por documento, conservando el orden de relevancia: el
-   * documento cuyo mejor fragmento puntúa más alto aparece primero.
+   * documento cuyo mejor fragmento puntúa más alto aparece primero, y dentro
+   * de cada documento, el fragmento más parecido a la pregunta va primero.
+   *
+   * El orden es lo único que se muestra de la puntuación en la fila: el valor
+   * exacto queda en el tooltip de cada fragmento (ver `similitud`).
    */
   agruparFuentes(sources: Source[]): FuenteAgrupada[] {
     const porDocumento = new Map<string, FuenteAgrupada>();
@@ -749,7 +761,50 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
       }
     }
 
-    return [...porDocumento.values()].sort((a, b) => b.mejorScore - a.mejorScore);
+    const grupos = [...porDocumento.values()].sort((a, b) => b.mejorScore - a.mejorScore);
+    for (const g of grupos) g.fragmentos.sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    return grupos;
+  }
+
+  /**
+   * Similitud coseno del fragmento con la pregunta, en decimal (`0,71`), para
+   * el tooltip de cada chip. `null` si la fuente no trae puntuación.
+   *
+   * Antes la fila del documento mostraba `71%` en verde desde 0,75 y en ámbar
+   * desde 0,5. Se retiró por tres motivos: un porcentaje se lee como
+   * confianza en la respuesta y no lo es; con `text-embedding-3-small` las
+   * similitudes viven en una banda estrecha (la señal empieza en 0,393, ver
+   * el umbral en `rag_service.py` del backend), así que "71%" hacía parecer
+   * mediocre una coincidencia fuerte; y esos cortes de color no salían de
+   * ninguna medición. Todo fragmento que llega aquí ya superó el umbral
+   * medido de 0,30, el único corte con respaldo.
+   */
+  similitud(f: Source): string | null {
+    return f.score == null ? null : f.score.toFixed(2).replace('.', ',');
+  }
+
+  /**
+   * ¿La respuesta es una abstención? Entonces no se muestran fuentes.
+   *
+   * El sistema se abstiene de dos formas: ningún fragmento supera el umbral
+   * (llegan sin fuentes) o alguno lo supera pero el modelo ve que no responde
+   * la pregunta (llegan con fuentes). Para el usuario significan lo mismo, y
+   * enseñar «Fuentes consultadas» bajo un «No encontré información» se
+   * contradecía. Los fragmentos siguen guardados y en la traza de Langfuse.
+   *
+   * La comparación es exacta porque el prompt exige la frase literal y la
+   * temperatura es 0; solo se toleran espacios y comillas alrededor.
+   */
+  esAbstencion(message: Message): boolean {
+    const texto = (message.content ?? '').trim().replace(/^["«“]|["»”]$/g, '').trim();
+    return texto === FRASE_ABSTENCION;
+  }
+
+  /** Lo mismo que dice el tooltip, en una frase, para lectores de pantalla. */
+  etiquetaFragmento(f: Source): string {
+    const quien = f.chunk_index != null ? `Fragmento ${f.chunk_index}` : 'Respuesta escrita';
+    const sim = this.similitud(f);
+    return `${quien}${sim ? `, similitud ${sim} con tu pregunta` : ''}. Pulsa para ver el texto.`;
   }
 
   scrollToBottom(): void {

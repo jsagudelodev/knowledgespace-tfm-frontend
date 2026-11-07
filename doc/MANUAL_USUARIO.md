@@ -123,9 +123,11 @@ eligiendo a qué asistente se asignan.
 3. Escribir la pregunta y enviarla. La respuesta aparece a medida que se
    genera, palabra a palabra, y al terminar se añaden sus fuentes.
 
-Cada respuesta muestra sus **fuentes**: los documentos consultados, con su
-puntuación de relevancia. Desde ahí se puede ver el fragmento exacto que usó
-el asistente y descargar el documento original. La respuesta se puede copiar,
+Cada respuesta muestra sus **fuentes**: los documentos consultados y, en cada
+uno, los fragmentos que usó el asistente, ordenados del más parecido a la
+pregunta al menos parecido; el más cercano aparece destacado. Al pasar el
+ratón por un fragmento se ve su similitud con la pregunta (de 0 a 1), y al
+pulsarlo, su texto exacto. También se puede descargar el documento original. La respuesta se puede copiar,
 y dentro de la conversación se puede buscar texto. Debajo de cada respuesta se
 muestra también lo que costó.
 

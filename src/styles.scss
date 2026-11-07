@@ -297,6 +297,68 @@ button { font-family: inherit; }
   }
 }
 
+// Tooltip de cada fragmento citado en el chat (chat-detail). PrimeNG está sin
+// tema (`providePrimeNG` sin preset), así que aquí va también lo estructural:
+// posición, ancho y flecha, no solo los colores.
+.fuente-tooltip {
+  &.p-tooltip {
+    position: absolute;
+    max-width: 240px;
+    padding: 6px 0;            // hueco para la flecha
+    pointer-events: none;
+  }
+
+  .p-tooltip-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    background: $slate-800;
+    color: $font-on-primary;
+    font-size: $size-xs;
+    line-height: 1.4;
+    padding: $sp-2 $sp-3;
+    border-radius: $radius-md;
+    box-shadow: $shadow-lg;
+  }
+
+  .p-tooltip-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+  }
+
+  &.p-tooltip-top .p-tooltip-arrow {
+    bottom: 1px;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px 6px 0;
+    border-top-color: $slate-800;
+  }
+
+  .fuente-tip__titulo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: $w-semibold;
+  }
+
+  .fuente-tip__marca {
+    padding: 0 5px;
+    border-radius: 3px;
+    background: rgba($navy-250, 0.18);
+    color: $navy-250;
+    font-size: 10px;
+    font-weight: $w-semibold;
+  }
+
+  .fuente-tip__dato { color: $slate-300; }
+  .fuente-tip__dato strong { color: $font-on-primary; font-weight: $w-semibold; }
+
+  .fuente-tip__accion { color: $slate-400; font-size: 11px; }
+}
+
 
 // ══════════════════════════════════════════════════════════════════════════
 // 5. TOAST GLOBAL — aplica el sistema de diseño a p-toast (appends to body)

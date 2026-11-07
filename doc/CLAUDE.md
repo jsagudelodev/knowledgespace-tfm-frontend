@@ -11,9 +11,13 @@ KnowledgeSpace — Plataforma de Conocimiento Empresarial IA. Frontend Angular 2
 ```bash
 # Serve por entorno
 npm start              # local   → backend en 127.0.0.1:8002  (environment.ts sin reemplazo)
-npm run start:dev      # dev     → api-dev.example.com
-npm run start:qa       # qa      → api-qa.example.com
-npm run start:pdn      # pdn     → api.example.com
+npm run start:dev      # dev     → api-dev.example.com (placeholder)
+npm run start:qa       # qa      → api-qa.example.com (placeholder)
+npm run start:pdn      # pdn     → backend de Cloud Run (europe-west1)
+
+# Tests (Vitest) y lint
+npm test
+npm run lint
 
 # Build por entorno
 npm run build          # producción
@@ -93,11 +97,11 @@ Prettier — `printWidth: 100`, `singleQuote: true`, Angular parser for HTML fil
 
 ## Documentation Rules (OBLIGATORIO al final de cada sesión)
 
-Al terminar cualquier sesión de trabajo en este repositorio, Claude **siempre** debe actualizar estos cuatro archivos:
+Al terminar cualquier sesión de trabajo en este repositorio, Claude **siempre** debe actualizar estos archivos:
 
-### 1. `doc/trabajo/BITACORA.md`
+### 1. `doc/trabajo/BITACORA.md` (solo local)
 
-Añadir una entrada nueva al inicio (orden descendente — lo más reciente arriba) con la fecha de hoy. Seguir el formato establecido:
+Diario de trabajo personal: está en `.gitignore` y no se sube. Añadir una entrada nueva al inicio (orden descendente — lo más reciente arriba) con la fecha de hoy. Seguir el formato establecido:
 
 ```
 ## AAAA-MM-DD
@@ -120,13 +124,7 @@ Añadir una entrada nueva al inicio (orden descendente — lo más reciente arri
 - Si se completó algo que estaba en "Pendientes": mover de la lista de pendientes a la sección correspondiente o actualizar el texto.
 - Actualizar la fecha en el encabezado del documento.
 
-### 3. `BACKLOG_FRONTEND.md`
-
-- Si un módulo pasó a estado Completo: cambiar `**Estado:** Pendiente` → `**Estado:** Completo ✅` y marcar cada tarea con ✅.
-- Si se agregaron tareas nuevas: añadirlas con ⬜.
-- Si se detectaron pendientes nuevos: agregarlos con ⬜.
-
-### 4. `CHANGELOG.md` (raíz de este repositorio)
+### 3. `CHANGELOG.md` (raíz de este repositorio)
 
 Registro de **todo lo que se hizo cada día, en los dos repos**: es el resumen
 que se consulta para saber qué pasó cuándo. La BITACORA es el diario de trabajo
@@ -141,3 +139,9 @@ con decisiones y pendientes; el CHANGELOG es el resumen limpio de resultados.
   completarlo en la siguiente sesión.
 - Cerrar con el número de tests si cambió.
 - Las migraciones de datos aplicadas en producción se nombran con su id.
+
+### 4. `doc/MANUAL_USUARIO.md`
+
+Si cambia una pantalla que el manual describe, actualizar el texto y, si hace
+falta, repetir su captura en `doc/capturas/` con el mismo nombre (sin datos
+reales: correos difuminados).

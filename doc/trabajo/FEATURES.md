@@ -1,6 +1,6 @@
 # FEATURES.md
 
-Documento de funcionalidades implementadas en KnowledgeSpace Frontend, a la fecha del 2026-11-03.
+Documento de funcionalidades implementadas en KnowledgeSpace Frontend, a la fecha del 2026-11-07.
 
 ## Descripción general del producto
 
@@ -151,7 +151,9 @@ trazabilidad de fuentes.
   hay endpoint para borrar un feedback).
 - **Dónde vive:** en un panel lateral (*drawer*) que abre el botón **Chat IA** de la cabecera, desde cualquier módulo. La página completa con lista de conversaciones (`ChatShellComponent`, `ChatListComponent`) se retiró por redundante. La ruta `/chat/:id` se conserva para los enlaces a una conversación concreta (por ejemplo, «Ver conversación» desde Feedback), y `/chat` a secas redirige al dashboard (2026-10-24; antes mostraba el layout en blanco).
 - **Chat Detail** (panel y `/chat/:id`): burbujas de mensaje usuario/asistente con formato markdown básico (negrita, cursiva, código), indicador de "escribiendo…", selector de **Asistente** activo cuando la empresa tiene más de uno configurado, sugerencias de inicio rápido en el estado vacío.
-  - **Fuentes citadas**: cada respuesta lista los documentos consultados con su score de relevancia, permite previsualizar el fragmento exacto usado por el modelo y descargar el documento original (vía URL firmada de S3). Una respuesta escrita en Preguntas sin respuesta aparece como «Respuesta directa», sin descarga y con el chip «ver texto» (2026-11-05; antes mostraba un «·»).
+  - **Fuentes citadas**: cada respuesta lista los documentos consultados y, en cada uno, sus fragmentos como chips, ordenados de mayor a menor similitud con la pregunta; el más cercano de la respuesta va destacado. Cada chip tiene un tooltip de PrimeNG con la similitud en decimal («Similitud 0,71 con tu pregunta»). Al pulsarlo se ve el fragmento exacto usado por el modelo, con sus saltos de línea y scroll si es largo; el documento original se descarga vía URL firmada de S3. Una respuesta escrita en Preguntas sin respuesta aparece como «Respuesta directa», sin descarga y con el chip «ver texto» (2026-11-05; antes mostraba un «·»).
+    - **Sin porcentaje ni colores por nivel** (2026-11-07): antes la fila mostraba el mejor score como `71%` en verde/ámbar. Un porcentaje se lee como confianza y no lo es, y los cortes de color (0,5/0,75) no estaban medidos; el único corte medido es el umbral de 0,30, que ya superó todo lo que se muestra.
+    - **Abstención sin fuentes** (2026-11-07): si la respuesta es la frase literal «No encontré información sobre este tema en los documentos de la empresa.», no se muestra el bloque, aunque algún fragmento haya pasado el umbral. La frase está duplicada a propósito en `chat-detail.component.ts` (`FRASE_ABSTENCION`) y en `rag_service.py` del backend, con un comentario cruzado.
   - **Fórmulas**: el LaTeX que copia el modelo se traduce a texto legible (`\frac`, símbolos griegos, `\cdot`, normas…) sin motor de fórmulas. Desde el 2026-11-05 cubre también los comandos de espaciado (`\,`, `\;`, `\:`, `\!`, `\quad`), que se colaban literales (`cos \, θ`).
   - **Feedback**: pulgar arriba/abajo por respuesta, con panel de comentario opcional al marcar una respuesta como mejorable (`POST /v1/feedback/`); el estado de feedback ya emitido se restaura al recargar la conversación.
   - **Búsqueda** dentro de los mensajes de la conversación (con resaltado de coincidencias) y **paginación** de mensajes largos.

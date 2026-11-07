@@ -12,6 +12,26 @@ backend.
 
 ## 2026-11-07
 
+### Chat: fuentes
+
+- **Fuera el `71%` con color** de la fila de cada documento: se leía como
+  confianza en la respuesta, y los cortes verde/ámbar (0,75/0,5) no estaban
+  medidos. Los fragmentos se ordenan de mayor a menor similitud, el más
+  cercano va destacado y cada uno tiene un tooltip de PrimeNG con la
+  similitud en decimal (0,71). Estilo en `styles.scss` (`.fuente-tooltip`),
+  porque PrimeNG va sin tema.
+- **Fragmento legible:** respeta los saltos de línea del texto indexado y hace
+  scroll si es largo; las diapositivas se leían como un bloque corrido.
+- **Abstención sin fuentes:** bajo «No encontré información…» ya no aparece
+  «Fuentes consultadas» (pasaba cuando algún fragmento superaba el umbral sin
+  responder la pregunta). Backend: solo un comentario en `rag_service.py` que
+  ata la frase literal a la del front.
+- Manual de usuario al día con el nuevo bloque de fuentes.
+
+### Asistentes
+
+- Cinco avatares más en el formulario (🎓 🏫 📘 💻 📊), 15 en total.
+
 ### Memoria
 
 - **Figura 2 (4.1) repetida** con la cuenta de rol usuario: el menú ya no
