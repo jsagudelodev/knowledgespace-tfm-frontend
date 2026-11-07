@@ -41,8 +41,15 @@ evolucionando por separado. Ver también `ALCANCE_TFM.md` del backend.
 
 ## Limitaciones conocidas
 
-- **Sin tests automatizados**: no existen `.spec.ts` en este repositorio.
-  Es una limitación real del proyecto, no un recorte de esta entrega —
-  se documenta aquí en vez de fabricar cobertura de última hora.
-- Sin CI/CD en este repositorio (el pipeline de la infraestructura comercial
-  queda fuera de esta entrega).
+- **Cobertura de tests parcial**: 19 archivos `.spec.ts` y 83 tests con Vitest
+  (`npm test`), centrados en la lógica con más riesgo: guardas de rutas por
+  rol, sesión e interceptores de autenticación y errores, el chat (streaming,
+  selección de asistente y formato de las respuestas), notificaciones,
+  candidatos de Preguntas sin respuesta y paginación del feedback. No hay pruebas
+  de extremo a extremo; el recorrido completo se comprobó a mano al elaborar
+  el manual de usuario (`doc/MANUAL_USUARIO.md`).
+- **Despliegue continuo sin integración continua**: Vercel publica cada push a
+  `main`, pero ningún pipeline ejecuta los tests antes de publicar.
+- Las funcionalidades retiradas durante la entrega (widget, etiquetas, registro
+  público, «Pedir documento», avisos de preguntas sin respuesta) se detallan en
+  `ALCANCE_TFM.md` del backend.
