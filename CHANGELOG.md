@@ -12,6 +12,35 @@ backend.
 
 ## 2026-11-07
 
+### Pulido visto al rehacer las capturas
+
+- **Fragmento citado legible:** `textoFragmento` une las líneas del PDF
+  partidas a mitad de frase y cambia las viñetas de uso privado (salían □)
+  por «•». Solo presentación; el texto indexado no cambia. 4 tests nuevos
+  (`chat-detail.fragmento.spec.ts`): el frontend pasa a 87.
+- **Calificar:** el motivo elegido va aparte del comentario (`feedbackMotivo`)
+  y se unen al enviar como «Motivo. Comentario»; antes quedaba «No fue
+  útilEsperaba…».
+- **Plurales:** «1 fuente», «1 consulta», «1 pregunta sin responder/abierta…»
+  en Feedback y Sin respuesta.
+- **Chat vacío:** muestra el emoji del asistente, como sus mensajes.
+- Descartado: el «Abiertas 8» que parecía un recuento erróneo era un 0 con
+  barra de la fuente monoespaciada.
+- Capturas 09, 21 y 24 rehechas con estos cambios.
+
+### Capturas y manual de usuario
+
+- **Capturas rehechas** (todas menos el login), con el asistente EBIS: 02–18.
+  La 16 lleva los correos difuminados y la 17 (Empresas, con el
+  superadministrador) los nombres y correos de las empresas reales.
+- **Nuevas:** calificar una respuesta (19), Nueva conversación (20),
+  sugerencias en el chat (21) y en el formulario del asistente (26), y el
+  ciclo completo de una pregunta sin respuesta: enviarla desde Feedback (22),
+  escribir la respuesta (23), verificación 0,32 → 0,93 (24) y el chat
+  respondiendo con ella (25).
+- **Manual:** sugerencias rápidas, Nueva conversación, calificar y un ejemplo
+  completo «de no lo sé a conocimiento» en la sección 5.
+
 ### Chat: fuentes
 
 - **Fuera el `71%` con color** de la fila de cada documento: se leía como
@@ -25,8 +54,51 @@ backend.
 - **Abstención sin fuentes:** bajo «No encontré información…» ya no aparece
   «Fuentes consultadas» (pasaba cuando algún fragmento superaba el umbral sin
   responder la pregunta). Backend: solo un comentario en `rag_service.py` que
-  ata la frase literal a la del front.
-- Manual de usuario al día con el nuevo bloque de fuentes.
+  ata la frase literal a la del front (backend `3644928`).
+- Manual de usuario al día con el nuevo bloque de fuentes. Todo lo de este
+  apartado: `840b2ac`.
+- Con una sola fuente, la cabecera dice «Fuente consultada · 1 fragmento» (antes
+  «1 fragmentos»). Una respuesta escrita en Preguntas sin respuesta se llama
+  ahora «Respuesta escrita · Preguntas sin respuesta»: el backend la indexa
+  como «Respuesta directa (preguntas sin responder)», que no coincidía con el
+  módulo, y cambiarlo allí no alcanzaba a las ya indexadas.
+
+### Chat: una conversación por asistente
+
+- **Cada asistente tiene su conversación:** al cambiar se ve la del elegido y,
+  al volver, la del anterior sigue intacta (en memoria, hasta recargar).
+  Antes los mensajes de los dos quedaban mezclados y el chip resaltado (el
+  asistente seleccionado ahora, no quien respondió) llevó a confundir de quién
+  era una respuesta. Se probaron y descartaron limpiar al cambiar y un
+  separador dentro de la misma conversación.
+- **Botón ✎ «Nueva conversación»** en la cabecera del panel, que limpia solo la
+  del asistente actual: hasta hoy la única forma de empezar de cero era
+  recargar la página. ✎ y los chips se desactivan mientras llega una respuesta.
+- Las respuestas llevan el emoji del asistente como avatar, no el robot
+  genérico.
+- `action-tooltip` (styles.scss) recibe la parte estructural que le faltaba
+  por ir PrimeNG sin tema. Front: 83 tests.
+
+### Chat: historial que recibe el modelo (backend)
+
+- **Ya no se mezclan asistentes:** al cambiar de asistente en la misma
+  conversación, el nuevo recibía como historial las preguntas y respuestas del
+  anterior, de otro espacio de conocimiento. Encontrado revisando el código, no
+  observado en una respuesta. Ahora el historial solo lleva los mensajes de ese
+  asistente (`historial_del_asistente` en `message_repository.py`).
+- **Los 20 más recientes, no los 20 primeros:** se ordenaba de antiguo a nuevo
+  con `limit`, así que en conversaciones largas el modelo veía el principio.
+  `get_by_conversation` no cambia: sigue pintando la conversación en pantalla.
+- `RAG_PIPELINE.md` al día. Backend: 289 tests (3 nuevos en
+  `test_historial_del_asistente.py`).
+
+### Preguntas sin respuesta
+
+- La respuesta escrita de una pregunta resuelta respeta sus saltos de línea
+  (`white-space: pre-line`); con listas y apartados se leía como un bloque
+  corrido. Comprobado con la #40 (Plan Vallejo): 37 saltos guardados. Con
+  altura máxima (~12 líneas) y scroll, como el fragmento del chat: una
+  respuesta larga estiraba la tarjeta y alejaba la verificación.
 
 ### Asistentes
 

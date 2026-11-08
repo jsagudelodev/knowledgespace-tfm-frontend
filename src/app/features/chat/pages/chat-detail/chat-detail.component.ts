@@ -119,6 +119,10 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
   readonly feedbackSent = signal<number | null>(null);
   readonly feedbackPanelOpen = signal<number | null>(null);
   readonly feedbackComment = signal('');
+  /** Motivo elegido en los chips, aparte del comentario libre: si el chip
+   *  escribiera en el textarea, lo que se tecleara después quedaba pegado
+   *  («No fue útilEsperaba…»). Se unen al enviar (`comentarioNegativo`). */
+  readonly feedbackMotivo = signal<string | null>(null);
   readonly sendError = signal<string | null>(null);
 
   readonly feedbackOptions = [
@@ -359,6 +363,81 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
     this.assistantId.set(assistant.id);
   }
 
+  /**
+   * Conversación de cada asistente mientras el usuario usa otro, por id de
+   * asistente. Solo en memoria: al recargar la página cada uno empieza vacío,
+   * como antes. La de cada asistente es también una conversación distinta en
+   * la base de datos, porque se crea con su primer mensaje (`sendMessage`).
+   */
+  private readonly conversacionesPorAsistente = new Map<
+    number,
+    { conversation: Conversation | null; messages: Message[] }
+  >();
+
+  /**
+   * Chip de asistente pulsado por el usuario: guarda la conversación del
+   * actual y muestra la del elegido (vacía si aún no se le escribió).
+   *
+   * Se probaron antes otras dos formas y se descartaron con el autor: limpiar
+   * al cambiar (sin lista de conversaciones, lo leído desaparecía) y seguir en
+   * la misma conversación con un separador (se veía la conversación de un
+   * asistente con el otro seleccionado). `selectAssistant` no hace este
+   * intercambio porque también lo usan la carga de asistentes y la de una
+   * conversación guardada.
+   *
+   * Bloqueado mientras llega una respuesta: el texto que sigue llegando
+   * acabaría en la conversación del otro asistente.
+   */
+  elegirAsistente(assistant: Assistant): void {
+    if (this.sending()) return;
+    const actual = this.selectedAssistant()?.id;
+    if (assistant.id === actual) return;
+
+    if (actual != null) {
+      this.conversacionesPorAsistente.set(actual, {
+        conversation: this.conversation(),
+        messages: this.messages(),
+      });
+    }
+    this.selectAssistant(assistant);
+
+    const guardada = this.conversacionesPorAsistente.get(assistant.id);
+    this.nuevaConversacion();
+    if (guardada) {
+      this.conversation.set(guardada.conversation);
+      this.messages.set(guardada.messages);
+      this.currentPage.set(this.totalPages());
+      this.scrollToBottom();
+    }
+  }
+
+  /** El asistente que respondió un mensaje, para su emoji como avatar. */
+  asistenteDe(message: Message): Assistant | undefined {
+    return message.assistant_id == null
+      ? undefined
+      : this.assistants().find((a) => a.id === message.assistant_id);
+  }
+
+  /**
+   * Deja en blanco la conversación del asistente actual; las de los demás no
+   * se tocan. No borra nada: la conversación anterior sigue guardada. La nueva se crea con el primer
+   * mensaje (`sendMessage`), así que pulsar varias veces no deja
+   * conversaciones vacías en la base de datos.
+   */
+  nuevaConversacion(): void {
+    if (this.sending()) return;
+    this.conversation.set(null);
+    this.messages.set([]);
+    this.asistenteDeLaConversacion.set(null);
+    this.searchTerm.set('');
+    this.searchActive.set(false);
+    this.currentPage.set(1);
+    this.expandedSource.set(null);
+    this.feedbackPanelOpen.set(null);
+    this.sendError.set(null);
+    this.loadError.set(null);
+  }
+
   loadMessages(conversationId: number): void {
     this.loading.set(true);
     this.loadError.set(null);
@@ -433,6 +512,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
         conversation_id: conv.id,
         role: 'user',
         content: text,
+        assistant_id: this.assistantId(),
         created_at: new Date().toISOString(),
       },
     ]);
@@ -465,6 +545,7 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
                   conversation_id: conv.id,
                   role: 'assistant',
                   content: evento.content,
+                  assistant_id: this.assistantId(),
                   created_at: new Date().toISOString(),
                   streaming: true,
                 },
@@ -697,6 +778,25 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
     );
   }
 
+  /**
+   * Texto de un fragmento citado, preparado para leerlo en el panel.
+   *
+   * El PDF llega con un salto por cada línea visual de la página, así que una
+   * frase de diapositiva quedaba partida en una columna estrecha. Se unen las
+   * líneas cortadas a mitad de frase (la siguiente empieza en minúscula) y se
+   * conservan los saltos reales. Las viñetas de las fuentes Symbol/Wingdings
+   * vienen como caracteres de uso privado (U+E000–U+F8FF), que ninguna fuente
+   * dibuja: salían como □. Pasan a «•» al principio del punto que introducen.
+   * Solo cambia la presentación: el texto indexado es el mismo.
+   */
+  textoFragmento(texto: string | null | undefined): string {
+    return (texto ?? '')
+      .replace(/[ \t]*[-][ \t]*(\n|$)/g, '\n• ')
+      .replace(/[-]/g, '•')
+      .replace(/([^\n.:;!?•])\n(?=[a-záéíóúüñ(])/g, '$1 ')
+      .trim();
+  }
+
   formatMessage(content: string): string {
     return (
       this.traducirLatex(content)
@@ -746,7 +846,13 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
     const porDocumento = new Map<string, FuenteAgrupada>();
 
     for (const s of sources) {
-      const clave = s.document_name || `doc-${s.document_id}`;
+      // Una respuesta escrita en Preguntas sin respuesta no tiene documento.
+      // El nombre que guarda el backend al indexarla («Respuesta directa
+      // (preguntas sin responder)») no coincide con el del módulo, y cambiarlo
+      // allí no alcanzaría a las ya indexadas: se unifica aquí.
+      const clave = s.document_id == null
+        ? 'Respuesta escrita · Preguntas sin respuesta'
+        : s.document_name || `doc-${s.document_id}`;
       const grupo = porDocumento.get(clave);
       if (grupo) {
         grupo.fragmentos.push(s);
@@ -859,19 +965,29 @@ export class ChatDetailComponent implements OnInit, OnDestroy {
     if (this.messageFeedback()[messageId] === 'down') return;
     this.feedbackPanelOpen.set(messageId);
     this.feedbackComment.set('');
+    this.feedbackMotivo.set(null);
   }
 
   closeFeedbackPanel(): void {
     this.feedbackPanelOpen.set(null);
     this.feedbackComment.set('');
+    this.feedbackMotivo.set(null);
   }
 
   selectFeedbackOption(opt: string): void {
-    this.feedbackComment.set(this.feedbackComment() === opt ? '' : opt);
+    this.feedbackMotivo.set(this.feedbackMotivo() === opt ? null : opt);
+  }
+
+  /** «Motivo. Comentario», o solo uno de los dos; `undefined` si no hay nada. */
+  comentarioNegativo(): string | undefined {
+    const motivo = this.feedbackMotivo();
+    const texto = this.feedbackComment().trim();
+    if (motivo && texto) return `${motivo}. ${texto}`;
+    return motivo ?? (texto || undefined);
   }
 
   submitNegativeFeedback(messageId: number): void {
-    this.submitFeedback(messageId, 'down', this.feedbackComment() || undefined);
+    this.submitFeedback(messageId, 'down', this.comentarioNegativo());
     this.closeFeedbackPanel();
   }
 

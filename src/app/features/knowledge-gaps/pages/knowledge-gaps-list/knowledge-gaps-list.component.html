@@ -12,13 +12,13 @@
   @if (summary(); as s) {
     <div class="gaps-summary">
       <span class="sum-num">{{ s.open_count }}</span>
-      <span class="sum-label">preguntas sin responder</span>
+      <span class="sum-label">{{ s.open_count === 1 ? 'pregunta sin responder' : 'preguntas sin responder' }}</span>
       <span class="sum-dot">·</span>
       <span class="sum-num">{{ s.open_volume }}</span>
-      <span class="sum-label">consultas afectadas este mes</span>
+      <span class="sum-label">{{ s.open_volume === 1 ? 'consulta afectada este mes' : 'consultas afectadas este mes' }}</span>
       <span class="sum-dot">·</span>
       <span class="sum-num">{{ s.resolved_this_period }}</span>
-      <span class="sum-label">resueltas en el periodo</span>
+      <span class="sum-label">{{ s.resolved_this_period === 1 ? 'resuelta en el periodo' : 'resueltas en el periodo' }}</span>
       <span class="sum-dot">·</span>
       <span class="sum-num">{{ s.coverage_pct }}%</span>
       <span class="sum-label">de las consultas encuentran fuente</span>
@@ -139,7 +139,7 @@
                 <div class="gap-row-right">
                   <div class="gap-row-volume">
                     <span class="vol-num">{{ gap.volume || 1 }}</span>
-                    <span class="vol-label">consultas</span>
+                    <span class="vol-label">{{ (gap.volume || 1) === 1 ? 'consulta' : 'consultas' }}</span>
                   </div>
                   <span class="pill pill--priority"
                         [class.pill--prio-high]="priorityOf(gap) === 'alta'"
@@ -190,7 +190,7 @@
             <p class="panel-question">{{ gap.question }}</p>
 
             <p class="panel-volume-line">
-              <strong>{{ gap.volume || 1 }}</strong> consultas
+              <strong>{{ gap.volume || 1 }}</strong> {{ (gap.volume || 1) === 1 ? 'consulta' : 'consultas' }}
               @if (trendLabel(gap)) { &nbsp;·&nbsp;{{ trendLabel(gap) }} }
             </p>
 
@@ -351,7 +351,7 @@
                     <p class="resolved-note">El contenido exist&#237;a. Esta pregunta se index&#243; apuntando a ese documento.</p>
                   } @else if (gap.answer_text) {
                     <p class="resolved-title">Resuelto con respuesta directa</p>
-                    <p class="resolved-note">{{ gap.answer_text }}</p>
+                    <p class="resolved-note resolved-note--respuesta">{{ gap.answer_text }}</p>
                   } @else {
                     <p class="resolved-title">Resuelta</p>
                   }

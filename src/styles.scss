@@ -274,6 +274,36 @@ button { font-family: inherit; }
 // ══════════════════════════════════════════════════════════════════════════
 
 .action-tooltip {
+  // PrimeNG va sin tema: sin esto el tooltip no se posiciona ni tiene flecha
+  // (ver `.fuente-tooltip`, más abajo, para el mismo caso).
+  &.p-tooltip {
+    position: absolute;
+    padding: 5px 0;
+    pointer-events: none;
+  }
+
+  .p-tooltip-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-color: transparent;
+    border-style: solid;
+  }
+
+  &.p-tooltip-top .p-tooltip-arrow {
+    bottom: 0;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px 5px 0;
+  }
+
+  &.p-tooltip-bottom .p-tooltip-arrow {
+    top: 0;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 0 5px 5px;
+  }
+
   &.p-tooltip .p-tooltip-text {
     background: $slate-800;
     color: $font-on-primary;

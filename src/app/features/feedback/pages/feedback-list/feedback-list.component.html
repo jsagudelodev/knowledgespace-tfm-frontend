@@ -263,7 +263,7 @@
                     <p class="answer-text">{{ fb.answer }}</p>
                     @if (fb.sources_count != null || fb.rag_score != null) {
                       <span class="answer-meta">
-                        @if (fb.sources_count != null) { {{ fb.sources_count }} fuentes }
+                        @if (fb.sources_count != null) { {{ fb.sources_count }} {{ fb.sources_count === 1 ? 'fuente' : 'fuentes' }} }
                         @if (fb.rag_score != null) { · score {{ fb.rag_score | number:'1.2-2' }} }
                       </span>
                     }

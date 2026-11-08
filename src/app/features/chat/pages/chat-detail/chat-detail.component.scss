@@ -317,6 +317,15 @@
   box-shadow: 0 6px 24px rgba($color-primary, 0.22);
 
   .material-symbols-outlined { font-size: 28px; }
+
+  // Igual que en los mensajes (`.assistant-avatar--emoji`): fondo claro para
+  // que el emoji conserve sus colores.
+  &--emoji {
+    background: $bg-card;
+    border: 1px solid $border-flat;
+    box-shadow: 0 6px 24px rgba($color-primary, 0.12);
+    line-height: 1;
+  }
 }
 
 .empty-title { margin: 0; font-size: 19px; font-weight: 700; color: $slate-900; letter-spacing: -0.02em; }
@@ -479,6 +488,14 @@
   flex-shrink: 0;
 
   &--typing { margin-bottom: 0; }
+
+  // El emoji del asistente: sobre el degradado azul sus colores se pierden.
+  &--emoji {
+    background: $bg-card;
+    border: 1px solid $border-flat;
+    font-size: 17px;
+    line-height: 1;
+  }
 }
 
 .message-body {

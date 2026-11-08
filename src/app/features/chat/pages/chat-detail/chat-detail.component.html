@@ -26,6 +26,21 @@
     </div>
 
     <div class="header-right">
+      <!-- Solo en el panel: `/chat/:id` es la vista de una conversación concreta
+           (p. ej. desde Feedback). Ver `nuevaConversacion`. -->
+      @if (isDrawerMode()) {
+        <button
+          class="btn-icon"
+          [disabled]="messages().length === 0 || sending()"
+          (click)="nuevaConversacion()"
+          pTooltip="Nueva conversación"
+          tooltipPosition="bottom"
+          tooltipStyleClass="action-tooltip"
+          aria-label="Nueva conversación"
+        >
+          <span class="material-symbols-outlined icon-sm">edit_square</span>
+        </button>
+      }
       <button
         class="btn-icon"
         [class.btn-icon--active]="searchActive()"
@@ -73,7 +88,8 @@
             <button
               class="chip"
               [class.active]="selectedAssistant()?.id === assistant.id"
-              (click)="selectAssistant(assistant)"
+              [disabled]="sending()"
+              (click)="elegirAsistente(assistant)"
             >
               <!-- `avatar` guarda un emoji (ver assistant-form), no una URL:
                    pintarlo como <img src="🤖"> pedía una imagen inexistente. -->
@@ -114,9 +130,14 @@
 
       @if (messages().length === 0) {
         <div class="empty-state">
-          <div class="empty-avatar">
-            <span class="material-symbols-outlined">smart_toy</span>
-          </div>
+          <!-- Con el emoji del asistente, como en sus mensajes; sin él, el robot. -->
+          @if (selectedAssistant()?.avatar; as emoji) {
+            <div class="empty-avatar empty-avatar--emoji">{{ emoji }}</div>
+          } @else {
+            <div class="empty-avatar">
+              <span class="material-symbols-outlined">smart_toy</span>
+            </div>
+          }
           <p class="empty-title">
             @if (selectedAssistant(); as a) { Hablas con {{ a.name }} } @else { ¿En qué puedo ayudarte? }
           </p>
@@ -160,9 +181,14 @@
           [class.assistant-message]="message.role === 'assistant'"
         >
           @if (message.role === 'assistant') {
-            <div class="assistant-avatar">
-              <span class="material-symbols-outlined icon-sm">smart_toy</span>
-            </div>
+            <!-- `avatar` es un emoji (ver assistant-form); sin él, el robot genérico. -->
+            @if (asistenteDe(message)?.avatar; as emoji) {
+              <div class="assistant-avatar assistant-avatar--emoji" [title]="asistenteDe(message)?.name ?? ''">{{ emoji }}</div>
+            } @else {
+              <div class="assistant-avatar">
+                <span class="material-symbols-outlined icon-sm">smart_toy</span>
+              </div>
+            }
           }
 
           <div class="message-body">
@@ -183,8 +209,8 @@
                 <button class="sources-title" (click)="toggleFuentes(message.id)">
                   <span class="material-symbols-outlined icon-sm">menu_book</span>
                   <span>
-                    Fuentes consultadas &nbsp;·&nbsp;
-                    {{ message.sources.length }} fragmentos
+                    {{ message.sources.length === 1 ? 'Fuente consultada' : 'Fuentes consultadas' }} &nbsp;·&nbsp;
+                    {{ message.sources.length }} {{ message.sources.length === 1 ? 'fragmento' : 'fragmentos' }}
                     @if (agruparFuentes(message.sources).length > 1) {
                       de {{ agruparFuentes(message.sources).length }} documentos
                     }
@@ -255,7 +281,7 @@
                       @if (expandedSource() === f) {
                         <div class="source-preview">
                           <span class="source-preview-tag">{{ f.chunk_index != null ? 'Fragmento ' + f.chunk_index : 'Respuesta escrita' }}</span>
-                          <p>{{ f.text }}</p>
+                          <p>{{ textoFragmento(f.text) }}</p>
                         </div>
                       }
                     }
@@ -326,7 +352,7 @@
                         @for (opt of feedbackOptions; track opt) {
                           <button
                             class="feedback-chip"
-                            [class.selected]="feedbackComment() === opt"
+                            [class.selected]="feedbackMotivo() === opt"
                             (click)="selectFeedbackOption(opt)"
                           >{{ opt }}</button>
                         }
@@ -353,9 +379,13 @@
 
       @if (isTyping()) {
         <div class="typing-indicator">
-          <div class="assistant-avatar assistant-avatar--typing">
-            <span class="material-symbols-outlined icon-sm">smart_toy</span>
-          </div>
+          @if (selectedAssistant()?.avatar; as emoji) {
+            <div class="assistant-avatar assistant-avatar--typing assistant-avatar--emoji">{{ emoji }}</div>
+          } @else {
+            <div class="assistant-avatar assistant-avatar--typing">
+              <span class="material-symbols-outlined icon-sm">smart_toy</span>
+            </div>
+          }
           <div class="typing-bubble">
             <span></span><span></span><span></span>
           </div>

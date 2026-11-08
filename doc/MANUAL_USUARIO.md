@@ -90,9 +90,14 @@ que se escriba en ese campo.
 La **temperatura** aparece bloqueada en 0: no se puede cambiar, porque es el
 valor que dio las respuestas más fieles a los documentos al medirlo.
 
-![Formulario de nuevo asistente](capturas/04-nuevo-asistente.jpg)
+![Formulario de un asistente](capturas/04-nuevo-asistente.jpg)
 
 ![La temperatura, fija en 0](capturas/05-temperatura-fija.jpg)
+
+Las **sugerencias rápidas** son las preguntas que el chat ofrece al abrir una
+conversación con ese asistente. Cada asistente tiene las suyas.
+
+![Sugerencias rápidas del asistente](capturas/26-asistente-sugerencias.jpg)
 
 ### Paso 2. Subirle documentos
 
@@ -120,8 +125,19 @@ eligiendo a qué asistente se asignan.
    lateral; no tiene entrada propia en el menú.
 2. Si la empresa tiene varios asistentes, elegir uno en la fila
    **Asistente**, en la parte superior del panel.
-3. Escribir la pregunta y enviarla. La respuesta aparece a medida que se
-   genera, palabra a palabra, y al terminar se añaden sus fuentes.
+3. Escribir la pregunta y enviarla, o pulsar una de las sugerencias rápidas
+   del asistente. La respuesta aparece a medida que se genera, palabra a
+   palabra, y al terminar se añaden sus fuentes.
+
+![Conversación nueva, con las sugerencias del asistente](capturas/21-chat-sugerencias.jpg)
+
+Cada asistente tiene su propia conversación: al cambiar de asistente se ve la
+suya, y al volver al anterior su conversación sigue donde se dejó (mientras no
+se recargue la página). Para empezar de cero con el asistente actual, pulsar
+**✎ Nueva conversación** en la cabecera del panel; las de los demás no se
+tocan.
+
+![El botón Nueva conversación](capturas/20-chat-nueva-conversacion.jpg)
 
 Cada respuesta muestra sus **fuentes**: los documentos consultados y, en cada
 uno, los fragmentos que usó el asistente, ordenados del más parecido a la
@@ -151,7 +167,12 @@ calificación negativa solo se guarda al pulsar **Enviar**. Esa calificación
 alimenta **Feedback IA** y **Sin respuesta**: es como la empresa descubre qué le
 falta a su documentación.
 
-![Una respuesta calificada como mala, vista desde Feedback IA](capturas/18-feedback-respuesta-calificada.jpg)
+![Calificar una respuesta: «¿Qué estuvo mal?»](capturas/19-chat-calificar.jpg)
+
+![La misma respuesta, vista desde Feedback IA](capturas/18-feedback-respuesta-calificada.jpg)
+
+La sección 5 sigue esta misma pregunta hasta que el asistente aprende a
+responderla.
 
 ---
 
@@ -221,6 +242,41 @@ desde **Documentos** y después se vincula.
 
 Al resolverla, el sistema **verifica** la solución: vuelve a lanzar la pregunta
 contra el índice y compara la puntuación de antes y de después.
+
+### Ejemplo completo: de «no lo sé» a conocimiento
+
+Así se convierte una pregunta que el asistente no supo responder en
+conocimiento que ya sabe usar. Es el caso de las capturas anteriores, con el
+asistente EBIS.
+
+1. Un usuario pregunta «¿Cuál es el horario de atención de la secretaría
+   académica?». Ningún documento lo dice, así que el asistente responde «No
+   encontré información…» (sección 3, Paso 3).
+2. El usuario la califica con el pulgar abajo y explica qué necesitaba
+   (Paso 4).
+3. En **Feedback IA**, el administrador ve la calificación con la pregunta y
+   pulsa **Enviar a preguntas sin respuesta**. Puede retocar el texto de la
+   pregunta antes de registrarla.
+
+   ![Enviar la calificación a preguntas sin respuesta](capturas/22-feedback-enviar-a-sin-respuesta.jpg)
+4. En **Sin respuesta** la pregunta aparece abierta. Como la respuesta no está
+   en ningún documento, elige **Escribir respuesta**, la redacta y pulsa
+   **Guardar respuesta**.
+
+   ![Escribir la respuesta](capturas/23-sin-respuesta-escribir.jpg)
+5. El sistema la indexa y la verifica: la pregunta, que antes solo encontraba
+   un fragmento poco parecido (0,32), ahora encuentra la respuesta escrita
+   (0,93).
+
+   ![La pregunta, resuelta y verificada](capturas/24-sin-respuesta-verificada.jpg)
+6. La próxima vez que alguien lo pregunte, el asistente responde con ese
+   conocimiento y lo cita como fuente: **Respuesta escrita · Preguntas sin
+   respuesta**.
+
+   ![El asistente responde con lo aprendido](capturas/25-chat-responde-con-lo-aprendido.jpg)
+
+En Feedback IA, la calificación original queda marcada como **Pregunta
+resuelta**.
 
 ### Notificaciones
 

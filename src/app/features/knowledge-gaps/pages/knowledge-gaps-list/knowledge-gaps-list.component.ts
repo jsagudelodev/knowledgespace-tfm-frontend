@@ -300,10 +300,12 @@ export class KnowledgeGapsListComponent implements OnInit {
 
   footerLabel(): string {
     const tab = this.gapTab();
-    const label = tab === 'open' ? 'abiertas' : tab === 'resolved' ? 'resueltas' : 'ignoradas';
     const query = this.gapQuery();
     const total = query ? this.gaps().length : this.tabCount(tab);
-    return `${total} preguntas ${label}${query ? ' que coinciden con la búsqueda' : ''}`;
+    const una = total === 1;
+    const label = tab === 'open' ? 'abierta' : tab === 'resolved' ? 'resuelta' : 'ignorada';
+    return `${total} ${una ? 'pregunta' : 'preguntas'} ${label}${una ? '' : 's'}`
+      + (query ? (una ? ' que coincide con la búsqueda' : ' que coinciden con la búsqueda') : '');
   }
 
   // `in_progress` venía de "Pedir documento", retirado: las que quedaran así se
