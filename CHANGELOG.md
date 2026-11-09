@@ -10,6 +10,32 @@ backend.
 
 ---
 
+## 2026-11-08
+
+### Experimentos (backend)
+
+- **Una carpeta por experimento de la memoria:** `api/experimentos/` pasa de
+  un `resultados/` común a `1-fragmentacion/` … `9-embeddings-y-tamano/` y
+  `ampliacion/` (EXP-11 y EXP-12, sin número en la memoria). Los 31 resultados
+  se movieron con `git mv` (conservan su historial); EXP-13 vive dentro del 5 y
+  EXP-14 y EXP-15 dentro del 9. Cada carpeta tiene un `LEEME.md` con la
+  pregunta, el resultado y la decisión de sus registros, sacados del propio
+  `REGISTRO.md`.
+- `REGISTRO.md` abre con la tabla del 1 al 9 enlazando cada carpeta;
+  `GUIA_PRUEBAS.md` indica en cada registro su experimento de la memoria.
+  Los guiones siguen en la raíz (varios los comparten): los de EXP-13, 14 y 15
+  escriben ahora en su carpeta nueva y las ejecuciones nuevas del resto caen en
+  `resultados/`. Rutas al día en `CLAUDE.md`, `.gitignore`, `docs/TFM` y tres
+  comentarios del código; ningún enlace roto. 289 tests y ruff en verde.
+
+### Memoria (fuera de git)
+
+- Revisión de estilo completa (263 cambios) para que no suene a texto
+  generado, correcciones de contenido cotejadas con el repositorio y pies
+  «Tabla N.» en las 30 tablas. 60 páginas.
+
+---
+
 ## 2026-11-07
 
 ### Pulido visto al rehacer las capturas
